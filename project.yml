@@ -1,0 +1,77 @@
+name: Pomly
+options:
+  bundleIdPrefix: com.purvt
+  deploymentTarget: { iOS: "26.0" }
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  Pomly:
+    type: application
+    platform: iOS
+    sources: [Pomly, Shared]
+    dependencies:
+      - target: PomlyWidgets
+    entitlements:
+      path: Pomly/Pomly.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.purvt.pomly]
+    info:
+      path: Pomly/Info.plist
+      properties:
+        CFBundleDisplayName: Pomly
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.productivity
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        NSSupportsLiveActivities: true
+        NSAlarmKitUsageDescription: Pomly rings when a focus session or break ends, even in Silent mode.
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  PomlyWidgets:
+    type: app-extension
+    platform: iOS
+    sources: [PomlyWidgets, Shared]
+    entitlements:
+      path: PomlyWidgets/PomlyWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.purvt.pomly]
+    info:
+      path: PomlyWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Pomly
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly.widgets
+  PomlyTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [PomlyTests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: Pomly
+schemes:
+  Pomly:
+    build:
+      targets: { Pomly: all }
+    test:
+      targets: [PomlyTests]
