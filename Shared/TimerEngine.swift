@@ -1,29 +1,39 @@
 import SwiftUI
 import SwiftData
-import AlarmKit
-import ActivityKit
 import UserNotifications
 import WidgetKit
 import OSLog
+#if os(iOS)
+import AlarmKit
+import ActivityKit
+#endif
 
 /// Single source of truth for the current session. Date-based: stores `endDate`, never counts down.
-/// AlarmKit owns the system countdown (Live Activity, alert); a local notification is the fallback.
+/// iOS: AlarmKit owns the system countdown (Live Activity, alert). Elsewhere, and as the fallback, a local notification.
 @MainActor @Observable
 final class TimerEngine {
     static let shared = TimerEngine()
 
     private(set) var snap = TimerSnapshot.load() {
-        didSet { if snap != oldValue { snap.save() } }
+        didSet {
+            guard snap != oldValue else { return }
+            snap.save()
+            Sync.shared.push(snap)
+        }
     }
     private(set) var lifetimeCompleted = UserDefaults.shared.integer(forKey: "lifetimeCompleted") {
         didSet { UserDefaults.shared.set(lifetimeCompleted, forKey: "lifetimeCompleted") }
     }
+    #if os(iOS)
     private var alarms: AlarmManager { .shared }
     /// Live Activity we run ourselves when AlarmKit isn't allowed; same attributes, so the same widget UI renders it.
     private var activity = Activity<PomlyActivityAttributes>.activities.first
+    #endif
 
     private init() {
+        #if os(iOS)
         Task { await observeAlarms() }
+        #endif
         refresh()
     }
 
@@ -43,15 +53,7 @@ final class TimerEngine {
         s.alarmID = nil
         snap = s
         endActivity()
-
-        let id = await scheduleAlert(for: s)
-        // The user may have stopped or restarted while the permission prompt was up.
-        guard snap.startedAt == s.startedAt, snap.isActive else {
-            if let id { try? alarms.cancel(id: id) }
-            return
-        }
-        snap.alarmID = id
-        surfacesChanged()
+        await arm(s)
     }
 
     func pause() {
@@ -59,7 +61,9 @@ final class TimerEngine {
         snap.remaining = snap.remaining()
         snap.endDate = nil
         snap.status = .paused
+        #if os(iOS)
         if let id = snap.alarmID { try? alarms.pause(id: id) }
+        #endif
         removeNotification()
         surfacesChanged()
     }
@@ -68,7 +72,36 @@ final class TimerEngine {
         guard snap.status == .paused else { return }
         snap.endDate = .now + snap.remaining
         snap.status = .running
-        if let id = snap.alarmID { try? alarms.resume(id: id) } else { await notify(snap) }
+        #if os(iOS)
+        if let id = snap.alarmID {
+            try? alarms.resume(id: id)
+            return surfacesChanged()
+        }
+        #endif
+        await arm(snap)
+    }
+
+    /// Another device changed the session: mirror it and set this device's own end alert.
+    func adoptRemote(_ remote: TimerSnapshot) {
+        var r = remote, mine = snap
+        r.alarmID = nil
+        mine.alarmID = nil
+        guard r != mine else { return }
+        cancelAlert()
+        snap = r
+        if r.status == .running {
+            endActivity()
+            Task { await arm(r) }
+        } else {
+            surfacesChanged()
+        }
+    }
+
+    /// Schedules the end alert, unless the session changed while the permission prompt was up.
+    private func arm(_ s: TimerSnapshot) async {
+        let id = await scheduleAlert(for: s)
+        guard snap.endDate == s.endDate, snap.status == .running else { return cancelAlarm(id) }
+        snap.alarmID = id
         surfacesChanged()
     }
 
@@ -139,6 +172,7 @@ final class TimerEngine {
         if phase == .rest, Pref.bool(Pref.autoFocus) { Task { await start(.focus) } }
     }
 
+    #if os(iOS)
     private func observeAlarms() async {
         for await list in alarms.alarmUpdates {
             guard let id = snap.alarmID else { continue }
@@ -151,7 +185,10 @@ final class TimerEngine {
     }
 
     /// The AlarmKit Live Activity holds the exact pause/resume state when it changed outside the app.
+    #endif
+
     private func syncFromSystem() {
+        #if os(iOS)
         guard snap.isActive, let id = snap.alarmID,
               let mode = Activity<AlarmAttributes<PomlyMetadata>>.activities
                 .first(where: { $0.content.state.alarmID == id })?.content.state.mode else { return }
@@ -167,6 +204,7 @@ final class TimerEngine {
         default: break
         }
         if snap != before { surfacesChanged() }
+        #endif
     }
 
     // MARK: History
@@ -174,10 +212,14 @@ final class TimerEngine {
     private func log(_ duration: TimeInterval, completed: Bool) {
         guard duration >= 60 || snap.planned < 60 else { return } // quick test sessions count too
         let ctx = Store.container.mainContext
-        ctx.insert(Session(start: snap.startedAt ?? .now.addingTimeInterval(-duration), duration: duration,
-                           planned: snap.planned, label: snap.label, completed: completed))
+        let start = snap.startedAt ?? .now.addingTimeInterval(-duration)
+        // A synced device may have logged this very session already.
+        guard (try? ctx.fetchCount(FetchDescriptor<Session>(predicate: #Predicate { $0.start == start }))) == 0 else { return }
+        let session = Session(start: start, duration: duration, planned: snap.planned, label: snap.label, completed: completed)
+        ctx.insert(session)
         try? ctx.save()
         cacheToday()
+        Sync.shared.add(session)
     }
 
     private func cacheToday() {
@@ -188,9 +230,13 @@ final class TimerEngine {
 
     private func surfacesChanged() {
         WidgetCenter.shared.reloadAllTimelines()
+        #if os(iOS)
         ControlCenter.shared.reloadAllControls()
         updateActivity()
+        #endif
     }
+
+    #if os(iOS)
 
     private func updateActivity() {
         guard snap.alarmID == nil else { return } // AlarmKit runs its own
@@ -206,32 +252,40 @@ final class TimerEngine {
         }
     }
 
+    #endif
+
     private func endActivity() {
+        #if os(iOS)
         guard let a = activity else { return }
         activity = nil
         Task { await a.end(nil, dismissalPolicy: .immediate) }
+        #endif
     }
 
     // MARK: Alerts
 
-    private func scheduleAlert(for s: TimerSnapshot) async -> Alarm.ID? {
+    private func scheduleAlert(for s: TimerSnapshot) async -> UUID? {
+        #if os(iOS)
         if alarms.authorizationState == .notDetermined { _ = try? await alarms.requestAuthorization() }
-        guard alarms.authorizationState == .authorized else {
-            await notify(s)
-            return nil
+        if alarms.authorizationState == .authorized {
+            let config: AlarmManager.AlarmConfiguration<PomlyMetadata> = .timer(
+                duration: s.remaining(), attributes: attributes(for: s), stopIntent: FinishIntent(),
+                secondaryIntent: s.phase == .focus ? StartBreakIntent() : StartFocusIntent(), sound: alertSound)
+            let id = UUID()
+            if (try? await alarms.schedule(id: id, configuration: config)) != nil { return id }
         }
-        let config: AlarmManager.AlarmConfiguration<PomlyMetadata> = .timer(
-            duration: s.planned, attributes: attributes(for: s), stopIntent: FinishIntent(),
-            secondaryIntent: s.phase == .focus ? StartBreakIntent() : StartFocusIntent(), sound: alertSound)
-        let id = UUID()
-        do {
-            _ = try await alarms.schedule(id: id, configuration: config)
-            return id
-        } catch {
-            await notify(s)
-            return nil
-        }
+        #endif
+        await notify(s)
+        return nil
     }
+
+    private func cancelAlarm(_ id: UUID?) {
+        #if os(iOS)
+        if let id { try? alarms.cancel(id: id) }
+        #endif
+    }
+
+    #if os(iOS)
 
     private var alertSound: AlertConfiguration.AlertSound { Pref.int(Pref.sound) == 1 ? .named("chime.caf") : .default }
 
@@ -250,6 +304,7 @@ final class TimerEngine {
             paused: .init(title: "Paused", resumeButton: .init(text: "Resume", textColor: tint, systemImageName: "play.fill")))
         return AlarmAttributes(presentation: presentation, metadata: PomlyMetadata(phase: s.phase, label: s.label), tintColor: tint)
     }
+    #endif
 
     private func notify(_ s: TimerSnapshot) async {
         guard let end = s.endDate else { return }
@@ -258,13 +313,17 @@ final class TimerEngine {
         let content = UNMutableNotificationContent()
         content.title = s.phase == .focus ? String(localized: "Focus Complete") : String(localized: "Break's Over")
         content.body = s.phase == .focus ? String(localized: "Nice work. Time for a break.") : String(localized: "Ready to focus again?")
+        #if os(watchOS)
+        content.sound = .default
+        #else
         content.sound = Pref.int(Pref.sound) == 1 ? UNNotificationSound(named: UNNotificationSoundName("chime.caf")) : .default
+        #endif
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, end.timeIntervalSinceNow), repeats: false)
         try? await center.add(UNNotificationRequest(identifier: "pomly.end", content: content, trigger: trigger))
     }
 
     private func cancelAlert() {
-        if let id = snap.alarmID { try? alarms.cancel(id: id) }
+        cancelAlarm(snap.alarmID)
         removeNotification()
     }
 

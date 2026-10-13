@@ -107,7 +107,9 @@ struct HistoryView: View {
     }
 
     private func delete(_ items: [Session], at offsets: IndexSet) {
-        offsets.forEach { context.delete(items[$0]) }
+        let gone = offsets.map { items[$0] }
+        Sync.shared.remove(gone)
+        gone.forEach(context.delete)
         try? context.save()
         TimerEngine.shared.historyChanged()
     }

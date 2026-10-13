@@ -1,8 +1,14 @@
 import SwiftUI
 import SwiftData
+#if os(iOS)
 import AlarmKit
 import ActivityKit
+#endif
+#if os(macOS)
+import AppKit
+#else
 import UIKit
+#endif
 
 // MARK: - Session history
 
@@ -50,6 +56,7 @@ enum Phase: String, Codable, Hashable, Sendable {
     case focus, rest
 }
 
+#if os(iOS)
 struct PomlyMetadata: AlarmMetadata {
     var phase: Phase
     var label: String
@@ -83,6 +90,7 @@ struct LiveState {
         }
     }
 }
+#endif
 
 struct TimerSnapshot: Codable, Equatable {
     enum Status: String, Codable { case idle, running, paused, finished }
@@ -223,6 +231,12 @@ struct DialFace: View, Animatable {
     var showsKnob = true
     @Environment(\.colorScheme) private var scheme
 
+    /// Idle dial: one turn is an hour; past 60 minutes it starts a second lap.
+    static func idleFraction(_ planned: TimeInterval) -> Double {
+        let m = planned / 60
+        return m > 60 ? (m - 60) / 60 : m / 60
+    }
+
     /// Lets state changes sweep the ticks instead of jumping.
     var animatableData: Double {
         get { fraction }
@@ -294,11 +308,23 @@ struct GoalRing: View {
 
 extension Color {
     init(light: UInt32, dark: UInt32) {
+        #if os(iOS)
         self.init(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(rgb: dark) : UIColor(rgb: light) })
+        #elseif os(macOS)
+        self.init(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(rgb: dark) : NSColor(rgb: light) })
+        #else
+        self.init(uiColor: UIColor(rgb: dark)) // watchOS is always dark
+        #endif
     }
 }
 
-extension UIColor {
+#if os(macOS)
+typealias PlatformColor = NSColor
+#else
+typealias PlatformColor = UIColor
+#endif
+
+extension PlatformColor {
     convenience init(rgb: UInt32) {
         self.init(red: CGFloat(rgb >> 16 & 0xFF) / 255, green: CGFloat(rgb >> 8 & 0xFF) / 255, blue: CGFloat(rgb & 0xFF) / 255, alpha: 1)
     }

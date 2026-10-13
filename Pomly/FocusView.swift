@@ -9,7 +9,7 @@ struct FocusView: View {
     @AppStorage(Pref.focusMin, store: .shared) private var focusMin = 25
     @AppStorage(Pref.theme, store: .shared) private var themeRaw = 0
     @AppStorage(Pref.haptics, store: .shared) private var haptics = true
-    @Environment(\.horizontalSizeClass) private var hSize
+    @State private var wide = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.requestReview) private var requestReview
     @ScaledMetric(relativeTo: .title3) private var scaledControl = 56.0
@@ -30,10 +30,11 @@ struct FocusView: View {
         let s = engine.snap
         ZStack {
             AppBackground(tint: tint)
-            Group { if hSize == .regular { regular } else { compact } }
+            Group { if wide { regular } else { compact } }
                 // The dial needs room; text still grows a lot but stops where this layout can hold it.
                 .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         }
+        .onGeometryChange(for: Bool.self) { $0.size.width > 640 } action: { wide = $0 }
         .animation(motion, value: s.status)
         .animation(motion, value: s.phase)
         .sensoryFeedback(.success, trigger: s.status == .finished) { _, new in haptics && new }
@@ -42,7 +43,11 @@ struct FocusView: View {
             guard [5, 25, 100].contains(n) else { return }
             Task { try? await Task.sleep(for: .seconds(2)); requestReview() } // after the celebration, not during it
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: $fullScreen) { FullScreenTimer(tint: tint) }
+        #else
+        .sheet(isPresented: $fullScreen) { FullScreenTimer(tint: tint).frame(minWidth: 640, minHeight: 420) }
+        #endif
         .alert("Focusing On", isPresented: $askingLabel) {
             TextField("Reading", text: $newLabel)
             Button("Save") { engine.setLabel(newLabel.trimmingCharacters(in: .whitespacesAndNewlines)) }
@@ -85,9 +90,11 @@ struct FocusView: View {
     }
 
     private func foldWidth(_ geo: GeometryProxy) -> CGFloat {
+#if os(iOS)
         if #available(iOS 27.1, *) {
             return geo.reservedRegions(kind: .division).filter(\.isActive).map(\.frame.width).max() ?? 32
         }
+#endif
         return 32
     }
 
@@ -338,7 +345,7 @@ struct DialView: View {
         TimelineView(.animation(minimumInterval: 0.5, paused: snap.status != .running || settling)) { ctx in
             let remaining = snap.remaining(at: ctx.date)
             let shown = idle ? snap.planned : done ? next : remaining
-            let fraction = idle ? Self.idleFraction(snap.planned) : done ? 1 : (snap.planned > 0 ? remaining / snap.planned : 0)
+            let fraction = idle ? DialFace.idleFraction(snap.planned) : done ? 1 : (snap.planned > 0 ? remaining / snap.planned : 0)
             let last = snap.status == .running ? Int(remaining.rounded(.up)) : 0
             GeometryReader { geo in
                 ZStack {
@@ -415,11 +422,6 @@ struct DialView: View {
         let m = Int((a / 6).rounded()) % 60
         let pick = [m - 60, m, m + 60, m + 120].min { abs($0 - current) < abs($1 - current) }!
         return min(120, max(1, pick))
-    }
-
-    static func idleFraction(_ planned: TimeInterval) -> Double {
-        let m = planned / 60
-        return m > 60 ? (m - 60) / 60 : m / 60
     }
 }
 
@@ -543,11 +545,15 @@ struct FullScreenTimer: View {
         }
         .contentShape(.rect)
         .onTapGesture { reveal() }
-        .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .preferredColorScheme(dark ? .dark : .light)
-        .onAppear { UIApplication.shared.isIdleTimerDisabled = true; reveal() }
-        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false; hideTask?.cancel() }
+        #if os(iOS)
+        .statusBarHidden()
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        #endif
+        .onAppear { reveal() }
+        .onDisappear { hideTask?.cancel() }
         .onChange(of: s.status) { reveal() }
     }
 

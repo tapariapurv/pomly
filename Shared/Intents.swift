@@ -1,8 +1,13 @@
 import AppIntents
 
-// LiveActivityIntent: always runs in the app process, also when tapped in a widget, control or Live Activity.
+// LiveActivityIntent: always runs in the app process, also when tapped in a widget, control or Live Activity (iOS only).
+#if os(iOS)
+typealias PomlyIntent = LiveActivityIntent
+#else
+typealias PomlyIntent = AppIntent
+#endif
 
-struct StartFocusIntent: LiveActivityIntent {
+struct StartFocusIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Start Focus"
     static let description = IntentDescription("Starts a focus session.")
     @Parameter(title: "Minutes") var minutes: Int?
@@ -16,7 +21,7 @@ struct StartFocusIntent: LiveActivityIntent {
     }
 }
 
-struct StartBreakIntent: LiveActivityIntent {
+struct StartBreakIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Take a Break"
     static let description = IntentDescription("Starts a break.")
     @Parameter(title: "Minutes") var minutes: Int?
@@ -29,7 +34,7 @@ struct StartBreakIntent: LiveActivityIntent {
     }
 }
 
-struct PauseIntent: LiveActivityIntent {
+struct PauseIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Pause Timer"
     @MainActor func perform() async throws -> some IntentResult {
         TimerEngine.shared.pause()
@@ -37,7 +42,7 @@ struct PauseIntent: LiveActivityIntent {
     }
 }
 
-struct ResumeIntent: LiveActivityIntent {
+struct ResumeIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Resume Timer"
     @MainActor func perform() async throws -> some IntentResult {
         await TimerEngine.shared.resume()
@@ -45,7 +50,7 @@ struct ResumeIntent: LiveActivityIntent {
     }
 }
 
-struct StopIntent: LiveActivityIntent {
+struct StopIntent: PomlyIntent {
     static let title: LocalizedStringResource = "End Session"
     @MainActor func perform() async throws -> some IntentResult {
         TimerEngine.shared.stop()
@@ -54,7 +59,7 @@ struct StopIntent: LiveActivityIntent {
 }
 
 /// "Done" on the end-of-session alarm.
-struct FinishIntent: LiveActivityIntent {
+struct FinishIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Finish Session"
     static let isDiscoverable = false
     @MainActor func perform() async throws -> some IntentResult {
@@ -65,7 +70,7 @@ struct FinishIntent: LiveActivityIntent {
 }
 
 /// Control Center / Lock Screen / Action Button toggle.
-struct ToggleFocusIntent: SetValueIntent, LiveActivityIntent {
+struct ToggleFocusIntent: SetValueIntent, PomlyIntent {
     static let title: LocalizedStringResource = "Toggle Focus"
     static let isDiscoverable = false
     @Parameter(title: "Focusing") var value: Bool

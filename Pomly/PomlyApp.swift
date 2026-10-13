@@ -15,6 +15,9 @@ struct PomlyApp: App {
                 .preferredColorScheme(appearance == 1 ? .light : appearance == 2 ? .dark : nil)
         }
         .modelContainer(Store.container)
+        #if os(macOS)
+        .defaultSize(width: 920, height: 640)
+        #endif
     }
 }
 
@@ -27,9 +30,13 @@ struct RootView: View {
             Tab("History", systemImage: "chart.bar.fill") { HistoryView() }
             Tab("Settings", systemImage: "gearshape.fill") { SettingsView() }
         }
+        #if os(iOS)
         .tabBarMinimizeBehavior(.onScrollDown)
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active { TimerEngine.shared.refresh() }
+        #endif
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            guard phase == .active else { return }
+            TimerEngine.shared.refresh()
+            Sync.shared.resume()
         }
     }
 }

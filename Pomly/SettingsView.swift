@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
+#if os(iOS)
 import AlarmKit
+#endif
 
 struct SettingsView: View {
     @AppStorage(Pref.focusMin, store: .shared) private var focusMin = 25
@@ -14,7 +16,10 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.openURL) private var openURL
     @State private var confirmReset = false
+    @State private var syncing = false
+    #if os(iOS)
     @State private var alarmsDenied = AlarmManager.shared.authorizationState == .denied
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -26,6 +31,15 @@ struct SettingsView: View {
                     NavigationLink("Advanced") { AdvancedSettings() }
                 }
 
+                Section {
+                    Button { syncing = true } label: {
+                        LabeledContent("Sync Devices", value: Sync.shared.isPaired ? String(localized: "On") : "")
+                    }
+                    .foregroundStyle(.primary)
+                } footer: {
+                    Text("Keep your timer and history the same on iPhone, iPad, Mac and Apple Watch.")
+                }
+
                 Section("Appearance") {
                     Picker("Appearance", selection: $appearance) {
                         Text("System").tag(0)
@@ -34,9 +48,11 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.segmented)
                     themeRow
+                    #if os(iOS)
                     Picker("Live Activity", selection: $liveStyle) {
                         ForEach(LiveStyle.allCases) { Text($0.name).tag($0.rawValue) }
                     }
+                    #endif
                 }
 
                 Section {
@@ -45,9 +61,11 @@ struct SettingsView: View {
                         Text("Soft Chime").tag(1)
                     }
                     Toggle("Haptics", isOn: $haptics)
+                    #if os(iOS)
                     if alarmsDenied {
                         Button("Allow Alarms in Settings") { openURL(URL(string: UIApplication.openSettingsURLString)!) }
                     }
+                    #endif
                 } header: {
                     Text("Alerts")
                 } footer: {
@@ -66,11 +84,13 @@ struct SettingsView: View {
             }
             .pomlyBackground()
             .navigationTitle("Settings")
+            .sheet(isPresented: $syncing) { SyncView() }
             .onChange(of: focusMin) { _, m in TimerEngine.shared.setDuration(TimeInterval(m * 60)) }
             .onChange(of: liveStyle) { TimerEngine.shared.historyChanged() } // re-renders a running Live Activity
             .confirmationDialog("Delete all sessions?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Delete All Sessions", role: .destructive) {
                     try? context.delete(model: Session.self)
+                    Sync.shared.removeAll()
                     try? context.save()
                     TimerEngine.shared.historyChanged()
                 }
