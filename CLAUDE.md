@@ -66,6 +66,8 @@ Native Pomodoro / focus timer. SwiftUI, iOS/iPadOS/macOS/watchOS 26+ (27 SDKs). 
 - iOS-only APIs (AlarmKit, ActivityKit, ControlCenter, UIApplication, `fullScreenCover`, `reservedRegions`) go behind `#if os(iOS)`. `LiveActivityIntent` doesn't exist on Mac or Watch, so use the `PomlyIntent` typealias.
 - Mac: `.glass` buttons draw as small tinted rects, so use `glassCapsule()`. A `Menu` needs `.menuStyle(.button).buttonStyle(.plain)`, forms need `.formStyle(.grouped)` (in `pomlyBackground()`), and the Mac uses a `Form` where iOS uses a `List`. Full Screen opens the `timer` Window. Signed to run locally, with no App Group.
 - Watch: toolbar buttons fill with `.tint`, so don't add `.glassProminent`. Don't tint the whole stack; tint only the primary action (`Theme.onTint` icon). The dial is edge to edge with controls in the corners.
+- Mac menu bar (`Pomly/MenuBar.swift`, AppKit `NSStatusItem`): press-drag is polled at 60 Hz while the button is held (synthetic and real input both work). Guided drag uses a click-catcher panel, and every NSPanel needs `hidesOnDeactivate = false`. Global hotkeys go through Carbon (⌃⌥P, ⌃⌥D). Mini PiP timer is `MiniTimer`. Automatic termination is disabled. Vorssaint (the user's menu bar manager) may hide the icon.
+- Watch: `PomlyWatchWidgets` provides complications through the App Group snapshot. iPhone Live Activities reach the Watch Smart Stack via `.supplementalActivityFamilies([.small])` (`LiveLockScreen.watch`). iPad has widgets; Apple has no Live Activities on iPad.
 - Never `killall` CoreSimulatorService: it purged the iOS runtime once (`xcodebuild -downloadPlatform iOS` restores it).
 
 ## Commands

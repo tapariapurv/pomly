@@ -216,14 +216,14 @@ struct StatusView: View {
 
     /// Interactive: see the session, or start one at any length without opening the app.
     private var large: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 todayBlock
                 Spacer()
                 Caps(text: String(localized: "of \(goalSeconds.minutesText)"))
             }
             HStack(spacing: 16) {
-                dial(28).frame(width: 150, height: 150)
+                dial(26).frame(width: 136, height: 136)
                 VStack(alignment: .leading, spacing: 6) {
                     Caps(text: active ? (s.phase == .focus ? String(localized: "Focusing on") : String(localized: "On a break")) : String(localized: "Ready"), color: tint)
                     Text(active ? title : String(localized: "Pick a length"))
@@ -256,8 +256,13 @@ struct StatusView: View {
                         .buttonStyle(.bordered).tint(tint)
                         .accessibilityLabel("Focus for \(m) minutes")
                     }
+                    // Break shares the row, so the large widget never overflows its margins.
+                    Button(intent: StartBreakIntent()) {
+                        Image(systemName: "cup.and.saucer.fill").font(.system(size: 17)).frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.bordered).tint(tint)
+                    .accessibilityLabel("Take a Break")
                 }
-                pill(StartBreakIntent(), "Take a Break", "cup.and.saucer.fill", prominent: false)
             }
         }
     }
@@ -342,6 +347,7 @@ struct FocusLiveActivity: Widget {
         } dynamicIsland: { ctx in
             liveIsland(LiveInfo(state: LiveState(ctx.state.mode), meta: ctx.attributes.metadata, tint: ctx.attributes.tintColor))
         }
+        .supplementalActivityFamilies([.small]) // Apple Watch Smart Stack and the Mac menu bar
     }
 }
 
@@ -353,6 +359,7 @@ struct FallbackLiveActivity: Widget {
         } dynamicIsland: { ctx in
             liveIsland(LiveInfo(state: LiveState(ctx.state), meta: PomlyMetadata(phase: ctx.attributes.phase, label: ctx.attributes.label), tint: Theme.current.tint))
         }
+        .supplementalActivityFamilies([.small]) // Apple Watch Smart Stack and the Mac menu bar
     }
 }
 
@@ -419,10 +426,11 @@ private func liveIsland(_ live: LiveInfo) -> DynamicIsland {
 struct LiveLockScreen: View {
     let live: LiveInfo
     @Environment(\.isActivityFullscreen) private var fullscreen
+    @Environment(\.activityFamily) private var activityFamily
 
     var body: some View {
         Group {
-            if fullscreen { standBy } else {
+            if activityFamily == .small { watch } else if fullscreen { standBy } else {
                 switch LiveStyle.current {
                 case .ruler: ruler
                 case .controls: controls
@@ -471,6 +479,20 @@ struct LiveLockScreen: View {
             LiveClock(state: live.state).font(.system(size: 34, weight: .semibold, design: .rounded)).monospacedDigit()
                 .lineLimit(1).minimumScaleFactor(0.6).multilineTextAlignment(.trailing).frame(width: 108, alignment: .trailing)
         }
+    }
+
+    /// Apple Watch Smart Stack: ring, phase and the countdown, nothing else.
+    private var watch: some View {
+        HStack(spacing: 10) {
+            LiveRing(live: live).frame(width: 30, height: 30)
+            VStack(alignment: .leading, spacing: 1) {
+                Caps(text: live.phase, size: 10, color: live.tint)
+                LiveClock(state: live.state).font(.system(size: 24, weight: .semibold, design: .rounded)).monospacedDigit()
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 4)
     }
 
     /// StandBy: the glowing dial with the time, and what you're focusing on.

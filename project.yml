@@ -69,6 +69,12 @@ targets:
     type: application
     platform: watchOS
     sources: [PomlyWatch, Shared]
+    dependencies:
+      - target: PomlyWatchWidgets
+    entitlements:
+      path: PomlyWatch/PomlyWatch.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.purvt.pomly]
     info:
       path: PomlyWatch/Info.plist
       properties:
@@ -82,6 +88,25 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly.watchkitapp
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  PomlyWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    sources: [PomlyWatchWidgets, Shared]
+    entitlements:
+      path: PomlyWatchWidgets/PomlyWatchWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.purvt.pomly]
+    info:
+      path: PomlyWatchWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Pomly
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly.watchkitapp.widgets
   PomlyTests:
     type: bundle.unit-test
     platform: iOS
