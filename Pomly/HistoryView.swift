@@ -109,7 +109,7 @@ struct HistoryView: View {
 
     private func stat(_ title: LocalizedStringKey, _ value: String) -> some View {
         VStack(spacing: 2) {
-            Text(value).font(.headline).fontDesign(.serif).monospacedDigit()
+            Text(value).font(.headline).fontDesign(.rounded).monospacedDigit()
             Text(title).font(.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)

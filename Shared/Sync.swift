@@ -312,47 +312,68 @@ struct SyncView: View {
     @State private var working = false
     @State private var failed: LocalizedStringKey?
 
+    #if os(watchOS)
+    private let codeFont = Font.system(.title2, design: .monospaced, weight: .semibold), codeKerning = 2.0
+    #else
+    private let codeFont = Font.system(size: 44, weight: .semibold, design: .monospaced), codeKerning = 6.0
+    #endif
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    Image(systemName: sync.isPaired ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
-                        .font(.system(size: 40, weight: .medium))
-                        .foregroundStyle(.tint)
-                        .contentTransition(.symbolEffect(.replace))
-                    Text(sync.isPaired ? "Devices Synced" : "Sync Your Devices")
-                        .font(.title3.weight(.semibold))
-                    Text("Enter this code on your other device, or enter its code here.")
-                        .font(.subheadline).foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+                VStack(spacing: 20) {
+                    VStack(spacing: 8) {
+                        Image(systemName: sync.isPaired ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
+                            .font(.system(size: 34, weight: .medium))
+                            .foregroundStyle(.tint)
+                            .contentTransition(.symbolEffect(.replace))
+                        Text(sync.isPaired ? "Devices Synced" : "Sync Your Devices")
+                            .font(.title2.weight(.semibold)).fontDesign(.rounded)
+                        Text(sync.isPaired ? "Add another device with this code." : "Enter this code on your other device, or enter its code below.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     Text(code ?? "POMLY0")
-                        .font(.system(.title, design: .monospaced, weight: .semibold))
-                        .kerning(3)
+                        .font(codeFont).kerning(codeKerning)
+                        .lineLimit(1).minimumScaleFactor(0.6)
                         .redacted(reason: code == nil ? .placeholder : [])
                         #if !os(watchOS)
                         .textSelection(.enabled)
                         #endif
                         .accessibilityLabel(code.map { $0.map(String.init).joined(separator: " ") } ?? "")
-                    TextField("Enter Code", text: $entry)
-                        .font(.system(.title3, design: .monospaced))
+                    TextField("Enter a Code", text: $entry)
+                        .font(.system(.title3, design: .monospaced, weight: .medium))
                         .multilineTextAlignment(.center)
                         .autocorrectionDisabled()
                         .disabled(working)
                         .onChange(of: entry) { _, v in typed(v) }
+                        #if !os(watchOS)
+                        .textFieldStyle(.plain)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: 240)
+                        .background(.fill.tertiary, in: .capsule)
+                        #endif
                     if working { ProgressView() }
-                    if let failed { Text(failed).font(.footnote).foregroundStyle(.red).multilineTextAlignment(.center) }
+                    if let failed {
+                        Text(failed).font(.footnote).foregroundStyle(.red).multilineTextAlignment(.center)
+                    }
                     if sync.isPaired {
                         Button("Stop Syncing", role: .destructive) { Task { await sync.leave(); dismiss() } }
                     }
                 }
-                .padding()
+                .padding(24)
+                .frame(maxWidth: 440)
+                .frame(maxWidth: .infinity)
                 .animation(.snappy, value: sync.isPaired)
             }
-            .navigationTitle("Sync")
             #if !os(watchOS) // watchOS adds its own close button
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             #endif
         }
+        #if os(iOS)
+        .presentationDetents([.medium, .large])
+        #endif
         .task {
             do { code = try await sync.makeCode() } catch { failed = "Can't reach sync right now. Check your connection." }
         }

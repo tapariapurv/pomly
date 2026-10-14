@@ -128,8 +128,8 @@ struct StatusView: View {
         VStack(alignment: .leading, spacing: 4) {
             Caps(text: String(localized: "Today"))
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(Int(entry.today / 60))").font(.system(size: 46, weight: .regular, design: .serif)).monospacedDigit()
-                Text("min").font(.system(size: 15, design: .serif)).foregroundStyle(.secondary)
+                Text("\(Int(entry.today / 60))").font(.system(size: 46, weight: .regular, design: .rounded)).monospacedDigit()
+                Text("min").font(.system(size: 15, design: .rounded)).foregroundStyle(.secondary)
             }
             .lineLimit(1).minimumScaleFactor(0.6)
             SessionBars(done: entry.sessions, goal: sessionGoal, tint: tint, height: 12).widgetAccentable()
@@ -141,9 +141,9 @@ struct StatusView: View {
         if let time = timeText {
             HStack(spacing: 6) {
                 Circle().fill(tint).frame(width: 6, height: 6)
-                time.font(.system(size: 15, weight: .semibold, design: .serif)).monospacedDigit()
+                time.font(.system(size: 15, weight: .semibold, design: .rounded)).monospacedDigit()
                 Text(paused ? String(localized: "paused") : phase.lowercased())
-                    .font(.system(size: 13, design: .serif)).foregroundStyle(.secondary)
+                    .font(.system(size: 13, design: .rounded)).foregroundStyle(.secondary)
             }
             .lineLimit(1).minimumScaleFactor(0.7)
         }
@@ -157,7 +157,7 @@ struct StatusView: View {
                 Group {
                     if let time = timeText { time } else { Text("\(Int(goalProgress * 100))%") }
                 }
-                .font(.system(size: digits, weight: .regular, design: .serif)).monospacedDigit()
+                .font(.system(size: digits, weight: .regular, design: .rounded)).monospacedDigit()
                 .lineLimit(1).minimumScaleFactor(0.5).multilineTextAlignment(.center)
                 Caps(text: active ? (paused ? String(localized: "Paused") : phase) : String(localized: "Goal"), size: digits * 0.36)
             }
@@ -208,7 +208,7 @@ struct StatusView: View {
             VStack(spacing: 6) {
                 dial(20)
                 Text(active ? title : String(localized: "of \(goalSeconds.minutesText)"))
-                    .font(.system(size: 14, weight: .semibold, design: .serif)).lineLimit(1).minimumScaleFactor(0.7)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded)).lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity)
         }
@@ -227,10 +227,10 @@ struct StatusView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Caps(text: active ? (s.phase == .focus ? String(localized: "Focusing on") : String(localized: "On a break")) : String(localized: "Ready"), color: tint)
                     Text(active ? title : String(localized: "Pick a length"))
-                        .font(.system(size: 24, weight: .regular, design: .serif)).lineLimit(1).minimumScaleFactor(0.6)
+                        .font(.system(size: 24, weight: .regular, design: .rounded)).lineLimit(1).minimumScaleFactor(0.6)
                     if let end {
                         Text("Ends at \(end, format: .dateTime.hour().minute())")
-                            .font(.system(size: 15, weight: .semibold, design: .serif)).foregroundStyle(tint).lineLimit(1)
+                            .font(.system(size: 15, weight: .semibold, design: .rounded)).foregroundStyle(tint).lineLimit(1)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -248,7 +248,7 @@ struct StatusView: View {
                     ForEach([15, 25, 45, 60], id: \.self) { m in
                         Button(intent: StartFocusIntent(minutes: m)) {
                             VStack(spacing: 0) {
-                                Text("\(m)").font(.system(size: 20, weight: .regular, design: .serif))
+                                Text("\(m)").font(.system(size: 20, weight: .regular, design: .rounded))
                                 Text("min").font(.caption2).foregroundStyle(.secondary)
                             }
                             .frame(maxWidth: .infinity, minHeight: 44)
@@ -277,7 +277,7 @@ struct StatusView: View {
             Gauge(value: active ? dialFraction : goalProgress) {
                 Image(systemName: active ? "pause.fill" : "timer")
             } currentValueLabel: {
-                Text(active ? s.remaining.clock : "\(Int(entry.today / 60))").font(.system(.body, design: .serif))
+                Text(active ? s.remaining.clock : "\(Int(entry.today / 60))").font(.system(.body, design: .rounded))
             }
             .gaugeStyle(.accessoryCircularCapacity)
         }
@@ -290,7 +290,7 @@ struct StatusView: View {
             Group {
                 if let time = timeText { time } else { Text(entry.today.minutesText) }
             }
-            .font(.system(size: 26, weight: .regular, design: .serif)).monospacedDigit().lineLimit(1)
+            .font(.system(size: 26, weight: .regular, design: .rounded)).monospacedDigit().lineLimit(1)
             if let end {
                 ProgressView(timerInterval: end.addingTimeInterval(-s.planned)...end, countsDown: true) { EmptyView() } currentValueLabel: { EmptyView() }
                     .progressViewStyle(.linear)
@@ -390,7 +390,7 @@ private func liveIsland(_ live: LiveInfo) -> DynamicIsland {
         DynamicIslandExpandedRegion(.trailing) {
             VStack(alignment: .trailing, spacing: 0) {
                 if style == .controls { Caps(text: live.phase, size: 10, color: live.tint) }
-                LiveClock(state: live.state).font(.system(size: 36, weight: .semibold, design: .serif)).monospacedDigit()
+                LiveClock(state: live.state).font(.system(size: 36, weight: .semibold, design: .rounded)).monospacedDigit()
             }
             .padding(.trailing, 8)
         }
@@ -408,7 +408,7 @@ private func liveIsland(_ live: LiveInfo) -> DynamicIsland {
     } compactLeading: {
         LiveRing(live: live).frame(width: 18, height: 18).padding(.leading, 2)
     } compactTrailing: {
-        LiveClock(state: live.state).font(.system(size: 15, weight: .semibold, design: .serif)).monospacedDigit()
+        LiveClock(state: live.state).font(.system(size: 15, weight: .semibold, design: .rounded)).monospacedDigit()
             .foregroundStyle(live.tint).frame(maxWidth: 56)
     } minimal: {
         LiveRing(live: live)
@@ -441,7 +441,7 @@ struct LiveLockScreen: View {
                 LiveRing(live: live).frame(width: 44, height: 44)
                 LiveTitles(live: live)
                 Spacer(minLength: 8)
-                LiveClock(state: live.state).font(.system(size: 42, weight: .semibold, design: .serif)).monospacedDigit()
+                LiveClock(state: live.state).font(.system(size: 42, weight: .semibold, design: .rounded)).monospacedDigit()
                     .lineLimit(1).minimumScaleFactor(0.6).multilineTextAlignment(.trailing).frame(width: 132, alignment: .trailing)
             }
             LiveRuler(live: live)
@@ -453,7 +453,7 @@ struct LiveLockScreen: View {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 0) {
                     Caps(text: live.phase, color: live.tint)
-                    LiveClock(state: live.state).font(.system(size: 42, weight: .semibold, design: .serif)).monospacedDigit()
+                    LiveClock(state: live.state).font(.system(size: 42, weight: .semibold, design: .rounded)).monospacedDigit()
                         .lineLimit(1).minimumScaleFactor(0.6).frame(width: 150, alignment: .leading)
                 }
                 Spacer(minLength: 8)
@@ -468,7 +468,7 @@ struct LiveLockScreen: View {
             LiveRing(live: live).frame(width: 40, height: 40)
             LiveTitles(live: live)
             Spacer(minLength: 8)
-            LiveClock(state: live.state).font(.system(size: 34, weight: .semibold, design: .serif)).monospacedDigit()
+            LiveClock(state: live.state).font(.system(size: 34, weight: .semibold, design: .rounded)).monospacedDigit()
                 .lineLimit(1).minimumScaleFactor(0.6).multilineTextAlignment(.trailing).frame(width: 108, alignment: .trailing)
         }
     }
@@ -479,19 +479,19 @@ struct LiveLockScreen: View {
             ZStack {
                 DialFace(fraction: live.state.done ? 0 : 1, tint: live.tint, showsKnob: false)
                 VStack(spacing: 4) {
-                    LiveClock(state: live.state).font(.system(size: 44, weight: .regular, design: .serif)).monospacedDigit()
+                    LiveClock(state: live.state).font(.system(size: 44, weight: .regular, design: .rounded)).monospacedDigit()
                     Caps(text: live.rest ? String(localized: "Break") : String(localized: "Focus"), size: 12)
                 }
             }
             .aspectRatio(1, contentMode: .fit)
             VStack(alignment: .leading, spacing: 8) {
                 Caps(text: live.rest ? String(localized: "On a break") : String(localized: "Focusing on"), size: 14, color: .white.opacity(0.8))
-                Text(live.title).font(.system(size: 40, weight: .regular, design: .serif)).lineLimit(1).minimumScaleFactor(0.5)
+                Text(live.title).font(.system(size: 40, weight: .regular, design: .rounded)).lineLimit(1).minimumScaleFactor(0.5)
                 if let end = live.state.end {
                     Text("Ends at \(end, format: .dateTime.hour().minute())")
-                        .font(.system(size: 22, weight: .semibold, design: .serif)).foregroundStyle(live.tint).lineLimit(1)
+                        .font(.system(size: 22, weight: .semibold, design: .rounded)).foregroundStyle(live.tint).lineLimit(1)
                 } else {
-                    Text(live.state.done ? "Done" : "Paused").font(.system(size: 22, weight: .semibold, design: .serif)).foregroundStyle(live.tint)
+                    Text(live.state.done ? "Done" : "Paused").font(.system(size: 22, weight: .semibold, design: .rounded)).foregroundStyle(live.tint)
                 }
             }
             Spacer(minLength: 0)
@@ -506,7 +506,7 @@ struct LiveTitles: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Caps(text: live.phase, size: 11, color: live.tint)
-            Text(live.title).font(.system(size: 17, weight: .semibold, design: .serif)).lineLimit(1).minimumScaleFactor(0.8)
+            Text(live.title).font(.system(size: 17, weight: .semibold, design: .rounded)).lineLimit(1).minimumScaleFactor(0.8)
         }
     }
 }

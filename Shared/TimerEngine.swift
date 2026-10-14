@@ -149,6 +149,8 @@ final class TimerEngine {
     func refresh() {
         syncFromSystem()
         if snap.status == .running, let end = snap.endDate, end <= .now { complete() }
+        // An old "Session Logged" isn't news an hour later: start fresh.
+        if snap.status == .finished, let start = snap.startedAt, start + snap.planned < .now - 3600 { reset() }
         cacheToday()
     }
 

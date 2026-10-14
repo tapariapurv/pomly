@@ -36,7 +36,12 @@ struct SettingsView: View {
                     LabeledContent("Sync Devices") { Button(Sync.shared.isPaired ? "Manage…" : "Set Up…") { syncing = true } }
                     #else
                     Button { syncing = true } label: {
-                        LabeledContent("Sync Devices", value: Sync.shared.isPaired ? String(localized: "On") : "")
+                        LabeledContent("Sync Devices") {
+                            HStack(spacing: 6) {
+                                Text(Sync.shared.isPaired ? "On" : "Off")
+                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                            }
+                        }
                     }
                     .foregroundStyle(.primary)
                     #endif
@@ -179,10 +184,22 @@ struct SilenceGuide: View {
 }
 
 /// Warm app background behind lists and forms so every tab feels like one place.
+/// App background plus a readable column: on iPad and Mac, forms and lists stop at ~680 pt instead of spanning the window.
 struct PomlyBackground: ViewModifier {
     @AppStorage(Pref.theme, store: .shared) private var theme = 0
+    @State private var width: CGFloat = 0
+
     func body(content: Content) -> some View {
-        content.formStyle(.grouped).scrollContentBackground(.hidden).background(AppBackground(tint: (Theme(rawValue: theme) ?? .ember).tint))
+        let side = (width - 680) / 2
+        content
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .contentMargins(.horizontal, side > 0 ? side : nil, for: .scrollContent)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(side > 0 ? .inline : .automatic) // a centered column wants a centered title
+            #endif
+            .background(AppBackground(tint: (Theme(rawValue: theme) ?? .ember).tint))
     }
 }
 

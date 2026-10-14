@@ -33,10 +33,10 @@ struct WatchFocusView: View {
                         .opacity(dim ? 0.5 : 1)
                     VStack(spacing: 2) {
                         if !s.label.isEmpty {
-                            Text(s.label).font(.footnote).fontDesign(.serif).foregroundStyle(.secondary).lineLimit(1)
+                            Text(s.label).font(.footnote).fontDesign(.rounded).foregroundStyle(.secondary).lineLimit(1)
                         }
                         Text((s.status == .idle ? s.planned : left).clock)
-                            .font(.system(size: 36, design: .serif).monospacedDigit())
+                            .font(.system(size: 36, design: .rounded).monospacedDigit())
                             .contentTransition(.numericText(countsDown: true))
                             .minimumScaleFactor(0.6)
                             .lineLimit(1)

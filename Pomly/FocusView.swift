@@ -69,22 +69,23 @@ struct FocusView: View {
             Spacer(minLength: 0)
             controls
         }
-        .frame(maxWidth: 560)
+        .frame(maxWidth: 560, maxHeight: 940) // tall iPads: keep the composition together
         .padding(Self.edge)
     }
 
     /// iPhone Duo inner display / landscape: focus on one side of the fold, today on the other.
     private var regular: some View {
         GeometryReader { geo in
-            HStack(spacing: foldWidth(geo)) {
+            HStack(alignment: .top, spacing: foldWidth(geo)) {
                 VStack(spacing: 18) {
                     header
                     title
                     dial.frame(maxWidth: 420)
                     presets
+                    Spacer(minLength: 0)
                     controls
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 TodayPanel(sessions: today, seconds: todaySeconds, goalMin: goalMin, focusMin: focusMin, tint: tint)
                     .frame(maxWidth: .infinity)
             }
@@ -112,9 +113,7 @@ struct FocusView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Text("TODAY").font(.caption.weight(.semibold)).fontWidth(.expanded).tracking(1.2).foregroundStyle(.secondary)
-            Text(todaySeconds.shortText).font(.subheadline.weight(.semibold)).fontDesign(.serif).monospacedDigit()
-                .contentTransition(.numericText())
+            if !wide { todayLine } // side by side, the Today panel says it
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: 36)
@@ -124,6 +123,12 @@ struct FocusView: View {
             #endif
         }
         .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder private var todayLine: some View {
+            Text("TODAY").font(.caption.weight(.semibold)).fontWidth(.expanded).tracking(1.2).foregroundStyle(.secondary)
+            Text(todaySeconds.shortText).font(.subheadline.weight(.semibold)).fontDesign(.rounded).monospacedDigit()
+                .contentTransition(.numericText())
     }
 
     /// Test builds only: 15-second sessions to try the whole cycle quickly.
@@ -144,11 +149,22 @@ struct FocusView: View {
             VStack(spacing: 6) {
                 Stamp(text: s.phase == .focus ? "Session Logged" : "Break Done", tint: tint)
                 Text(s.label.isEmpty ? (s.phase == .focus ? String(localized: "Focus") : String(localized: "Break")) : s.label)
-                    .font(.title2.weight(.semibold)).fontDesign(.serif).lineLimit(1)
+                    .font(.title2.weight(.semibold)).fontDesign(.rounded).lineLimit(1)
                 Group {
                     s.phase == .focus ? Text("\(s.planned.shortText) of focus. Take a breather.") : Text("Rested. Ready for the next one?")
                 }
-                .font(.subheadline).fontDesign(.serif).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.8)
+                .font(.subheadline).fontDesign(.rounded).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            .transition(.blurReplace)
+        } else if s.phase == .rest, s.isActive {
+            // A break has no label to pick; say when focus resumes instead.
+            VStack(spacing: 4) {
+                Text("ON A BREAK").font(.caption.weight(.semibold)).fontWidth(.expanded).tracking(1.2).foregroundStyle(.secondary)
+                Group {
+                    if let end = s.endDate { Text("Back at \(end, format: .dateTime.hour().minute())") } else { Text("Paused") }
+                }
+                .font(.title.weight(.semibold)).fontDesign(.rounded).lineLimit(1).minimumScaleFactor(0.7)
+                .contentTransition(.opacity)
             }
             .transition(.blurReplace)
         } else {
@@ -178,7 +194,7 @@ struct FocusView: View {
                     .font(.caption.weight(.semibold)).fontWidth(.expanded).tracking(1.2).foregroundStyle(.secondary)
                 HStack(spacing: 6) {
                     Text(s.label.isEmpty ? String(localized: "Anything") : s.label)
-                        .font(.title.weight(.semibold)).fontDesign(.serif).lineLimit(1)
+                        .font(.title.weight(.semibold)).fontDesign(.rounded).lineLimit(1)
                         .contentTransition(.opacity)
                     Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 }
@@ -290,7 +306,7 @@ struct FocusView: View {
                 if let icon = a.icon {
                     Image(systemName: icon).font(.title3.weight(.semibold)).frame(width: controlSize, height: controlSize)
                 } else {
-                    Text(a.label).font(.headline).fontDesign(.serif).lineLimit(1).padding(.horizontal, 24).frame(height: controlSize)
+                    Text(a.label).font(.headline).fontDesign(.rounded).lineLimit(1).padding(.horizontal, 24).frame(height: controlSize)
                 }
             }
             .contentShape(.capsule)
@@ -304,7 +320,7 @@ struct FocusView: View {
     private func primary(_ a: Action) -> some View {
         Button(action: a.run) {
             Label(a.label, systemImage: a.icon ?? "play.fill")
-                .font(.headline).fontDesign(.serif)
+                .font(.headline).fontDesign(.rounded)
                 .lineLimit(1).minimumScaleFactor(0.7)
                 .contentTransition(.opacity)
                 .frame(maxWidth: .infinity, minHeight: controlSize)
@@ -373,7 +389,7 @@ struct DialView: View {
                         .animation(reduceMotion ? nil : .smooth(duration: 0.9), value: snap.status)
                     VStack(spacing: 6) {
                         Text(shown.clock)
-                            .font(.system(size: geo.size.width * 0.22, weight: .regular, design: .serif)).monospacedDigit()
+                            .font(.system(size: geo.size.width * 0.22, weight: .regular, design: .rounded)).monospacedDigit()
                             .contentTransition(.numericText(countsDown: true))
                             .animation(reduceMotion ? nil : .smooth, value: Int(shown))
                             .lineLimit(1).minimumScaleFactor(0.4)
@@ -456,17 +472,17 @@ struct TodayPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Today").font(.largeTitle.weight(.semibold)).fontDesign(.serif)
+            Text("Today").font(.largeTitle.weight(.semibold)).fontDesign(.rounded)
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("\(Int(seconds / 60))").font(.system(size: 48, weight: .regular, design: .serif)).monospacedDigit()
+                    Text("\(Int(seconds / 60))").font(.system(size: 48, weight: .regular, design: .rounded)).monospacedDigit()
                         .contentTransition(.numericText())
-                    Text("min of focus").font(.body).fontDesign(.serif).foregroundStyle(.secondary).lineLimit(1)
+                    Text("min of focus").font(.body).fontDesign(.rounded).foregroundStyle(.secondary).lineLimit(1)
                     Spacer(minLength: 8)
                     SessionBars(done: sessions.count, goal: SessionBars.goal(goalMin: goalMin, focusMin: focusMin), tint: tint, height: 22)
                 }
                 Text(sessions.count == 1 ? String(localized: "1 session") : String(localized: "\(sessions.count) sessions"))
-                    .font(.subheadline).fontDesign(.serif).foregroundStyle(.secondary)
+                    .font(.subheadline).fontDesign(.rounded).foregroundStyle(.secondary)
             }
             .padding(20)
             .background(Color.primary.opacity(0.05), in: .rect(cornerRadius: 24))
@@ -503,13 +519,13 @@ struct SessionRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(session.label.isEmpty ? String(localized: "Focus") : session.label)
-                    .font(.body.weight(.medium)).fontDesign(.serif).lineLimit(1)
+                    .font(.body.weight(.medium)).fontDesign(.rounded).lineLimit(1)
                 Text(session.completed ? session.start.formatted(.dateTime.hour().minute())
                                        : String(localized: "Ended early · \(session.start.formatted(.dateTime.hour().minute()))"))
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Text(session.duration.shortText).font(.body).fontDesign(.serif).monospacedDigit()
+            Text(session.duration.shortText).font(.body).fontDesign(.rounded).monospacedDigit()
                 .foregroundStyle(session.completed ? .primary : .secondary)
         }
         .accessibilityElement(children: .combine)
@@ -536,7 +552,7 @@ struct FullScreenTimer: View {
         GeometryReader { geo in
             TimelineView(.periodic(from: .now, by: 1)) { ctx in
                 let remaining = s.remaining(at: ctx.date)
-                let size = min(geo.size.width * 0.26, geo.size.height * 0.5)
+                let size = min(geo.size.width * 0.26, (geo.size.height - 96) * 0.5)
                 VStack(spacing: size * 0.1) {
                     HStack(spacing: 8) {
                         Circle().fill(tint).frame(width: 7, height: 7)
@@ -544,7 +560,7 @@ struct FullScreenTimer: View {
                     }
                     .opacity(0.6)
                     Text(remaining.clock)
-                        .font(.system(size: size, weight: .light, design: .serif)).monospacedDigit()
+                        .font(.system(size: size, weight: .light, design: .rounded)).monospacedDigit()
                         .contentTransition(.numericText(countsDown: true))
                         .animation(reduceMotion ? nil : .smooth, value: Int(remaining))
                         .lineLimit(1).minimumScaleFactor(0.5)
@@ -556,6 +572,7 @@ struct FullScreenTimer: View {
                 }
                 .offset(reduceMotion ? .zero : Self.drift(ctx.date))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.bottom, 96) // room for the controls, so they never cover the timer
             }
         }
         .foregroundStyle(dark ? .white : .black)
@@ -606,6 +623,7 @@ struct FullScreenTimer: View {
             Image(systemName: icon).font(.title3.weight(.semibold)).frame(width: 56, height: 56).contentShape(.circle)
         }
         .buttonStyle(.plain)
+        .foregroundStyle(dark ? Color.white : .black) // the overlay doesn't inherit the screen's foreground
         .glassEffect(.regular.interactive(), in: .circle)
         .accessibilityLabel(label)
     }
