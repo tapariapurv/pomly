@@ -37,7 +37,8 @@ struct FocusView: View {
                 // The dial needs room; text still grows a lot but stops where this layout can hold it.
                 .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         }
-        .onGeometryChange(for: Bool.self) { $0.size.width > 640 } action: { wide = $0 }
+        // Side by side only when there's width to spare (landscape, Mac, iPhone Duo inside); portrait iPad stacks like iPhone.
+        .onGeometryChange(for: Bool.self) { $0.size.width > 640 && $0.size.width >= $0.size.height * 0.9 } action: { wide = $0 }
         .animation(motion, value: s.status)
         .animation(motion, value: s.phase)
         .sensoryFeedback(.success, trigger: s.status == .finished) { _, new in haptics && new }
@@ -63,11 +64,12 @@ struct FocusView: View {
             header
             title
             Spacer(minLength: 0)
-            dial.frame(maxWidth: 380)
+            dial.frame(maxWidth: 520)
             presets
             Spacer(minLength: 0)
             controls
         }
+        .frame(maxWidth: 560)
         .padding(Self.edge)
     }
 

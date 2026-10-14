@@ -1,6 +1,6 @@
 # Pomly — project rules
 
-Native iOS Pomodoro / focus timer. SwiftUI, iOS 26+ (built with the iOS 27 SDK), iPhone incl. iPhone Duo.
+Native Pomodoro / focus timer. SwiftUI, iOS/iPadOS/macOS/watchOS 26+ (27 SDKs). One `Pomly` target builds iPhone, iPad and Mac (`supportedDestinations`); `PomlyWatch` is the Watch app.
 
 ## 0. Token efficiency (top priority, applies to every agent and subagent)
 - The cheapest correct path wins. Batch independent tool calls. Never re-read, re-fetch or re-derive what is already known.
@@ -61,6 +61,12 @@ Native iOS Pomodoro / focus timer. SwiftUI, iOS 26+ (built with the iOS 27 SDK),
 - Never call `UNUserNotificationCenter.removePendingNotificationRequests` on the main thread (it's synchronous XPC).
 - Preference plist reads from the shell lag behind the app (cfprefsd caching). Verify UI state by screenshot, not by the plist.
 - Cheap screenshots: `xcrun simctl io booted screenshot x.png && sips -Z 420 x.png`, cropped with `sips -c H W --cropOffset Y X`.
+
+## Platform notes
+- iOS-only APIs (AlarmKit, ActivityKit, ControlCenter, UIApplication, `fullScreenCover`, `reservedRegions`) go behind `#if os(iOS)`. `LiveActivityIntent` doesn't exist on Mac or Watch, so use the `PomlyIntent` typealias.
+- Mac: `.glass` buttons draw as small tinted rects, so use `glassCapsule()`. A `Menu` needs `.menuStyle(.button).buttonStyle(.plain)`, forms need `.formStyle(.grouped)` (in `pomlyBackground()`), and the Mac uses a `Form` where iOS uses a `List`. Full Screen opens the `timer` Window. Signed to run locally, with no App Group.
+- Watch: toolbar buttons fill with `.tint`, so don't add `.glassProminent`. Don't tint the whole stack; tint only the primary action (`Theme.onTint` icon). The dial is edge to edge with controls in the corners.
+- Never `killall` CoreSimulatorService: it purged the iOS runtime once (`xcodebuild -downloadPlatform iOS` restores it).
 
 ## Commands
 - `xcodegen generate`
