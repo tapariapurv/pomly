@@ -80,3 +80,21 @@ struct ToggleFocusIntent: SetValueIntent, PomlyIntent {
         return .result()
     }
 }
+
+/// "How much time is left?" for Siri, Spotlight and Apple Intelligence: answers without opening the app.
+struct TimeLeftIntent: AppIntent {
+    static let title: LocalizedStringResource = "Time Left"
+    static let description = IntentDescription("Tells you how much is left of the current focus session or break.")
+
+    @MainActor func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog {
+        let s = TimerEngine.shared.snap
+        let minutes = Int((s.remaining() / 60).rounded(.up))
+        let what = s.phase == .focus ? String(localized: "focus") : String(localized: "break")
+        let dialog: IntentDialog = switch s.status {
+        case .running: "\(minutes) min left in your \(what)."
+        case .paused: "Your \(what) is paused with \(minutes) min left."
+        default: "No session running. Say \"Start a focus in Pomly\" to begin."
+        }
+        return .result(value: s.isActive ? minutes : 0, dialog: dialog)
+    }
+}
