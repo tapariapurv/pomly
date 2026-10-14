@@ -75,6 +75,11 @@ Native Pomodoro / focus timer. SwiftUI, iOS/iPadOS/macOS/watchOS 26+ (27 SDKs). 
 - Build: `xcodebuild -scheme Pomly -destination 'generic/platform=iOS Simulator' -quiet build 2>&1 | grep -E "error:|warning: .*/(Pomly|Shared|PomlyWidgets)/" | head -30`
 - Test: `xcodebuild -scheme Pomly -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -quiet test 2>&1 | tail -20`
 
+## Release & publish
+- `scripts/release.sh` builds `dist/` (Mac zip and unsigned IPA) and writes the cask's sha256. `--publish` creates the GitHub release. Bump `MARKETING_VERSION` in project.yml first.
+- Website: `docs/`, served by GitHub Pages at https://tapariapurv.github.io/pomly/. Store copy and keywords: `AppStore/metadata.md`. Promo: `promo/` (HyperFrames; timing in `scripts/sound.py`).
+- Mac target is sandboxed (`Pomly/PomlyMac.entitlements`), so prefs and data live in `~/Library/Containers/com.purvt.pomly`.
+
 ## Deferred
 - App blocking (needs a paid account + the Family Controls entitlement): `.individual` auth, `FamilyActivityPicker` for allowed apps, `ManagedSettingsStore` shield applied on start and cleared on end, plus a DeviceActivity monitor extension as a safety net.
 - iCloud sync: switch the `ModelContainer` config to CloudKit. The model is already CloudKit-compatible.
