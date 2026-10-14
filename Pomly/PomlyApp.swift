@@ -21,6 +21,7 @@ struct PomlyApp: App {
         .modelContainer(Store.container)
         #if os(macOS)
         .defaultSize(width: 920, height: 640)
+        .commands { PomlyCommands() }
         #endif
 
         #if os(macOS)

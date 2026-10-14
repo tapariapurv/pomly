@@ -1,9 +1,20 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
+import Carbon.HIToolbox
 
 final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) { MenuBar.shared.install() }
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // A menu bar timer must never be reaped in the background (macOS can auto-terminate windowless SwiftUI apps).
+        ProcessInfo.processInfo.disableAutomaticTermination("Pomly keeps a timer in the menu bar")
+        ProcessInfo.processInfo.disableSuddenTermination()
+        MenuBar.shared.install()
+        HotKeys.register()
+        if UserDefaults.standard.bool(forKey: "miniTimer") { MiniTimer.show() }
+    }
+
+    /// A menu bar timer keeps running when its window closes.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 }
 
 /// Menu bar: a compact live timer. Click for the panel; drag down from the icon to pull out a focus length.
@@ -11,8 +22,20 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
 @MainActor final class MenuBar: NSObject, NSPopoverDelegate {
     static let shared = MenuBar()
 
+    /// Pomly's Light / Dark / System setting, for windows that live outside the SwiftUI scene.
+    static var appearance: NSAppearance? {
+        switch Pref.int(Pref.appearance) {
+        case 1: NSAppearance(named: .aqua)
+        case 2: NSAppearance(named: .darkAqua)
+        default: nil
+        }
+    }
+
     @Observable final class Model {
         var dragMinutes = 0
+        var from = CGPoint.zero // line ends, in overlay coordinates
+        var to = CGPoint.zero
+        var guided = false // started from the panel's button: no button held, click to set
         var pendingMinutes: Int? // set by a drag: ask what we're focusing on, then start
     }
 
@@ -22,20 +45,18 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
     private let popover = NSPopover()
     private var preview: NSPanel?
     private var ticker: Timer?
+    private var press: Timer?
+    private var lineEnd = NSPoint.zero
+    private var anchor: NSWindow?
+    private var guide: (poll: Timer, catcher: NSWindow, monitors: [Any])?
 
     func install() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.item = item
         guard let b = item.button else { return }
-        // A view over the icon gets real down / dragged / up events (a button's action can't see the drag).
-        let tracker = TrackingView(frame: b.bounds)
-        tracker.autoresizingMask = [.width, .height]
-        tracker.onDown = { [weak self] in self?.item?.button?.highlight(true); self?.model.dragMinutes = 0 }
-        tracker.onDrag = { [weak self] length, start in self?.showPreview(length: length, from: start) }
-        tracker.onUp = { [weak self] dragged in self?.released(dragged: dragged) }
-        tracker.onRight = { [weak self] in self?.togglePopover() }
-        b.addSubview(tracker)
-        NSLog("Pomly menu bar item at %@", NSStringFromRect(b.window?.frame ?? .zero))
+        b.target = self
+        b.action = #selector(pressed)
+        b.sendAction(on: [.leftMouseDown, .rightMouseDown])
         b.imagePosition = .imageLeading
         b.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .medium)
         b.setAccessibilityLabel("Pomly")
@@ -45,7 +66,10 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         observe()
     }
 
-    func popoverDidClose(_ notification: Notification) { model.pendingMinutes = nil }
+    func popoverDidClose(_ notification: Notification) {
+        model.pendingMinutes = nil
+        anchor?.orderOut(nil)
+    }
 
     // MARK: Status item
 
@@ -102,33 +126,115 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: Click or drag
 
+    /// Guided drag: the line follows the pointer without holding the button. Click or Return sets it, Esc cancels.
+    /// A faint full-screen layer catches that click, so it never lands in another app.
+    func startGuided() {
+        popover.performClose(nil)
+        guard guide == nil, let b = item?.button, let win = b.window, let screen = win.screen ?? NSScreen.main else { return }
+        let icon = win.convertToScreen(b.convert(b.bounds, to: nil)), start = NSPoint(x: icon.midX, y: icon.midY)
+        model.guided = true
+        model.dragMinutes = 0
+        let catcher = KeyPanel(contentRect: screen.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+        catcher.backgroundColor = NSColor.black.withAlphaComponent(0.12)
+        catcher.isOpaque = false
+        catcher.hidesOnDeactivate = false // panels hide when the app isn't frontmost; this one must not
+        catcher.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue - 1)
+        NSApp.activate()
+        catcher.makeKeyAndOrderFront(nil)
+        let poll = Timer(timeInterval: 1.0 / 60, repeats: true) { _ in
+            MainActor.assumeIsolated { MenuBar.shared.showPreview(to: NSEvent.mouseLocation, from: start) }
+        }
+        RunLoop.main.add(poll, forMode: .common)
+        let monitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { e in
+            MainActor.assumeIsolated {
+                MenuBar.shared.endGuided(confirm: e.type == .leftMouseDown || e.keyCode == 36 || e.keyCode == 76) // click or Return sets; right-click, Esc or any other key cancels
+            }
+            return nil
+        }
+        // Backup: a click that still lands in another app ends the mode too, so it can never get stuck.
+        let outside = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { e in
+            MainActor.assumeIsolated { MenuBar.shared.endGuided(confirm: e.type == .leftMouseDown) }
+        }
+        guide = (poll, catcher, [monitor, outside].compactMap { $0 })
+        showPreview(to: NSEvent.mouseLocation, from: start)
+    }
+
+    private func endGuided(confirm: Bool) {
+        guard let g = guide else { return }
+        guide = nil
+        g.poll.invalidate()
+        g.monitors.forEach(NSEvent.removeMonitor)
+        g.catcher.orderOut(nil)
+        model.guided = false
+        released(dragged: confirm)
+        if !confirm { popover.performClose(nil) }
+    }
+
+    /// Press on the icon: follow the pointer at 60 Hz until the button comes up. Polling needs no drag events,
+    /// so it works with any mouse, trackpad or input tool, and runs only while the button is held.
+    @objc private func pressed() {
+        if NSApp.currentEvent?.type == .rightMouseDown { return togglePopover() }
+        let start = NSEvent.mouseLocation
+        var dragged = false
+        model.dragMinutes = 0
+        press?.invalidate()
+        let t = Timer(timeInterval: 1.0 / 60, repeats: true) { _ in
+            MainActor.assumeIsolated {
+                let bar = MenuBar.shared, p = NSEvent.mouseLocation
+                if dragged || hypot(p.x - start.x, p.y - start.y) > 12 {
+                    dragged = true
+                    bar.showPreview(to: p, from: start)
+                }
+                if NSEvent.pressedMouseButtons & 1 == 0 {
+                    bar.press?.invalidate()
+                    bar.press = nil
+                    bar.released(dragged: dragged)
+                }
+            }
+        }
+        RunLoop.main.add(t, forMode: .common)
+        press = t
+    }
+
     private func released(dragged: Bool) {
-        item?.button?.highlight(false)
-        preview?.orderOut(nil)
+        hidePreview()
         if !dragged { return togglePopover() }
         guard model.dragMinutes > 0 else { return } // dragged back up: cancel
         model.pendingMinutes = model.dragMinutes
-        showPopover()
+        showPopover(at: lineEnd) // at the end of the line: works even when a menu bar manager hides the icon
     }
 
-    /// 4 pt per minute, snapped to 5 (25 min ≈ 100 pt). Under 24 pt cancels.
+    /// 4 pt per minute of distance, snapped to 5 (25 min ≈ 100 pt). Under 24 pt cancels.
     static func minutes(forDrag length: CGFloat) -> Int {
         length < 24 ? 0 : min(120, max(5, (Int(length / 4) + 2) / 5 * 5))
     }
 
-    private func showPreview(length: CGFloat, from start: NSPoint) {
-        let m = Self.minutes(forDrag: length)
+    /// The line runs from the icon to the pointer in any direction; its length sets the time.
+    /// Back in the menu bar strip (or right by the icon) means cancel.
+    private func showPreview(to cursor: NSPoint, from start: NSPoint) {
+        guard let b = item?.button, let win = b.window, let screen = win.screen ?? NSScreen.main else { return }
+        let icon = win.convertToScreen(b.convert(b.bounds, to: nil))
+        let m = cursor.y >= icon.minY ? 0 : Self.minutes(forDrag: hypot(cursor.x - start.x, cursor.y - start.y))
         if m != model.dragMinutes {
             model.dragMinutes = m
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         }
-        guard let b = item?.button, let win = b.window else { return }
-        let icon = win.convertToScreen(b.convert(b.bounds, to: nil))
         let panel = preview ?? makePreview()
-        let w: CGFloat = 160, cursor = start.y - length
-        let h = max(icon.minY - cursor, 0) + 44 // line down to the cursor, then the label
-        panel.setFrame(NSRect(x: icon.midX - w / 2, y: icon.minY - h, width: w, height: h), display: true)
-        panel.orderFrontRegardless()
+        let f = screen.frame
+        if panel.frame != f { panel.setFrame(f, display: false) }
+        model.from = CGPoint(x: icon.midX - f.minX, y: f.maxY - icon.minY)
+        model.to = CGPoint(x: cursor.x - f.minX, y: f.maxY - cursor.y)
+        lineEnd = cursor
+        if !panel.isVisible {
+            panel.alphaValue = 0
+            panel.orderFrontRegardless()
+            NSAnimationContext.runAnimationGroup { $0.duration = 0.12; panel.animator().alphaValue = 1 }
+        }
+    }
+
+    private func hidePreview() {
+        guard let p = preview, p.isVisible else { return }
+        NSAnimationContext.runAnimationGroup({ $0.duration = 0.12; p.animator().alphaValue = 0 }, completionHandler: { p.orderOut(nil) })
     }
 
     private func makePreview() -> NSPanel {
@@ -137,7 +243,9 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         p.backgroundColor = .clear
         p.hasShadow = false
         p.ignoresMouseEvents = true
-        p.level = .statusBar
+        p.ignoresMouseEvents = true
+        p.hidesOnDeactivate = false
+        p.appearance = Self.appearance
         p.contentView = NSHostingView(rootView: MenuBarDragPreview(model: model))
         preview = p
         return p
@@ -145,69 +253,56 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
 
     private func togglePopover() { popover.isShown ? popover.performClose(nil) : showPopover() }
 
-    private func showPopover() {
+    private func showPopover(at point: NSPoint? = nil) {
         guard let b = item?.button else { return }
-        popover.show(relativeTo: b.bounds, of: b, preferredEdge: .minY)
+        popover.appearance = Self.appearance
+        if let point {
+            let w = anchor ?? NSWindow(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: true)
+            w.isOpaque = false
+            w.backgroundColor = .clear
+            w.level = .statusBar
+            anchor = w
+            w.setFrame(NSRect(x: point.x - 1, y: point.y - 1, width: 2, height: 2), display: false)
+            w.orderFrontRegardless()
+            popover.show(relativeTo: w.contentView?.bounds ?? .zero, of: w.contentView ?? b, preferredEdge: .minY)
+        } else {
+            popover.show(relativeTo: b.bounds, of: b, preferredEdge: .minY)
+        }
         NSApp.activate()
         popover.contentViewController?.view.window?.makeKey()
     }
 }
 
-private final class TrackingView: NSView {
-    var onDown: () -> Void = {}
-    var onDrag: (CGFloat, NSPoint) -> Void = { _, _ in }
-    var onUp: (Bool) -> Void = { _ in }
-    var onRight: () -> Void = {}
-    private var start = NSPoint.zero
-    private var dragged = false
-    private var poll: Timer?
-
-    // Follows the pointer only while the button is held (60 Hz), so any input source works and idle costs nothing.
-    override func mouseDown(with event: NSEvent) {
-        start = NSEvent.mouseLocation
-        dragged = false
-        onDown()
-        poll?.invalidate()
-        let t = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in MainActor.assumeIsolated { self?.tick() } }
-        RunLoop.main.add(t, forMode: .common)
-        poll = t
-    }
-    override func mouseUp(with event: NSEvent) { tick(); finish() }
-    override func rightMouseDown(with event: NSEvent) { onRight() }
-
-    private func tick() {
-        let length = start.y - NSEvent.mouseLocation.y
-        if length > 12 || dragged {
-            dragged = true
-            onDrag(max(length, 0), start)
-        }
-        if NSEvent.pressedMouseButtons & 1 == 0 { finish() }
-    }
-
-    private func finish() {
-        guard let p = poll else { return }
-        p.invalidate()
-        poll = nil
-        onUp(dragged)
-    }
+private final class KeyPanel: NSPanel {
+    override var canBecomeKey: Bool { true } // so Return and Esc reach us in guided mode
 }
 
-/// The line pulled down from the icon, with the length it will set.
+/// The line pulled from the icon to the pointer, with the length it will set.
 struct MenuBarDragPreview: View {
     let model: MenuBar.Model
     @AppStorage(Pref.theme, store: .shared) private var theme = 0
 
     var body: some View {
-        let tint = (Theme(rawValue: theme) ?? .ember).tint
-        VStack(spacing: 0) {
-            Capsule().fill(tint.gradient).frame(width: 3).frame(maxHeight: .infinity)
-            Circle().fill(tint).frame(width: 12, height: 12)
-            Text(model.dragMinutes > 0 ? "\(model.dragMinutes) min" : String(localized: "Cancel"))
-                .font(.system(.callout, design: .rounded, weight: .semibold)).monospacedDigit()
-                .contentTransition(.numericText())
-                .padding(.horizontal, 10).padding(.vertical, 4)
-                .glassEffect(.regular, in: .capsule)
-                .padding(.top, 4)
+        let tint = (Theme(rawValue: theme) ?? .ember).tint, on = model.dragMinutes > 0
+        ZStack {
+            Path { p in p.move(to: model.from); p.addLine(to: model.to) }
+                .stroke(tint.opacity(on ? 1 : 0.4), style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: on ? [] : [4, 6]))
+            Circle().fill(tint).frame(width: 12, height: 12).position(model.to)
+            VStack(spacing: 6) {
+                Text(on ? "\(model.dragMinutes) min" : model.guided ? String(localized: "Click to Cancel") : String(localized: "Release to Cancel"))
+                    .font(.system(.callout, design: .rounded, weight: .semibold)).monospacedDigit()
+                    .contentTransition(.numericText())
+                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .glassEffect(.regular, in: .capsule)
+                if model.guided {
+                    Text(on ? "Click to set · Esc to cancel" : "Move away from the icon to choose a length")
+                        .font(.caption.weight(.medium))
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .glassEffect(.regular, in: .rect(cornerRadius: 10))
+                }
+            }
+            .fixedSize()
+            .position(x: model.to.x, y: model.to.y + (model.guided ? 52 : 28))
         }
         .animation(.snappy(duration: 0.15), value: model.dragMinutes)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -231,6 +326,8 @@ struct MenuBarPanel: View {
         }
         .padding(16)
         .frame(width: 260)
+        .animation(.snappy(duration: 0.25), value: model.pendingMinutes)
+        .animation(.snappy(duration: 0.3), value: engine.snap.status)
         .tint(tint)
         .fontDesign(.rounded)
     }
@@ -238,7 +335,7 @@ struct MenuBarPanel: View {
     private func ask(_ m: Int) -> some View {
         VStack(spacing: 12) {
             Text("Focus for \(m) min").font(.title3.weight(.semibold))
-            TextField("What are you focusing on?", text: $label)
+            TextField(engine.snap.label.isEmpty ? String(localized: "What are you focusing on?") : engine.snap.label, text: $label)
                 .textFieldStyle(.roundedBorder)
                 .focused($typing)
                 .onSubmit { start(m) }
@@ -250,11 +347,16 @@ struct MenuBarPanel: View {
                     .keyboardShortcut(.defaultAction)
             }
         }
-        .onAppear { label = engine.snap.label; typing = true }
+        .task {
+            label = "" // the last label shows as the placeholder; Return keeps it
+            try? await Task.sleep(for: .milliseconds(80)) // the popover must be key before the field can take focus
+            typing = true
+        }
     }
 
     private func start(_ m: Int) {
-        engine.setLabel(label.trimmingCharacters(in: .whitespacesAndNewlines))
+        let typed = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !typed.isEmpty { engine.setLabel(typed) }
         model.pendingMinutes = nil
         close()
         Task { await engine.start(.focus, seconds: TimeInterval(m * 60)) }
@@ -282,7 +384,14 @@ struct MenuBarPanel: View {
                     Button("Quit") { NSApp.terminate(nil) }
                 }
                 .buttonStyle(.plain).font(.callout).foregroundStyle(.secondary)
-                Text("Tip: drag down from the menu bar icon to set a time.")
+                HStack(spacing: 8) {
+                    Button("Set by Dragging", systemImage: "arrow.down.to.line") { MenuBar.shared.startGuided() }
+                    Button("Mini Timer", systemImage: "pip") { close(); MiniTimer.toggle() }
+                }
+                .glassCapsule(neutral: true)
+                .controlSize(.regular)
+                    .help("Pull a line down from the menu bar to pick a length, then click.")
+                Text("Or press and drag from the menu bar icon. ⌃⌥P start or pause · ⌃⌥D drag")
                     .font(.caption2).foregroundStyle(.tertiary).multilineTextAlignment(.center)
             }
         }
@@ -322,6 +431,174 @@ struct MenuBarPanel: View {
         NSApp.activate()
         if let w = NSApp.windows.first(where: { $0.title == "Pomly" }) { w.makeKeyAndOrderFront(nil) }
         else { NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: .init()) } // reopen makes a new window
+    }
+}
+#endif
+
+#if os(macOS)
+/// Timer menu in the Mac menu bar: the main actions by keyboard.
+struct PomlyCommands: Commands {
+    var body: some Commands {
+        CommandMenu("Timer") {
+            Button("Start Focus") { Task { await TimerEngine.shared.start(.focus) } }
+                .keyboardShortcut("f", modifiers: [.command, .shift])
+            Button("Pause or Resume") {
+                let e = TimerEngine.shared
+                if e.snap.status == .running { e.pause() } else { Task { await e.resume() } }
+            }
+            .keyboardShortcut("p", modifiers: [.command, .shift])
+            Button("End Session") { TimerEngine.shared.stop() }
+            Divider()
+            Button("Set Focus by Dragging") { MenuBar.shared.startGuided() }
+                .keyboardShortcut("d", modifiers: [.command, .shift])
+            Button("Mini Timer") { MiniTimer.toggle() }
+                .keyboardShortcut("m", modifiers: [.command, .shift])
+        }
+    }
+}
+#endif
+
+#if os(macOS)
+/// Global shortcuts from any app (Carbon hot keys: no Accessibility permission needed).
+/// ⌃⌥P start, pause or resume · ⌃⌥D set a focus by dragging.
+enum HotKeys {
+    private static var refs: [EventHotKeyRef?] = []
+
+    static func register() {
+        var spec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
+        InstallEventHandler(GetApplicationEventTarget(), { _, event, _ in
+            var id = EventHotKeyID()
+            GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID),
+                              nil, MemoryLayout<EventHotKeyID>.size, nil, &id)
+            DispatchQueue.main.async { MainActor.assumeIsolated { HotKeys.fire(id.id) } }
+            return noErr
+        }, 1, &spec, nil, nil)
+        for (id, key) in [(UInt32(1), kVK_ANSI_P), (2, kVK_ANSI_D)] {
+            var ref: EventHotKeyRef?
+            RegisterEventHotKey(UInt32(key), UInt32(controlKey | optionKey), EventHotKeyID(signature: 0x504F_4D59, id: id),
+                                GetApplicationEventTarget(), 0, &ref)
+            refs.append(ref)
+        }
+    }
+
+    @MainActor static func fire(_ id: UInt32) {
+        let e = TimerEngine.shared
+        switch (id, e.snap.status) {
+        case (1, .running): e.pause()
+        case (1, .paused): Task { await e.resume() }
+        case (1, _): Task { await e.start(.focus) }
+        default: MenuBar.shared.startGuided()
+        }
+    }
+}
+#endif
+
+#if os(macOS)
+/// Picture-in-picture timer: the signature dial floating above everything, draggable, on every Space.
+@MainActor enum MiniTimer {
+    private static var panel: NSPanel?
+
+    static func toggle() { panel?.isVisible == true ? hide() : show() }
+    static func refreshAppearance() { panel?.appearance = MenuBar.appearance }
+
+    static func show() {
+        let p = panel ?? make()
+        p.appearance = MenuBar.appearance
+        UserDefaults.standard.set(true, forKey: "miniTimer")
+        guard !p.isVisible else { return }
+        p.alphaValue = 0
+        p.orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { $0.duration = 0.2; p.animator().alphaValue = 1 }
+    }
+
+    static func hide() {
+        UserDefaults.standard.set(false, forKey: "miniTimer")
+        guard let p = panel, p.isVisible else { return }
+        NSAnimationContext.runAnimationGroup({ $0.duration = 0.15; p.animator().alphaValue = 0 }, completionHandler: { p.orderOut(nil) })
+    }
+
+    private static func make() -> NSPanel {
+        let side: CGFloat = 136
+        let p = NSPanel(contentRect: NSRect(x: 0, y: 0, width: side, height: side), styleMask: [.borderless, .nonactivatingPanel],
+                        backing: .buffered, defer: false)
+        p.isFloatingPanel = true
+        p.level = .floating
+        p.hidesOnDeactivate = false
+        p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        p.isMovableByWindowBackground = true
+        p.backgroundColor = .clear
+        p.isOpaque = false
+        p.hasShadow = true
+        p.contentView = NSHostingView(rootView: MiniTimerView())
+        if !p.setFrameUsingName("PomlyMini"), let v = NSScreen.main?.visibleFrame {
+            p.setFrameOrigin(NSPoint(x: v.maxX - side - 24, y: v.maxY - side - 24))
+        }
+        p.setFrameAutosaveName("PomlyMini") // remembers where you left it
+        panel = p
+        return p
+    }
+}
+
+struct MiniTimerView: View {
+    private let engine = TimerEngine.shared
+    @AppStorage(Pref.theme, store: .shared) private var theme = 0
+    @AppStorage(Pref.appearance, store: .shared) private var look = 0
+    @State private var hover = false
+
+    var body: some View {
+        let s = engine.snap, tint = (Theme(rawValue: theme) ?? .ember).tint
+        // Redraws once a second only while running; paused or idle it costs nothing.
+        TimelineView(.animation(minimumInterval: 1, paused: s.status != .running)) { ctx in
+            let left = s.remaining(at: ctx.date)
+            ZStack {
+                DialFace(fraction: s.status == .idle ? DialFace.idleFraction(s.planned) : s.status == .finished ? 1 : left / max(s.planned, 1),
+                         tint: tint, showsKnob: false)
+                    .padding(6)
+                VStack(spacing: 2) {
+                    Text((s.status == .idle ? s.planned : left).clock)
+                        .font(.system(size: 24, weight: .light, design: .rounded)).monospacedDigit()
+                        .contentTransition(.numericText(countsDown: true))
+                    if hover {
+                        HStack(spacing: 6) {
+                            control(s.status == .running ? "pause.fill" : "play.fill") {
+                                switch s.status {
+                                case .running: engine.pause()
+                                case .paused: Task { await engine.resume() }
+                                default: Task { await engine.start(.focus) }
+                                }
+                            }
+                            control("xmark") { MiniTimer.hide() }
+                        }
+                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                    } else if s.status == .paused {
+                        Text("PAUSED").font(.system(size: 8, weight: .semibold)).fontWidth(.expanded).foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .animation(.snappy(duration: 0.25), value: Int(left))
+        }
+        .frame(width: 124, height: 124)
+        .background(Circle().fill(Color(light: 0xFBF6EF, dark: 0x1C130E).opacity(0.82))) // the app's face, for contrast
+        .glassEffect(.regular, in: .circle)
+        .frame(width: 136, height: 136)
+        .animation(.snappy(duration: 0.2), value: hover)
+        .onHover { hover = $0 }
+        .onTapGesture(count: 2) { NSApp.activate(); NSApp.windows.first { $0.title == "Pomly" }?.makeKeyAndOrderFront(nil) }
+        .contextMenu {
+            if s.status == .running { Button("Pause") { engine.pause() } }
+            if s.status == .paused { Button("Resume") { Task { await engine.resume() } } }
+            if s.isActive { Button("End Session") { engine.stop() } } else { Button("Start Focus") { Task { await engine.start(.focus) } } }
+            Divider()
+            Button("Hide Mini Timer") { MiniTimer.hide() }
+        }
+        .tint(tint)
+        .onChange(of: look) { MiniTimer.refreshAppearance() }
+    }
+
+    private func control(_ icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) { Image(systemName: icon).font(.system(size: 10, weight: .bold)).frame(width: 22, height: 22) }
+            .buttonStyle(.plain)
+            .glassEffect(.regular.interactive(), in: .circle)
     }
 }
 #endif
