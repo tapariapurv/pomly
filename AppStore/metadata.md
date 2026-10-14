@@ -1,42 +1,100 @@
-# App Store listing — Pomly
+# App Store listing: Pomly
 
-| Field | Value | Limit |
+Character counts are exact. Apple indexes the **name, subtitle and keyword field** (and on macOS, the in-app purchase names). The keyword field never repeats a word that's already in the name or subtitle, because Apple combines them.
+
+## iOS / iPadOS / watchOS (one listing)
+
+| Field | Text | Chars |
 |---|---|---|
 | Name | Pomly: Pomodoro Focus Timer | 27/30 |
 | Subtitle | Study, deep work & break timer | 30/30 |
-| Category | Productivity (secondary: Education) | |
-| Price | Free | |
+| Keywords | productivity,adhd,tomato,flow,concentration,habit,goal,streak,widget,countdown,clock,tracker,session | 100/100 |
+| Category | Productivity (primary) · Education (secondary) | |
 | Age rating | 4+ | |
 
-**Keywords** (100 chars, no words already in the name or subtitle):
-`productivity,adhd,flow,pomo,tomato,habit,goal,streak,concentration,widget,live,activity,clock,tracker`
-
-**Promotional text** (170):
-Set a time, start, breathe. Pomly lives on your Lock Screen, Dynamic Island, StandBy and Control Center, so focusing is always one tap away.
+**Promotional text** (170, editable without review)
+> Stay focused anywhere. Drag the dial, start a session, and let Pomly ring when it ends. Live Activities, widgets, Mac menu bar and Apple Watch, all in sync. (156)
 
 **Description**
-Focus made beautifully simple. Drag the dial, tap Start, and get to work. When time's up, Pomly rings, even in Silent mode, and offers a break with one tap.
+```
+Pomly is the calm Pomodoro timer: drag the dial, tap Start, focus. Take a break when it rings.
+Live Activities, Dynamic Island, widgets, Apple Watch and a Mac menu bar timer keep it one glance away.
+Free, private, and no account: devices pair with a 6-character code.
 
-• One-tap focus: drag the glass dial to set 1–120 minutes, or pick 15, 25, 45 or 60
-• Breaks on your terms: take one whenever you want, and get longer breaks every few sessions
-• Everywhere you look: Live Activity on the Lock Screen and Dynamic Island, StandBy, Home and Lock Screen widgets, and a Control Center toggle
-• Hands-free: "Start a focus in Pomly" with Siri, Shortcuts or the Action Button
-• Pair it with a Focus to silence notifications and start your session automatically
-• History that motivates: a weekly and monthly chart, a daily goal and streaks
-• Label sessions: Reading, Study, Writing, or your own
-• Liquid Glass design, light and dark modes, and five color themes
-• Built for every iPhone, including iPhone Duo's two displays
-• Private by design: no account, no tracking, no data leaves your iPhone
+FOCUS, SIMPLY
+• Drag around the dial to set 1–120 minutes, or tap 15 · 25 · 45 · 60
+• Alarms ring through Silent mode and Focus, with "Take a Break" right on the alert
+• Label what you're working on: Study, Reading, Deep Work
+• Full-screen minimal timer in black or white, portrait or landscape
 
-Simple by default. Under Advanced, power users can tune long breaks and auto-start.
+ALWAYS IN REACH
+• Live Activity on the Lock Screen and in the Dynamic Island, in three styles
+• Home Screen widgets that start sessions, plus Lock Screen and StandBy
+• Control Center and Action Button toggle
+• Siri and Shortcuts: "Start a focus in Pomly", "How much time is left in Pomly?"
 
-**Privacy label:** Data Not Collected. **Support / marketing URL:** TBD.
+EVERY DEVICE
+• iPhone, iPad and iPhone Duo layouts
+• Apple Watch app with Digital Crown and watch-face complications
+• Mac: menu bar timer, drag down from the icon to set a time, floating mini timer, global shortcuts
+• Instant sync between your devices with a pairing code
 
-## Screenshots (6.9", iPhone 17 Pro Max, light + dark)
-1. Dial idle: "Set a time. Start. Focus."
-2. Running + Dynamic Island: "Your timer, always in view"
-3. Lock Screen Live Activity + widgets: "One tap from anywhere"
-4. History chart: "See your focus grow"
-5. Break alert: "Breaks when you want them"
-6. StandBy: "A calm desk clock"
-7. Settings: "Simple. Customizable when you need it."
+PROGRESS WITHOUT PRESSURE
+• Daily goal ring, week and month charts, streaks
+• Long breaks every few sessions, auto-start options, five color themes, light and dark
+
+PRIVATE BY DESIGN
+No ads, no tracking, no analytics, no sign-up. Sync is optional and anonymous.
+```
+
+**What's New (1.0)**
+> Hello, Pomly. Drag, focus, rest, repeat on iPhone, iPad, Mac and Apple Watch.
+
+**Support URL:** https://tapariapurv.github.io/pomly/support.html
+**Marketing URL:** https://tapariapurv.github.io/pomly/
+**Privacy Policy URL:** https://tapariapurv.github.io/pomly/privacy.html
+
+## Mac App Store (separate keyword field)
+
+| Field | Text | Chars |
+|---|---|---|
+| Name | Pomly: Pomodoro Focus Timer | 27/30 |
+| Subtitle | Menu bar study & break clock | 28/30 |
+| Keywords | productivity,adhd,tomato,flow,concentration,habit,goal,streak,widget,menubar,countdown,routine,exam | 99/100 |
+| Category | Productivity | |
+
+Lead the Mac description with the menu bar: "A Pomodoro timer that lives in your menu bar. Press the icon and drag down to pick a length, name it, and focus."
+
+## Screenshots (order matters: the first 3 show in search)
+
+**6.9" iPhone (1320×2868):**
+1. "Drag. Focus. Rest." The dial in dark mode, mid-session.
+2. "Always one glance away." Lock Screen Live Activity and Dynamic Island.
+3. "Widgets that start sessions." The large widget with the presets.
+4. "Rings through Silent mode." The alarm with "Take a Break".
+5. "See your streak." History with the week chart.
+6. "Every device, in sync." iPhone, iPad, Mac and Watch with the pairing code.
+
+**13" iPad:** the side-by-side dial and Today panel, then History and Settings.
+**Mac:** the menu bar drag line ("25 min"), the mini timer floating over work, then the main window.
+**Watch:** the edge-to-edge dial, then a complication on a face.
+
+**App Preview (15–30 s):** use the 9:16 cut of `promo/` (drag the dial → Live Activity → widget → Watch → Mac menu bar → sync).
+
+## App Privacy ("nutrition label")
+
+- **Data Not Linked to You** (only when the user turns on Sync):
+  - *Identifiers → User ID*: an anonymous Firebase ID, for App Functionality.
+  - *Usage Data → Product Interaction*: timer state, for App Functionality.
+  - *User Content → Other User Content*: focus sessions (times and labels), for App Functionality.
+- **Tracking:** none. No third-party SDKs, analytics or ads.
+- **Encryption:** HTTPS only, so `ITSAppUsesNonExemptEncryption = NO`.
+
+## In-app events (later)
+
+- "Exam Season Focus Sprint": 7 days of 4 sessions a day.
+- "Deep Work Week", for Productivity featuring.
+
+## Review notes
+
+Sync is optional and uses no account: open Settings › Sync Devices and enter the code shown on another device. AlarmKit permission is asked on the first Start.

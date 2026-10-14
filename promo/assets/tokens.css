@@ -1,0 +1,5 @@
+:root {
+  --bg: #1c130e; --bg2: #2a1c14; --ink: #f6ebe0; --soft: #bfa898; --muted: #8c7666;
+  --tint: #f4a66a; --deep: #b85a1e; --glass: rgba(255, 244, 232, .09); --line: rgba(255, 244, 232, .14);
+  --sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", system-ui, sans-serif;
+}

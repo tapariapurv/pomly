@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tapariapurv.github.io/pomly/sitemap.xml
