@@ -6,6 +6,10 @@ struct PomlyApp: App {
     @AppStorage(Pref.appearance, store: .shared) private var appearance = 0
     @AppStorage(Pref.theme, store: .shared) private var theme = 0
 
+    #if os(macOS)
+    @NSApplicationDelegateAdaptor(PomlyAppDelegate.self) private var appDelegate
+    #endif
+
     init() { Pref.register() }
 
     var body: some Scene {
@@ -23,7 +27,6 @@ struct PomlyApp: App {
         // "Full Screen" on Mac: a minimal timer window to park anywhere or take full screen.
         Window("Timer", id: "timer") { FullScreenTimer(tint: (Theme(rawValue: theme) ?? .ember).tint) }
             .defaultSize(width: 560, height: 360)
-        MenuBarExtra { MenuBarMenu() } label: { MenuBarLabel() }
         Settings { SettingsView().frame(width: 460, height: 560).tint((Theme(rawValue: theme) ?? .ember).tint) }
             .modelContainer(Store.container)
         #endif
@@ -52,48 +55,6 @@ struct RootView: View {
         }
     }
 }
-
-#if os(macOS)
-/// Menu bar: the time left at a glance, the main actions one click away.
-struct MenuBarLabel: View {
-    private let engine = TimerEngine.shared
-    var body: some View {
-        let s = engine.snap
-        if s.isActive {
-            TimelineView(.periodic(from: .now, by: 1)) { ctx in
-                Label(s.remaining(at: ctx.date).clock, systemImage: s.status == .paused ? "pause.circle" : s.phase == .focus ? "timer" : "cup.and.saucer")
-                    .monospacedDigit()
-            }
-        } else {
-            Image(systemName: "timer")
-        }
-    }
-}
-
-struct MenuBarMenu: View {
-    private let engine = TimerEngine.shared
-    @Environment(\.openWindow) private var openWindow
-    var body: some View {
-        let s = engine.snap
-        switch s.status {
-        case .running:
-            Button("Pause") { engine.pause() }.keyboardShortcut("p")
-            Button("End Session") { engine.stop() }
-        case .paused:
-            Button("Resume") { Task { await engine.resume() } }.keyboardShortcut("p")
-            Button("End Session") { engine.stop() }
-        case .idle, .finished:
-            Button("Start Focus") { Task { await engine.start(.focus) } }.keyboardShortcut("f")
-            Button("Take a Break") { Task { await engine.start(.rest) } }.keyboardShortcut("b")
-        }
-        Divider()
-        Button("Show Timer") { openWindow(id: "timer"); NSApp.activate() }
-        Button("Open Pomly") { NSApp.activate(); NSApp.windows.first { $0.title == "Pomly" }?.makeKeyAndOrderFront(nil) }
-        Divider()
-        Button("Quit Pomly") { NSApp.terminate(nil) }.keyboardShortcut("q")
-    }
-}
-#endif
 
 struct PomlyShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
