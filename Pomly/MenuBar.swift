@@ -526,6 +526,16 @@ enum HotKeys {
         p.hidesOnDeactivate = false
         p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         p.isMovableByWindowBackground = true
+        // Borderless windows can be dragged off-screen; pull it back so it's always reachable.
+        NotificationCenter.default.addObserver(forName: NSWindow.didMoveNotification, object: p, queue: .main) { _ in
+            MainActor.assumeIsolated {
+                guard let v = (p.screen ?? NSScreen.main)?.visibleFrame else { return }
+                var f = p.frame
+                f.origin.x = min(max(f.minX, v.minX - f.width / 3), v.maxX - f.width * 2 / 3)
+                f.origin.y = min(max(f.minY, v.minY), v.maxY - f.height)
+                if f.origin != p.frame.origin { p.setFrameOrigin(f.origin) }
+            }
+        }
         p.backgroundColor = .clear
         p.isOpaque = false
         p.hasShadow = true
@@ -544,6 +554,8 @@ struct MiniTimerView: View {
     @AppStorage(Pref.theme, store: .shared) private var theme = 0
     @AppStorage(Pref.appearance, store: .shared) private var look = 0
     @State private var hover = false
+    @State private var shown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let s = engine.snap, tint = (Theme(rawValue: theme) ?? .ember).tint
@@ -580,7 +592,12 @@ struct MiniTimerView: View {
         .frame(width: 124, height: 124)
         .background(Circle().fill(Color(light: 0xFBF6EF, dark: 0x1C130E).opacity(0.82))) // the app's face, for contrast
         .glassEffect(.regular, in: .circle)
+        .scaleEffect(shown || reduceMotion ? 1 : 0.6)
         .frame(width: 136, height: 136)
+        .contentShape(.circle)
+        .gesture(WindowDragGesture()) // grab the dial anywhere to move it
+        .allowsWindowActivationEvents(true)
+        .onAppear { withAnimation(.spring(duration: 0.35, bounce: 0.3)) { shown = true } }
         .animation(.snappy(duration: 0.2), value: hover)
         .onHover { hover = $0 }
         .onTapGesture(count: 2) { NSApp.activate(); NSApp.windows.first { $0.title == "Pomly" }?.makeKeyAndOrderFront(nil) }
