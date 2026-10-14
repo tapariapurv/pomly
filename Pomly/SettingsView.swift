@@ -32,10 +32,14 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    #if os(macOS)
+                    LabeledContent("Sync Devices") { Button(Sync.shared.isPaired ? "Manage…" : "Set Up…") { syncing = true } }
+                    #else
                     Button { syncing = true } label: {
                         LabeledContent("Sync Devices", value: Sync.shared.isPaired ? String(localized: "On") : "")
                     }
                     .foregroundStyle(.primary)
+                    #endif
                 } footer: {
                     Text("Keep your timer and history the same on iPhone, iPad, Mac and Apple Watch.")
                 }
@@ -178,7 +182,7 @@ struct SilenceGuide: View {
 struct PomlyBackground: ViewModifier {
     @AppStorage(Pref.theme, store: .shared) private var theme = 0
     func body(content: Content) -> some View {
-        content.scrollContentBackground(.hidden).background(AppBackground(tint: (Theme(rawValue: theme) ?? .ember).tint))
+        content.formStyle(.grouped).scrollContentBackground(.hidden).background(AppBackground(tint: (Theme(rawValue: theme) ?? .ember).tint))
     }
 }
 

@@ -31,16 +31,32 @@ struct HistoryView: View {
             .sorted { $0.key > $1.key }.map { ($0.key, $0.value) }
     }
 
+    @ViewBuilder private var rows: some View {
+        if !sessions.isEmpty { summary }
+        ForEach(grouped, id: \.day) { group in
+            Section(dayTitle(group.day)) {
+                ForEach(group.items) { session in
+                    SessionRow(session: session, tint: tint)
+                        .contextMenu {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                delete(group.items, at: IndexSet(integer: group.items.firstIndex(of: session) ?? 0))
+                            }
+                        }
+                }
+                .onDelete { delete(group.items, at: $0) }
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            List {
-                if !sessions.isEmpty { summary }
-                ForEach(grouped, id: \.day) { group in
-                    Section(dayTitle(group.day)) {
-                        ForEach(group.items) { SessionRow(session: $0, tint: tint) }
-                            .onDelete { delete(group.items, at: $0) }
-                    }
-                }
+            Group {
+                // Mac has no inset-grouped list; a grouped Form draws the same cards as Settings.
+                #if os(macOS)
+                Form { rows }
+                #else
+                List { rows }
+                #endif
             }
             .pomlyBackground()
             .navigationTitle("History")
@@ -62,6 +78,7 @@ struct HistoryView: View {
                 Text("Month").tag(30)
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
 
             Chart {
                 ForEach(d) { day in

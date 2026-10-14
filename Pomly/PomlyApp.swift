@@ -18,6 +18,14 @@ struct PomlyApp: App {
         #if os(macOS)
         .defaultSize(width: 920, height: 640)
         #endif
+
+        #if os(macOS)
+        // "Full Screen" on Mac: a minimal timer window to park anywhere or take full screen.
+        Window("Timer", id: "timer") { FullScreenTimer(tint: (Theme(rawValue: theme) ?? .ember).tint) }
+            .defaultSize(width: 560, height: 360)
+        Settings { SettingsView().frame(width: 460, height: 560).tint((Theme(rawValue: theme) ?? .ember).tint) }
+            .modelContainer(Store.container)
+        #endif
     }
 }
 
@@ -32,6 +40,9 @@ struct RootView: View {
         }
         #if os(iOS)
         .tabBarMinimizeBehavior(.onScrollDown)
+        #endif
+        #if os(macOS)
+        .frame(minWidth: 400, minHeight: 620)
         #endif
         .onChange(of: scenePhase, initial: true) { _, phase in
             guard phase == .active else { return }

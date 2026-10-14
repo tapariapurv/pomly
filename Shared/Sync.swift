@@ -349,7 +349,9 @@ struct SyncView: View {
                 .animation(.snappy, value: sync.isPaired)
             }
             .navigationTitle("Sync")
+            #if !os(watchOS) // watchOS adds its own close button
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            #endif
         }
         .task {
             do { code = try await sync.makeCode() } catch { failed = "Can't reach sync right now. Check your connection." }

@@ -10,6 +10,9 @@ struct FocusView: View {
     @AppStorage(Pref.theme, store: .shared) private var themeRaw = 0
     @AppStorage(Pref.haptics, store: .shared) private var haptics = true
     @State private var wide = false
+    #if os(macOS)
+    @Environment(\.openWindow) private var openWindow
+    #endif
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.requestReview) private var requestReview
     @ScaledMetric(relativeTo: .title3) private var scaledControl = 56.0
@@ -45,8 +48,6 @@ struct FocusView: View {
         }
         #if os(iOS)
         .fullScreenCover(isPresented: $fullScreen) { FullScreenTimer(tint: tint) }
-        #else
-        .sheet(isPresented: $fullScreen) { FullScreenTimer(tint: tint).frame(minWidth: 640, minHeight: 420) }
         #endif
         .alert("Focusing On", isPresented: $askingLabel) {
             TextField("Reading", text: $newLabel)
@@ -67,7 +68,7 @@ struct FocusView: View {
             Spacer(minLength: 0)
             controls
         }
-        .padding()
+        .padding(Self.edge)
     }
 
     /// iPhone Duo inner display / landscape: focus on one side of the fold, today on the other.
@@ -85,9 +86,16 @@ struct FocusView: View {
                 TodayPanel(sessions: today, seconds: todaySeconds, goalMin: goalMin, focusMin: focusMin, tint: tint)
                     .frame(maxWidth: .infinity)
             }
-            .padding()
+            .padding(Self.edge)
         }
     }
+
+    /// Mac is viewed from further away: roomier margins.
+    #if os(macOS)
+    static let edge: CGFloat = 28
+    #else
+    static let edge: CGFloat = 16
+    #endif
 
     private func foldWidth(_ geo: GeometryProxy) -> CGFloat {
 #if os(iOS)
@@ -176,6 +184,9 @@ struct FocusView: View {
             }
             .contentShape(.rect)
         }
+        #if os(macOS)
+        .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden)
+        #endif
         .animation(motion, value: s.label)
         .accessibilityLabel("Focusing on \(s.label.isEmpty ? String(localized: "anything") : s.label)")
         .accessibilityHint("Choose a label for this session")
@@ -198,17 +209,23 @@ struct FocusView: View {
                         Button { engine.setDuration(TimeInterval(m * 60)) } label: {
                             Text("\(m)").font(.subheadline.weight(.semibold)).monospacedDigit().lineLimit(1).frame(minWidth: 32, minHeight: 32)
                         }
-                        .buttonStyle(.glass)
+                        .glassCapsule()
                         .tint(s.planned == TimeInterval(m * 60) ? tint : nil)
                         .accessibilityLabel("\(m) minutes")
                     }
                 }
             } else if s.status == .finished, s.phase == .focus {
                 Button("Add 5 Minutes", systemImage: "plus") { Task { await engine.start(.focus, seconds: 300) } }
-                    .font(.subheadline.weight(.semibold)).buttonStyle(.glass)
+                    .font(.subheadline.weight(.semibold)).glassCapsule(neutral: true)
             } else if s.isActive {
-                Button("Full Screen", systemImage: "arrow.up.left.and.arrow.down.right") { fullScreen = true }
-                    .font(.subheadline.weight(.semibold)).buttonStyle(.glass)
+                Button("Full Screen", systemImage: "arrow.up.left.and.arrow.down.right") {
+                    #if os(macOS)
+                    openWindow(id: "timer")
+                    #else
+                    fullScreen = true
+                    #endif
+                }
+                .font(.subheadline.weight(.semibold)).glassCapsule(neutral: true)
             } else {
                 Color.clear
             }
@@ -295,6 +312,7 @@ struct FocusView: View {
         .foregroundStyle(Theme.onTint)
         .glassEffect(.regular.tint(tint).interactive(), in: .capsule)
         .glassEffectID(a.id, in: glass)
+        .keyboardShortcut(.space, modifiers: [])
     }
 
     private func waitForEnd(_ end: Date?) async {
@@ -606,5 +624,17 @@ struct FullScreenTimer: View {
     static func drift(_ date: Date) -> CGSize {
         let m = Int(date.timeIntervalSince1970 / 60)
         return CGSize(width: CGFloat(m % 5 - 2) * 3, height: CGFloat(m / 5 % 5 - 2) * 3)
+    }
+}
+
+extension View {
+    /// Secondary glass capsule. macOS draws `.glass` as a small tinted rounded rect; match the iOS capsule instead.
+    @ViewBuilder func glassCapsule(neutral: Bool = false) -> some View {
+        #if os(macOS)
+        if neutral { buttonStyle(.glass).buttonBorderShape(.capsule).controlSize(.large).tint(nil) }
+        else { buttonStyle(.glass).buttonBorderShape(.capsule).controlSize(.large) }
+        #else
+        buttonStyle(.glass)
+        #endif
     }
 }
