@@ -16,15 +16,18 @@ final class Sync {
     private(set) var members: Set<String> = []
     var isPaired: Bool { space != nil && members.count > 1 }
 
-    private var uid = UserDefaults.shared.string(forKey: "syncUID")
-    private var idToken: String?
-    private var expiry = Date.distantPast
-    private var code: String?
-    private var listener: Task<Void, Never>?
-    private var pending: TimerSnapshot?
-    private var lastState: TimerSnapshot?
+    // Plumbing, not UI state: views never need to re-render for these.
+    @ObservationIgnored private var uid = UserDefaults.shared.string(forKey: "syncUID")
+    @ObservationIgnored private var idToken: String?
+    @ObservationIgnored private var expiry = Date.distantPast
+    @ObservationIgnored private var code: String?
+    @ObservationIgnored private var listener: Task<Void, Never>?
+    /// Last byte from the stream. Firebase sends a keep-alive every 30 s, so a quiet stream is a dead one.
+    @ObservationIgnored private var heard = Date.distantPast
+    @ObservationIgnored private var outgoing: Task<Void, Never>?
+    @ObservationIgnored private var lastState: TimerSnapshot?
     /// When the shared state last changed, here or elsewhere. A newer local change (e.g. made offline) beats an older remote one.
-    private var lastAt = UserDefaults.shared.double(forKey: "syncAt") {
+    @ObservationIgnored private var lastAt = UserDefaults.shared.double(forKey: "syncAt") {
         didSet { UserDefaults.shared.set(lastAt, forKey: "syncAt") }
     }
 
@@ -74,12 +77,16 @@ final class Sync {
         _ = try? await call("spaces/\(old)/members/\(uid ?? "-")", "DELETE")
     }
 
-    /// Foreground: (re)open the stream; its first event carries everything missed meanwhile.
-    func resume() { if space != nil { listen() } }
+    /// Foreground: reopen the stream if it went quiet (its first event carries everything missed meanwhile).
+    /// A live one stays, so window focus changes and wrist raises don't reconnect.
+    func resume() {
+        guard space != nil, heard < .now - 45 else { return }
+        listen()
+    }
 
     // MARK: Outgoing
 
-    /// Every local timer change. Coalesced, so dragging the dial sends only where it settles.
+    /// Every local timer change. Debounced, so dragging the dial sends only where it settles.
     func push(_ s: TimerSnapshot) {
         guard space != nil else { return }
         var s = s
@@ -87,10 +94,10 @@ final class Sync {
         guard s != lastState else { return }
         lastState = s
         lastAt = Date.now.timeIntervalSince1970
-        pending = s
-        Task {
+        outgoing?.cancel()
+        outgoing = Task {
             try? await Task.sleep(for: .milliseconds(150))
-            if let p = pending { pending = nil; send(p) }
+            if !Task.isCancelled { send(s) }
         }
     }
 
@@ -134,6 +141,7 @@ final class Sync {
     private func listen() {
         listener?.cancel()
         guard let space else { return }
+        heard = .now // a fresh stream gets the benefit of the doubt; it retries by itself if it fails
         listener = Task {
             while !Task.isCancelled, self.space == space {
                 do {
@@ -143,6 +151,7 @@ final class Sync {
                     if (res as? HTTPURLResponse)?.statusCode == 401 { return lost() }
                     var event = ""
                     for try await line in bytes.lines {
+                        heard = .now
                         if line.hasPrefix("event:") { event = line.dropFirst(6).trimmingCharacters(in: .whitespaces); continue }
                         guard line.hasPrefix("data:") else { continue }
                         switch event {

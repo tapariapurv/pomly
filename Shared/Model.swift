@@ -244,42 +244,61 @@ struct DialFace: View, Animatable {
     }
 
     var body: some View {
+        let f = min(max(fraction, 0), 1)
+        ZStack {
+            // The glowing ticks only change every 1/60 of a session, so they redraw only then; the knob moves every second.
+            DialTicks(lit: Int((f * 60).rounded(.up)), tint: tint, lap: lap, glow: scheme == .dark).equatable()
+            if showsKnob {
+                Canvas { gc, size in
+                    let r = min(size.width, size.height) / 2, w = max(r / 80, 0.8)
+                    let c = CGPoint(x: size.width / 2, y: size.height / 2)
+                    let theta = f * 2 * .pi
+                    let clear = 1 / ((sin(theta) / 0.62) * (sin(theta) / 0.62) + (cos(theta) / 0.34) * (cos(theta) / 0.34)).squareRoot()
+                    var hand = Path()
+                    hand.move(to: DialTicks.point(f, r * min(clear + 0.05, 0.62), c))
+                    hand.addLine(to: DialTicks.point(f, r * 0.7, c))
+                    gc.stroke(hand, with: .color(scheme == .dark ? tint.opacity(0.35) : .white.opacity(0.9)), style: StrokeStyle(lineWidth: w * 1.1, lineCap: .round))
+                    let kp = DialTicks.point(f, r * 0.7, c), kr = r * 0.035 * knobScale
+                    gc.fill(Path(ellipseIn: CGRect(x: kp.x - kr, y: kp.y - kr, width: kr * 2, height: kr * 2)), with: .color(tint))
+                }
+            }
+        }
+    }
+}
+
+/// The dial's 60 ticks, the first `lit` in the tint.
+struct DialTicks: View, Equatable {
+    let lit: Int
+    let tint: Color
+    let lap: Bool
+    let glow: Bool
+
+    static func point(_ turn: Double, _ radius: CGFloat, _ c: CGPoint) -> CGPoint {
+        let a = turn * 2 * .pi - .pi / 2
+        return CGPoint(x: c.x + cos(a) * radius, y: c.y + sin(a) * radius)
+    }
+
+    var body: some View {
         Canvas { gc, size in
             let r = min(size.width, size.height) / 2
             let c = CGPoint(x: size.width / 2, y: size.height / 2)
-            let f = min(max(fraction, 0), 1)
             let w = max(r / 80, 0.8) // stroke scales with the dial
-            func point(_ turn: Double, _ radius: CGFloat) -> CGPoint {
-                let a = turn * 2 * .pi - .pi / 2
-                return CGPoint(x: c.x + cos(a) * radius, y: c.y + sin(a) * radius)
-            }
-
-            var lit = Path(), litMajor = Path(), dim = Path(), dimMajor = Path()
+            var on = Path(), onMajor = Path(), off = Path(), offMajor = Path()
             for i in 0..<60 {
                 let t = Double(i) / 60, major = i % 5 == 0
                 var p = Path()
-                p.move(to: point(t, r * (major ? 0.79 : 0.85)))
-                p.addLine(to: point(t, r * 0.95))
-                if t < f { major ? litMajor.addPath(p) : lit.addPath(p) } else { major ? dimMajor.addPath(p) : dim.addPath(p) }
+                p.move(to: Self.point(t, r * (major ? 0.79 : 0.85), c))
+                p.addLine(to: Self.point(t, r * 0.95, c))
+                if i < lit { major ? onMajor.addPath(p) : on.addPath(p) } else { major ? offMajor.addPath(p) : off.addPath(p) }
             }
-            let off = lap ? tint.opacity(0.45) : Color.secondary.opacity(0.3)
-            gc.stroke(dim, with: .color(off), style: StrokeStyle(lineWidth: w, lineCap: .round))
-            gc.stroke(dimMajor, with: .color(off), style: StrokeStyle(lineWidth: w * 1.6, lineCap: .round))
+            let dim = lap ? tint.opacity(0.45) : Color.secondary.opacity(0.3)
+            gc.stroke(off, with: .color(dim), style: StrokeStyle(lineWidth: w, lineCap: .round))
+            gc.stroke(offMajor, with: .color(dim), style: StrokeStyle(lineWidth: w * 1.6, lineCap: .round))
             gc.drawLayer { layer in
-                if scheme == .dark { layer.addFilter(.shadow(color: tint.opacity(0.75), radius: w * 2.2)) }
-                layer.stroke(lit, with: .color(tint), style: StrokeStyle(lineWidth: w, lineCap: .round))
-                layer.stroke(litMajor, with: .color(tint), style: StrokeStyle(lineWidth: w * 1.6, lineCap: .round))
+                if glow { layer.addFilter(.shadow(color: tint.opacity(0.75), radius: w * 2.2)) }
+                layer.stroke(on, with: .color(tint), style: StrokeStyle(lineWidth: w, lineCap: .round))
+                layer.stroke(onMajor, with: .color(tint), style: StrokeStyle(lineWidth: w * 1.6, lineCap: .round))
             }
-
-            guard showsKnob else { return }
-            let theta = f * 2 * .pi
-            let clear = 1 / ((sin(theta) / 0.62) * (sin(theta) / 0.62) + (cos(theta) / 0.34) * (cos(theta) / 0.34)).squareRoot()
-            var hand = Path()
-            hand.move(to: point(f, r * min(clear + 0.05, 0.62)))
-            hand.addLine(to: point(f, r * 0.7))
-            gc.stroke(hand, with: .color(scheme == .dark ? tint.opacity(0.35) : .white.opacity(0.9)), style: StrokeStyle(lineWidth: w * 1.1, lineCap: .round))
-            let kp = point(f, r * 0.7), kr = r * 0.035 * knobScale
-            gc.fill(Path(ellipseIn: CGRect(x: kp.x - kr, y: kp.y - kr, width: kr * 2, height: kr * 2)), with: .color(tint))
         }
     }
 }

@@ -26,6 +26,8 @@
 	<string>public.app-category.productivity</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Pomly rings when a focus session or break ends, even in Silent mode.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Purv Taparia</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UILaunchScreen</key>

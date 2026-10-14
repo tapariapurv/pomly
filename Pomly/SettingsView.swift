@@ -95,7 +95,8 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .sheet(isPresented: $syncing) { SyncView() }
             .onChange(of: focusMin) { _, m in TimerEngine.shared.setDuration(TimeInterval(m * 60)) }
-            .onChange(of: liveStyle) { TimerEngine.shared.historyChanged() } // re-renders a running Live Activity
+            .onChange(of: liveStyle) { TimerEngine.shared.lookChanged() } // re-renders a running Live Activity
+            .onChange(of: theme) { TimerEngine.shared.lookChanged() } // widgets and the control pick up the new tint
             .confirmationDialog("Delete all sessions?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Delete All Sessions", role: .destructive) {
                     try? context.delete(model: Session.self)

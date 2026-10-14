@@ -24,10 +24,12 @@ final class TimerEngine {
     private(set) var lifetimeCompleted = UserDefaults.shared.integer(forKey: "lifetimeCompleted") {
         didSet { UserDefaults.shared.set(lifetimeCompleted, forKey: "lifetimeCompleted") }
     }
+    /// What the Control Center toggle last showed; it only needs a reload when this flips.
+    @ObservationIgnored private var controlActive: Bool?
     #if os(iOS)
     private var alarms: AlarmManager { .shared }
     /// Live Activity we run ourselves when AlarmKit isn't allowed; same attributes, so the same widget UI renders it.
-    private var activity = Activity<PomlyActivityAttributes>.activities.first
+    @ObservationIgnored private var activity = Activity<PomlyActivityAttributes>.activities.first
     #endif
 
     private init() {
@@ -35,14 +37,17 @@ final class TimerEngine {
         Task { await observeAlarms() }
         #endif
         refresh()
+        cacheToday()
     }
 
     // MARK: Actions
 
     func start(_ phase: Phase, seconds: TimeInterval? = nil) async {
         refresh()
-        let duration = min(180 * 60, max(1, seconds ?? defaultSeconds(for: phase))) // before stop() resets the length
-        if snap.isActive { stop() } else { cancelAlert() }
+        let duration = min(180 * 60, max(1, seconds ?? defaultSeconds(for: phase)))
+        // Like stop(), minus its reset: the new session replaces the old one in a single change.
+        if snap.phase == .focus, snap.isActive { log(snap.planned - snap.remaining(), completed: false) }
+        cancelAlert()
         var s = snap
         s.phase = phase
         s.status = .running
@@ -58,9 +63,11 @@ final class TimerEngine {
 
     func pause() {
         guard snap.status == .running else { return }
-        snap.remaining = snap.remaining()
-        snap.endDate = nil
-        snap.status = .paused
+        var s = snap
+        s.remaining = s.remaining()
+        s.endDate = nil
+        s.status = .paused
+        snap = s // one save and one sync push, not three
         #if os(iOS)
         if let id = snap.alarmID { try? alarms.pause(id: id) }
         #endif
@@ -70,8 +77,10 @@ final class TimerEngine {
 
     func resume() async {
         guard snap.status == .paused else { return }
-        snap.endDate = .now + snap.remaining
-        snap.status = .running
+        var s = snap
+        s.endDate = .now + s.remaining
+        s.status = .running
+        snap = s
         #if os(iOS)
         if let id = snap.alarmID {
             try? alarms.resume(id: id)
@@ -130,9 +139,11 @@ final class TimerEngine {
     func toggleQuick() {
         guard !snap.isActive else { return }
         cancelAlert()
-        snap.status = .idle
-        snap.phase = .focus
-        snap.planned = snap.planned < 60 ? TimeInterval(Pref.int(Pref.focusMin) * 60) : 15
+        var s = snap
+        s.status = .idle
+        s.phase = .focus
+        s.planned = s.planned < 60 ? TimeInterval(Pref.int(Pref.focusMin) * 60) : 15
+        snap = s
     }
 
     func defaultSeconds(for phase: Phase) -> TimeInterval {
@@ -146,12 +157,12 @@ final class TimerEngine {
     // MARK: Sync
 
     /// Launch / foreground / alarm change: adopt pauses made from the Live Activity, finish elapsed sessions.
+    /// No store fetch: today's cache only changes when history does, and it expires by itself at midnight.
     func refresh() {
         syncFromSystem()
         if snap.status == .running, let end = snap.endDate, end <= .now { complete() }
         // An old "Session Logged" isn't news an hour later: start fresh.
         if snap.status == .finished, let start = snap.startedAt, start + snap.planned < .now - 3600 { reset() }
-        cacheToday()
     }
 
     func historyChanged() {
@@ -161,14 +172,16 @@ final class TimerEngine {
 
     private func complete() {
         let phase = snap.phase
+        var s = snap
         if phase == .focus {
             log(snap.planned, completed: true)
-            snap.focusCount += 1
+            s.focusCount += 1
             lifetimeCompleted += 1
         }
-        snap.status = .finished
-        snap.endDate = nil
-        snap.remaining = 0
+        s.status = .finished
+        s.endDate = nil
+        s.remaining = 0
+        snap = s
         surfacesChanged()
         if phase == .focus, Pref.bool(Pref.autoBreak) { Task { await start(.rest) } }
         if phase == .rest, Pref.bool(Pref.autoFocus) { Task { await start(.focus) } }
@@ -194,18 +207,20 @@ final class TimerEngine {
         guard snap.isActive, let id = snap.alarmID,
               let mode = Activity<AlarmAttributes<PomlyMetadata>>.activities
                 .first(where: { $0.content.state.alarmID == id })?.content.state.mode else { return }
-        let before = snap
+        var s = snap
         switch mode {
         case .countdown(let c):
-            snap.status = .running
-            snap.endDate = c.fireDate
+            s.status = .running
+            s.endDate = c.fireDate
         case .paused(let p):
-            snap.status = .paused
-            snap.endDate = nil
-            snap.remaining = p.totalCountdownDuration - p.previouslyElapsedDuration
+            s.status = .paused
+            s.endDate = nil
+            s.remaining = p.totalCountdownDuration - p.previouslyElapsedDuration
         default: break
         }
-        if snap != before { surfacesChanged() }
+        guard s != snap else { return }
+        snap = s
+        surfacesChanged()
         #endif
     }
 
@@ -230,10 +245,20 @@ final class TimerEngine {
         Today.store(today.reduce(0) { $0 + $1.duration }, count: today.count)
     }
 
+    /// Theme or Live Activity style changed: redraw everything outside the app.
+    func lookChanged() {
+        controlActive = nil
+        surfacesChanged()
+    }
+
+    /// Widgets, the control and our Live Activity follow the session.
     private func surfacesChanged() {
         WidgetCenter.shared.reloadAllTimelines()
         #if os(iOS)
-        ControlCenter.shared.reloadAllControls()
+        if controlActive != snap.isActive {
+            controlActive = snap.isActive
+            ControlCenter.shared.reloadAllControls()
+        }
         updateActivity()
         #endif
     }
