@@ -27,9 +27,15 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.item = item
         guard let b = item.button else { return }
-        b.target = self
-        b.action = #selector(pressed)
-        b.sendAction(on: [.leftMouseDown, .rightMouseDown])
+        // A view over the icon gets real down / dragged / up events (a button's action can't see the drag).
+        let tracker = TrackingView(frame: b.bounds)
+        tracker.autoresizingMask = [.width, .height]
+        tracker.onDown = { [weak self] in self?.item?.button?.highlight(true); self?.model.dragMinutes = 0 }
+        tracker.onDrag = { [weak self] length, start in self?.showPreview(length: length, from: start) }
+        tracker.onUp = { [weak self] dragged in self?.released(dragged: dragged) }
+        tracker.onRight = { [weak self] in self?.togglePopover() }
+        b.addSubview(tracker)
+        NSLog("Pomly menu bar item at %@", NSStringFromRect(b.window?.frame ?? .zero))
         b.imagePosition = .imageLeading
         b.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .medium)
         b.setAccessibilityLabel("Pomly")
@@ -96,21 +102,8 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: Click or drag
 
-    @objc private func pressed() {
-        guard let event = NSApp.currentEvent else { return }
-        if event.type == .rightMouseDown { return togglePopover() }
-        let start = NSEvent.mouseLocation
-        var dragged = false
-        model.dragMinutes = 0
-        // Follow the pointer until the button actually comes up (some input sources send moves, not drags).
-        while let e = NSApp.nextEvent(matching: [.leftMouseDragged, .mouseMoved, .leftMouseUp], until: .distantFuture, inMode: .eventTracking, dequeue: true),
-              e.type != .leftMouseUp, NSEvent.pressedMouseButtons & 1 == 1 {
-            let length = start.y - NSEvent.mouseLocation.y
-            if length > 12 || dragged {
-                dragged = true
-                showPreview(length: max(length, 0), from: start)
-            }
-        }
+    private func released(dragged: Bool) {
+        item?.button?.highlight(false)
         preview?.orderOut(nil)
         if !dragged { return togglePopover() }
         guard model.dragMinutes > 0 else { return } // dragged back up: cancel
@@ -157,6 +150,45 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         popover.show(relativeTo: b.bounds, of: b, preferredEdge: .minY)
         NSApp.activate()
         popover.contentViewController?.view.window?.makeKey()
+    }
+}
+
+private final class TrackingView: NSView {
+    var onDown: () -> Void = {}
+    var onDrag: (CGFloat, NSPoint) -> Void = { _, _ in }
+    var onUp: (Bool) -> Void = { _ in }
+    var onRight: () -> Void = {}
+    private var start = NSPoint.zero
+    private var dragged = false
+    private var poll: Timer?
+
+    // Follows the pointer only while the button is held (60 Hz), so any input source works and idle costs nothing.
+    override func mouseDown(with event: NSEvent) {
+        start = NSEvent.mouseLocation
+        dragged = false
+        onDown()
+        poll?.invalidate()
+        let t = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in MainActor.assumeIsolated { self?.tick() } }
+        RunLoop.main.add(t, forMode: .common)
+        poll = t
+    }
+    override func mouseUp(with event: NSEvent) { tick(); finish() }
+    override func rightMouseDown(with event: NSEvent) { onRight() }
+
+    private func tick() {
+        let length = start.y - NSEvent.mouseLocation.y
+        if length > 12 || dragged {
+            dragged = true
+            onDrag(max(length, 0), start)
+        }
+        if NSEvent.pressedMouseButtons & 1 == 0 { finish() }
+    }
+
+    private func finish() {
+        guard let p = poll else { return }
+        p.invalidate()
+        poll = nil
+        onUp(dragged)
     }
 }
 
