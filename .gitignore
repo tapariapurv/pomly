@@ -5,3 +5,4 @@ DerivedData/
 build.noindex/
 docs/.vercel
 docs/.env*
+dist/

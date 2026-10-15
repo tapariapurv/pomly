@@ -76,7 +76,8 @@ Native Pomodoro / focus timer. SwiftUI, iOS/iPadOS/macOS/watchOS 26+ (27 SDKs). 
 - Test: `xcodebuild -scheme Pomly -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -quiet test 2>&1 | tail -20`
 
 ## Release & publish
-- `scripts/release.sh` builds `dist/` (Mac zip and unsigned IPA) and writes the cask's sha256. `--publish` creates the GitHub release. Bump `MARKETING_VERSION` in project.yml first.
+- `scripts/release.sh` builds `dist/` (Mac zip and unsigned IPA, gitignored: they live only on GitHub Releases) and writes the cask sha256 and the AltStore entry. `--publish` creates the GitHub release; then commit the cask, `docs/altstore.json` and project.yml (never `dist/`). Bump `MARKETING_VERSION` in project.yml first.
+- `scripts/merge-worktrees.sh` (run on a loop) keeps `main` synced with GitHub: rebases onto origin, merges finished agent worktrees, builds, pushes. History stays linear (rebase, no merge commits).
 - Website: `docs/`, served by GitHub Pages at https://tapariapurv.github.io/pomly/. Store copy and keywords: `AppStore/metadata.md`. Promo: `promo/` (HyperFrames; timing in `scripts/sound.py`).
 - Mac target is sandboxed (`Pomly/PomlyMac.entitlements`), so prefs and data live in `~/Library/Containers/com.purvt.pomly`.
 
