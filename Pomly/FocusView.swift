@@ -50,11 +50,6 @@ struct FocusView: View {
         #if os(iOS)
         .fullScreenCover(isPresented: $fullScreen) { FullScreenTimer(tint: tint) }
         #endif
-        .alert("Focusing On", isPresented: $askingLabel) {
-            TextField("Reading", text: $newLabel)
-            Button("Save") { engine.setLabel(newLabel.trimmingCharacters(in: .whitespacesAndNewlines)) }
-            Button("Cancel", role: .cancel) {}
-        }
     }
 
     // MARK: Layouts
@@ -205,9 +200,27 @@ struct FocusView: View {
         #if os(macOS)
         .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden)
         #endif
+        // Alerts can't host a TextField on every platform (Mac), so a popover (a sheet on iPhone) takes the label.
+        .popover(isPresented: $askingLabel) { labelEditor }
         .animation(motion, value: s.label)
         .accessibilityLabel("Focusing on \(s.label.isEmpty ? String(localized: "anything") : s.label)")
         .accessibilityHint("Choose a label for this session")
+    }
+
+    private var labelEditor: some View {
+        let save = {
+            engine.setLabel(newLabel.trimmingCharacters(in: .whitespacesAndNewlines))
+            askingLabel = false
+        }
+        return VStack(spacing: 12) {
+            TextField("Reading", text: $newLabel).onSubmit(save).textFieldStyle(.roundedBorder)
+            HStack {
+                Button("Cancel", role: .cancel) { askingLabel = false }
+                Spacer()
+                Button("Save", action: save).buttonStyle(.borderedProminent).disabled(newLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+        }
+        .padding().frame(minWidth: 260).presentationCompactAdaptation(.popover)
     }
 
     // MARK: Dial and presets
