@@ -1,5 +1,8 @@
 **Pomly 1.0: a calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch.**
 
+### New in 1.0.2
+- Mac: the menu bar panel, drag line and guided drag now show over full-screen apps instead of on the desktop Space.
+
 ### Install on Mac
 - Homebrew: `brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly`
 - One line: `curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash`

@@ -71,6 +71,11 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         Task { await Updater.shared.check() }
     }
 
+    func popoverWillShow(_ notification: Notification) {
+        // Set before it's on screen, so it shows in a full-screen Space instead of the desktop one.
+        popover.contentViewController?.view.window?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+    }
+
     func popoverDidClose(_ notification: Notification) {
         model.pendingMinutes = nil
         anchor?.orderOut(nil)
@@ -144,6 +149,7 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         catcher.backgroundColor = NSColor.black.withAlphaComponent(0.12)
         catcher.isOpaque = false
         catcher.hidesOnDeactivate = false // panels hide when the app isn't frontmost; this one must not
+        catcher.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary] // must show in a full-screen Space, without switching Spaces
         catcher.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue - 1)
         NSApp.activate()
         catcher.makeKeyAndOrderFront(nil)
@@ -251,6 +257,7 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         p.ignoresMouseEvents = true
         p.ignoresMouseEvents = true
         p.hidesOnDeactivate = false
+        p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary] // must show in a full-screen Space, without switching Spaces
         p.appearance = Self.appearance
         p.contentView = NSHostingView(rootView: MenuBarDragPreview(model: model))
         preview = p
@@ -267,6 +274,7 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
             w.isOpaque = false
             w.backgroundColor = .clear
             w.level = .statusBar
+            w.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary] // must show in a full-screen Space, without switching Spaces
             anchor = w
             w.setFrame(NSRect(x: point.x - 1, y: point.y - 1, width: 2, height: 2), display: false)
             w.orderFrontRegardless()
@@ -274,8 +282,9 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         } else {
             popover.show(relativeTo: b.bounds, of: b, preferredEdge: .minY)
         }
-        NSApp.activate()
+        // Key the popover in this Space before activating, or activation jumps to the Space with Pomly's window.
         popover.contentViewController?.view.window?.makeKey()
+        NSApp.activate()
     }
 }
 
