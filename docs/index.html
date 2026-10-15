@@ -2,309 +2,726 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pomly: Pomodoro Focus Timer for iPhone, iPad, Mac &amp; Apple Watch</title>
-<meta name="description" content="Pomly is a free, open-source Pomodoro focus timer for iPhone, iPad, Mac and Apple Watch. Drag the dial, focus, take a break. Live Activities, widgets, a Mac menu bar timer and instant sync. No account, no tracking.">
-<link rel="canonical" href="https://tapariapurv.github.io/pomly/">
-<meta name="theme-color" content="#1c130e">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pomly · A calm focus timer for iPhone, iPad, Mac and Apple Watch</title>
+<meta name="description" content="Pomly is a free, calm Pomodoro focus timer for iPhone, iPad, Mac and Apple Watch. Set it with one drag, focus, and get a gentle nudge when it's time to rest. No account, no ads.">
+<link rel="canonical" href="https://pomly-vert.vercel.app/">
+<meta name="theme-color" content="#120c09">
 <link rel="icon" href="icon-180.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Pomly">
-<meta property="og:title" content="Pomly: Pomodoro Focus Timer">
-<meta property="og:description" content="Drag the dial, focus, take a break. iPhone, iPad, Mac and Apple Watch, in sync. Free and open source.">
-<meta property="og:image" content="https://tapariapurv.github.io/pomly/promo-poster.jpg">
-<meta property="og:video" content="https://tapariapurv.github.io/pomly/pomly-film.mp4">
+<meta property="og:title" content="Pomly · Drag. Focus. Rest.">
+<meta property="og:description" content="A calm focus timer for iPhone, iPad, Mac and Apple Watch. Free, no account, no ads.">
+<meta property="og:image" content="https://pomly-vert.vercel.app/img/poster.jpg">
+<meta property="og:video" content="https://pomly-vert.vercel.app/pomly-film.mp4">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pomly: Pomodoro Focus Timer","applicationCategory":"ProductivityApplication","operatingSystem":"iOS 26, iPadOS 26, macOS 26, watchOS 26","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/tapariapurv/pomly/releases/latest","image":"https://tapariapurv.github.io/pomly/icon.png","author":{"@type":"Person","name":"Purv Taparia"},"license":"https://opensource.org/licenses/MIT"}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pomly: Pomodoro Focus Timer","applicationCategory":"ProductivityApplication","operatingSystem":"iOS 26, iPadOS 26, macOS 26, watchOS 26","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/tapariapurv/pomly/releases/latest","image":"https://pomly-vert.vercel.app/icon.png","author":{"@type":"Person","name":"Purv Taparia"}}
 </script>
 <style>
-:root{--bg:#1c130e;--bg2:#2a1c14;--ink:#f6ebe0;--soft:#c4ae9e;--tint:#f4a66a;--deep:#b85a1e;--glass:rgba(255,244,232,.07);--line:rgba(255,244,232,.13);color-scheme:dark;
---sans:ui-rounded,"SF Pro Rounded","SF Pro Display",system-ui,-apple-system,sans-serif}
-*{box-sizing:border-box;margin:0}
+:root{
+  --bg:#120c09;--bg2:#1b120d;--ink:#f6ebe0;--soft:#c9b4a4;--mute:#9a8373;--tint:#f4a66a;--deep:#d9692e;
+  --line:rgba(255,240,225,.1);--glass:rgba(255,240,225,.055);
+  --sans:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --serif:"Instrument Serif",ui-serif,Georgia,serif;
+  --ease:cubic-bezier(.2,.75,.2,1);
+  color-scheme:dark;interpolate-size:allow-keywords;
+}
+*{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font:17px/1.55 var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:clip}
-a{color:var(--tint)}
-img{max-width:100%;display:block}
-.wrap{max-width:1160px;margin:auto;padding:0 24px}
-h1,h2,h3{font-weight:650;letter-spacing:-.025em;line-height:1.04}
-.soft{color:var(--soft)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:600 16px var(--sans);text-decoration:none;color:var(--ink);background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);cursor:pointer;transition:transform .2s,background .2s}
-.btn:hover{transform:translateY(-1px);background:rgba(255,244,232,.12)}
-.btn.pri{background:var(--tint);color:#21140c;border-color:transparent}
-.btn.pri:hover{background:#ffb985}
-:focus-visible{outline:2px solid var(--tint);outline-offset:3px}
+body::after{content:"";position:fixed;inset:0;background:url(img/grain.png);opacity:.05;pointer-events:none;z-index:100;mix-blend-mode:overlay}
+a{color:inherit}
+img{display:block;max-width:100%;height:auto}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.wrap{width:min(1180px,100% - 40px);margin-inline:auto}
+h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.02}
+em{font:italic 400 1.08em/1 var(--serif);letter-spacing:-.01em;color:var(--tint)}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tint);margin-bottom:18px}
+.h2{font-size:clamp(40px,6vw,80px)}
+.lead{font-size:clamp(18px,1.8vw,21px);color:var(--soft);max-width:36ch}
+:focus-visible{outline:2px solid var(--tint);outline-offset:3px;border-radius:12px}
 
-/* nav */
-nav{position:fixed;inset:12px 0 auto;z-index:20;display:flex;justify-content:center;pointer-events:none}
-nav div{pointer-events:auto;display:flex;align-items:center;gap:6px;padding:6px 6px 6px 14px;border-radius:999px;background:rgba(28,19,14,.62);border:1px solid var(--line);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4)}
-nav .brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);text-decoration:none;margin-right:8px}
-nav .brand img{width:26px;height:26px;border-radius:7px}
-nav a.l{color:var(--soft);text-decoration:none;font-size:15px;padding:10px 10px}
-nav a.l:hover{color:var(--ink)}
-nav .btn{min-height:38px;padding:0 16px;font-size:15px}
-@media(max-width:560px){nav a.l{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:52px;padding:0 26px;border-radius:999px;font-weight:650;font-size:16.5px;text-decoration:none;
+  background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:transform .25s var(--ease),background .25s,box-shadow .25s}
+.btn:hover{transform:translateY(-2px);background:rgba(255,240,225,.1)}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:linear-gradient(180deg,#f7b37e,#ee9654);color:#2a160a;border-color:transparent;box-shadow:0 10px 30px -8px rgba(244,166,106,.55),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn.pri:hover{box-shadow:0 16px 40px -8px rgba(244,166,106,.7),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn svg{width:18px;height:18px;flex:none}
 
-/* hero */
-.hero{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:40px;padding-top:90px;padding-bottom:40px;position:relative}
-.hero::before{content:"";position:absolute;inset:-10% -30% auto auto;width:900px;height:900px;background:radial-gradient(closest-side,rgba(244,166,106,.16),transparent);pointer-events:none;transform:translateY(calc(var(--y,0) * .25px))}
-.hero h1{font-size:clamp(52px,8.4vw,112px)}
-.hero h1 span{color:var(--tint)}
-.hero .lede{font-size:clamp(18px,2.1vw,22px);color:var(--soft);max-width:30ch;margin:22px 0 30px}
-.cta{display:flex;flex-wrap:wrap;gap:12px}
-.meta{margin-top:18px;font-size:14px;color:var(--soft)}
-.stage{position:relative;justify-self:center;width:min(480px,88vw);aspect-ratio:1}
-.dial{width:100%;height:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
-.dial:active{cursor:grabbing}
-.dial .face{fill:url(#face);stroke:var(--line)}
-.dial line{stroke-linecap:round;transition:stroke .25s,stroke-opacity .25s}
-.dial .t{font:300 46px var(--sans);fill:var(--ink);font-variant-numeric:tabular-nums}
-.dial .s{font:700 8.5px var(--sans);letter-spacing:2.5px;fill:var(--tint)}
-.dial .knob{fill:var(--ink);filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-.ctrl{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);display:flex;gap:10px}
-.hint{position:absolute;top:-4px;right:2%;font-size:14px;color:var(--soft);transition:opacity .4s}
-.float{position:absolute;width:31%;border-radius:22px;box-shadow:0 30px 60px rgba(0,0,0,.5);border:1px solid var(--line)}
-.f1{left:-16%;bottom:6%;rotate:-7deg;transform:translateY(calc(var(--y,0) * -.12px))}
-.f2{right:-12%;top:8%;width:24%;border-radius:30%;rotate:6deg;transform:translateY(calc(var(--y,0) * -.22px))}
-@media(max-width:900px){.hero{grid-template-columns:1fr;text-align:left;padding-top:110px}.stage{margin-top:20px}.f1{left:-4%}.f2{right:-2%}}
+/* ---------- nav ---------- */
+.nav{position:fixed;top:14px;left:0;right:0;z-index:50;display:flex;justify-content:center;pointer-events:none;transition:transform .5s var(--ease)}
+.nav.hide{transform:translateY(-90px)}
+.nav>div{pointer-events:auto;display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;background:rgba(24,16,12,.6);border:1px solid var(--line);backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.nav .brand{display:flex;align-items:center;gap:9px;font-weight:750;text-decoration:none;padding:0 12px 0 6px}
+.nav .brand img{width:30px;height:30px;border-radius:8px}
+.nav a.l{color:var(--soft);text-decoration:none;font-size:15px;padding:10px 12px;border-radius:999px;transition:color .2s,background .2s}
+.nav a.l:hover{color:var(--ink);background:var(--glass)}
+.nav .btn{min-height:40px;padding:0 18px;font-size:15px;margin-left:4px}
+@media(max-width:640px){.nav a.l{display:none}}
 
-/* film */
-.film{height:220vh;position:relative}
+/* ---------- hero ---------- */
+.hero{position:relative;padding:150px 0 40px;text-align:center;isolation:isolate}
+.hero .glow{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.hero .glow::before,.hero .glow::after{content:"";position:absolute;border-radius:50%}
+.hero .glow::before{width:1100px;height:1100px;left:calc(50% - 550px + var(--mx,0px));top:120px;background:radial-gradient(closest-side,rgba(217,105,46,.28),rgba(217,105,46,.08) 55%,transparent);transition:left 1.2s var(--ease)}
+.hero .glow::after{width:700px;height:700px;left:calc(50% - 350px - var(--mx,0px) * .6);top:-300px;background:radial-gradient(closest-side,rgba(244,166,106,.12),transparent);transition:left 1.2s var(--ease)}
+.hero h1{font-size:clamp(60px,10.5vw,148px);letter-spacing:-.045em;line-height:.92}
+.hero h1 .w{display:inline-block;opacity:0;transform:translateY(40px);filter:blur(12px);animation:rise 1.1s var(--ease) forwards}
+.hero h1 .w:nth-child(2){animation-delay:.12s}.hero h1 .w:nth-child(3){animation-delay:.24s}
+.hero h1 em{font-size:1.12em;padding-right:.04em}
+.hero .lead{margin:26px auto 34px;max-width:40ch;opacity:0;animation:fade 1s .45s var(--ease) forwards}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;opacity:0;animation:fade 1s .6s var(--ease) forwards}
+.hero .trust{margin-top:20px;font-size:14.5px;color:var(--mute);opacity:0;animation:fade 1s .75s forwards}
+.hero .trust span{margin:0 8px}
+@keyframes rise{to{opacity:1;transform:none;filter:none}}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.stage{position:relative;height:clamp(560px,62vw,760px);margin-top:70px;perspective:1600px}
+.stage .layer{position:absolute;transition:transform .9s var(--ease)}
+.stage .in{opacity:0;animation:stagein 1.4s var(--ease) forwards}
+@keyframes stagein{from{opacity:0;transform:translateY(80px) scale(.96)}to{opacity:1;transform:none}}
+.l-mac{left:0;top:9%;width:58%;transform:translateY(calc(var(--hp,0) * 60px))}
+.l-mac .in{animation-delay:.55s}
+.l-ipad{right:0;top:3%;width:27%;transform:translateY(calc(var(--hp,0) * 110px))}
+.l-ipad .in{animation-delay:.7s}
+.l-phone{left:50%;top:0;width:clamp(260px,25vw,320px);margin-left:calc(clamp(260px,25vw,320px) / -2);transform:translateY(calc(var(--hp,0) * -40px)) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));z-index:3}
+.l-phone .in{animation-delay:.35s}
+.l-watch{left:calc(50% + clamp(150px,15vw,200px));bottom:4%;width:clamp(120px,11vw,150px);transform:translateY(calc(var(--hp,0) * -120px));z-index:4}
+.l-watch .in{animation-delay:.9s}
+.hint{position:absolute;left:calc(50% - clamp(260px,25vw,320px) / 2 - 190px);top:34%;width:170px;text-align:right;font:italic 22px/1.15 var(--serif);color:var(--soft);z-index:4;opacity:0;animation:fade 1s 1.8s forwards;transition:opacity .4s}
+.hint svg{display:block;margin:6px 0 0 auto;width:70px;color:var(--tint)}
+.hint.gone{opacity:0!important;animation:none}
+@media(max-width:860px){
+  .l-mac,.l-ipad,.hint{display:none}
+  .stage{height:auto;padding-bottom:20px}
+  .stage .l-phone{position:relative;left:auto;margin:0 auto;width:min(300px,76vw)}
+  .l-watch{left:auto;right:max(0px,calc(50% - 215px));bottom:8%;width:104px}
+}
+
+/* ---------- device frames ---------- */
+.phone{position:relative;background:linear-gradient(145deg,#3a3532,#0e0c0b 40%,#1d1a18);border-radius:15.5%/7.2%;padding:3.2%;container-type:inline-size;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 0 0 1px rgba(0,0,0,.8),0 60px 120px -30px rgba(0,0,0,.85),0 30px 60px -30px rgba(80,30,5,.6)}
+.phone .scr{position:relative;border-radius:12.6cqw;overflow:hidden;background:#000;aspect-ratio:1206/2622}
+.phone .scr>img{width:100%;height:100%;object-fit:cover}
+.phone.island .scr::after{content:"";position:absolute;top:2.6%;left:50%;width:31%;height:3.4%;transform:translateX(-50%);background:#000;border-radius:99px}
+.tablet{background:linear-gradient(145deg,#38332f,#0e0c0b 40%,#1b1816);border-radius:6%/4.5%;padding:3.4%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 50px 100px -30px rgba(0,0,0,.85)}
+.tablet img{border-radius:3.6%/2.7%;width:100%}
+.laptop{position:relative}
+.laptop .lid{background:#0b0908;border-radius:16px 16px 6px 6px;padding:1.6% 1.6% 2.6%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 50px 100px -30px rgba(0,0,0,.85)}
+.laptop .lid img{border-radius:6px;width:100%}
+.laptop::after{content:"";display:block;margin:0 -6%;height:14px;border-radius:2px 2px 16px 16px;background:linear-gradient(#5b5450,#2a2522 40%,#151210);box-shadow:0 20px 40px -10px rgba(0,0,0,.8)}
+.watch{position:relative;background:linear-gradient(145deg,#4a4440,#111 35%,#1e1b19);border-radius:33%/29%;padding:7.5%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 40px 80px -20px rgba(0,0,0,.9)}
+.watch img{border-radius:26%/22%;width:100%}
+.watch::before{content:"";position:absolute;right:-5%;top:24%;width:6%;height:17%;border-radius:4px;background:linear-gradient(90deg,#2a2522,#6a625c)}
+
+/* ---------- live app replica (inside hero phone) ---------- */
+.app{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;background:radial-gradient(120% 70% at 50% 46%,#4a2f20 0%,#2c1c13 45%,#1a110c 100%);color:var(--ink);font-family:var(--sans);user-select:none;-webkit-user-select:none}
+.app .sb{width:100%;display:flex;justify-content:space-between;align-items:center;padding:4.6cqw 9cqw 0 10cqw;font-size:4.6cqw;font-weight:650;height:12cqw}
+.app .sb i{display:flex;gap:1.6cqw;align-items:center}
+.app .sb i b{display:block;width:6.4cqw;height:3.2cqw;border-radius:1cqw;border:.35cqw solid rgba(255,255,255,.6);position:relative}
+.app .sb i b::after{content:"";position:absolute;inset:.4cqw;right:1.2cqw;background:#5fd36b;border-radius:.4cqw}
+.app .di{position:absolute;top:2.6%;left:50%;transform:translateX(-50%);height:3.4%;width:31%;background:#000;border-radius:99px;display:flex;align-items:center;justify-content:space-between;padding:0 2.6cqw;transition:width .6s var(--ease);z-index:2;overflow:hidden}
+.app .di span{font-size:3.6cqw;font-weight:700;color:var(--tint);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .3s}
+.app .di svg{width:4.6cqw;height:4.6cqw;opacity:0;transition:opacity .3s}
+.app.run .di{width:54%}
+.app.run .di span,.app.run .di svg{opacity:1;transition-delay:.3s}
+.app .top{width:100%;display:flex;justify-content:center;align-items:center;margin-top:5cqw;font-size:3.2cqw;font-weight:800;letter-spacing:.14em;color:var(--soft);position:relative}
+.app .top b{color:var(--ink);margin-left:1.4cqw;letter-spacing:.02em}
+.app .top i{position:absolute;right:8cqw;width:7.6cqw;height:7.6cqw;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center}
+.app .on{margin-top:5cqw;font-size:3cqw;font-weight:800;letter-spacing:.16em;color:var(--deep)}
+.app .lbl{font-size:6.4cqw;font-weight:700;color:var(--tint);margin-top:.4cqw}
+.app .lbl small{font-size:.6em;opacity:.7;margin-left:.6cqw}
+.app svg.dial{width:88cqw;margin-top:7cqw;touch-action:none;cursor:grab;overflow:visible}
+.app svg.dial:active{cursor:grabbing}
+.app .chips{display:flex;gap:4cqw;margin-top:5cqw;transition:opacity .4s,transform .4s var(--ease)}
+.app .chips button{width:11.5cqw;height:11.5cqw;border-radius:50%;background:rgba(255,255,255,.09);border:.3cqw solid rgba(255,255,255,.08);font-size:3.8cqw;font-weight:700}
+.app .chips button.sel{color:var(--tint);background:rgba(244,166,106,.16)}
+.app.run .chips,.app.paused .chips{opacity:0;transform:scale(.9);pointer-events:none}
+.app .acts{position:absolute;bottom:21cqw;left:7cqw;right:7cqw;display:flex;align-items:center}
+.app .acts button{height:13.5cqw;border-radius:99px;display:flex;align-items:center;justify-content:center;gap:2cqw;font-size:4.4cqw;font-weight:700;transition:all .5s var(--ease)}
+.app .x{width:0;opacity:0;background:rgba(255,255,255,.1);overflow:hidden;margin-right:0}
+.app.run .x,.app.paused .x{width:13.5cqw;opacity:1;margin-right:3cqw}
+.app .go{flex:1;background:linear-gradient(180deg,#f6b07a,#ec9150);color:#2a160a;box-shadow:0 2cqw 6cqw -2cqw rgba(244,166,106,.6)}
+.app .cup{width:13.5cqw;background:rgba(255,255,255,.1);margin-left:3cqw}
+.app .acts svg{width:4.6cqw;height:4.6cqw}
+.app .tabs{position:absolute;bottom:4.5cqw;left:50%;transform:translateX(-50%);display:flex;gap:1cqw;padding:1.4cqw;border-radius:99px;background:rgba(255,255,255,.09);border:.3cqw solid rgba(255,255,255,.08)}
+.app .tabs span{display:flex;flex-direction:column;align-items:center;font-size:2.4cqw;font-weight:650;padding:1.2cqw 4cqw;border-radius:99px;color:var(--soft)}
+.app .tabs span:first-child{background:rgba(255,255,255,.1);color:var(--tint)}
+.app .tabs svg{width:5cqw;height:5cqw;margin-bottom:.4cqw}
+.app .home{position:absolute;bottom:1.4cqw;left:50%;width:36%;height:1.3cqw;border-radius:9px;background:rgba(255,255,255,.75);transform:translateX(-50%)}
+
+/* shared dial look */
+.dial .face{fill:url(#face)}
+.dial .rim{fill:none;stroke:rgba(255,255,255,.07);stroke-width:1}
+.dial .tk{stroke-linecap:round;transition:stroke .3s,opacity .3s}
+.dial .hand{stroke:var(--tint);stroke-width:1.4;stroke-linecap:round;opacity:.65}
+.dial .knob{fill:var(--tint);filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+.dial .t{font:300 34px var(--sans);fill:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.dial .s{font:800 6px var(--sans);letter-spacing:1.6px;fill:var(--tint)}
+
+/* ---------- film ---------- */
+.film{position:relative;height:210vh;margin-top:12vh}
 .film .pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
-.film .frame{position:relative;width:min(1160px,92vw);aspect-ratio:16/9;border-radius:calc(40px - var(--p,0) * 22px);overflow:hidden;
- transform:scale(calc(.62 + var(--p,0) * .38));border:1px solid var(--line);box-shadow:0 40px 120px rgba(0,0,0,.6);background:#000}
-.film video{width:100%;height:100%;object-fit:cover}
-.film .play{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;padding:clamp(14px,3vw,32px);background:linear-gradient(transparent 40%,rgba(0,0,0,.55));border:0;cursor:pointer;color:var(--ink)}
-.film .play span{display:flex;align-items:center;gap:12px;font:600 18px var(--sans);padding:14px 24px 14px 18px;border-radius:999px;background:rgba(28,19,14,.55);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-.film .play svg{width:30px;height:30px}
-.film h2{position:absolute;top:12vh;left:0;right:0;text-align:center;font-size:clamp(34px,5vw,64px);opacity:calc(1 - var(--p,0) * 2.2);transform:translateY(calc(var(--p,0) * -60px))}
-@media(max-width:700px){.film{height:auto}.film .pin{position:static;height:auto;padding:60px 0;gap:24px}.film .frame{transform:none;border-radius:20px;aspect-ratio:9/16;width:min(92vw,420px)}.film h2{position:static;opacity:1;transform:none}}
+.film .head{position:absolute;top:13vh;left:0;right:0;text-align:center;opacity:calc(1 - var(--p,0) * 2.4);transform:translateY(calc(var(--p,0) * -80px))}
+.film .frame{position:relative;width:min(1180px,94vw);aspect-ratio:16/9;max-height:86svh;border-radius:calc(44px - var(--p,0) * 26px);overflow:hidden;background:#000;
+  transform:translateY(calc((1 - var(--p,0)) * 14vh)) scale(calc(.58 + var(--p,0) * .42));box-shadow:0 0 0 1px var(--line),0 60px 160px -20px rgba(0,0,0,.8),0 0 120px -30px rgba(217,105,46,calc(var(--p,0) * .5))}
+.film video{width:100%;height:100%;object-fit:cover;display:block}
+.film .play{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;gap:16px;padding:clamp(18px,3vw,34px);background:linear-gradient(transparent 55%,rgba(0,0,0,.6));transition:opacity .4s;text-align:left}
+.film .play span{flex:none;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:rgba(246,235,224,.16);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:transform .35s var(--ease)}
+.film .play:hover span{transform:scale(1.08)}
+.film .play svg{width:28px;height:28px;margin-left:4px}
+.film .play i{margin-bottom:10px;font:italic 30px/1.1 var(--serif);color:var(--ink)}.film .play small{display:block;font:600 14px var(--sans);color:var(--soft);margin-top:4px}
+@media(max-width:700px){.film{height:auto;margin-top:60px}.film .pin{position:static;height:auto;display:block}.film .head{position:static;opacity:1;transform:none;margin-bottom:28px}
+  .film .frame{transform:none;border-radius:26px;aspect-ratio:9/16;width:min(100% - 40px,400px);margin:auto;max-height:none}}
 
-/* devices: horizontal pan */
-.devices{height:400vh;position:relative}
-.devices .pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
-.devices header{padding:0 max(24px,calc(50vw - 556px));margin-bottom:4vh}
-.devices header h2{font-size:clamp(34px,5vw,64px);max-width:14ch}
-.track{display:flex;gap:4vw;padding:0 max(24px,calc(50vw - 556px));width:max-content;transform:translateX(calc(var(--p,0) * (100vw - 100%)))}
-.dev{flex:none;display:flex;flex-direction:column;gap:16px}
-.dev img{height:min(56vh,560px);width:auto;border-radius:28px;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.45)}
-.dev.wide img{border-radius:14px}
-.dev.watch img{height:min(34vh,340px);border-radius:28%;align-self:center;margin:auto 0}
-.dev p{max-width:34ch;color:var(--soft);font-size:16px}
-.dev b{color:var(--ink);display:block;font-size:19px;margin-bottom:2px}
-@media(max-width:700px){.devices{height:auto;padding:70px 0}.devices .pin{position:static;height:auto}.track{transform:none;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px}.dev{scroll-snap-align:center}.dev img{height:440px}}
+/* ---------- how it works ---------- */
+.how{position:relative;height:340vh}
+.how .pin{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:1fr 1.05fr;align-items:center;gap:40px;width:min(1180px,100% - 40px);margin:auto}
+.steps{list-style:none;position:relative;padding-left:34px}
+.steps::before{content:"";position:absolute;left:5px;top:12px;bottom:12px;width:2px;background:var(--line);border-radius:2px}
+.steps::after{content:"";position:absolute;left:5px;top:12px;width:2px;height:calc((100% - 24px) * var(--p,0));background:var(--tint);border-radius:2px}
+.steps li{padding:22px 0;opacity:.32;transition:opacity .5s,transform .5s var(--ease)}
+.steps li.on{opacity:1;transform:translateX(8px)}
+.steps h3{font-size:clamp(30px,3.6vw,46px);margin-bottom:8px}
+.steps p{color:var(--soft);max-width:34ch}
+.how .vis{position:relative;aspect-ratio:1;width:min(520px,100%);justify-self:center}
+.how .vis>svg{width:100%;height:100%;filter:drop-shadow(0 40px 80px rgba(0,0,0,.6))}
+.la{position:absolute;left:-8%;bottom:6%;width:74%;padding:16px 18px;border-radius:26px;background:rgba(10,8,7,.88);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(20px);display:flex;align-items:center;gap:14px;box-shadow:0 30px 60px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(30px) scale(.95);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.la svg{width:38px;height:38px;flex:none}
+.la small{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--tint)}
+.la b{font-size:15px}
+.la .n{margin-left:auto;font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.note{position:absolute;right:-6%;top:4%;width:78%;padding:14px 16px;border-radius:24px;background:rgba(58,44,36,.82);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(30px) saturate(1.4);-webkit-backdrop-filter:blur(30px) saturate(1.4);box-shadow:0 30px 60px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(-30px) scale(.95);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.note .nh{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--soft)}
+.note .nh img{width:22px;height:22px;border-radius:6px}
+.note .nh span{margin-left:auto}
+.note b{display:block;margin-top:8px;font-size:16px}
+.note p{font-size:14.5px;color:var(--soft)}
+.note .row{display:flex;gap:8px;margin-top:12px}
+.note .row span{flex:1;text-align:center;padding:9px;border-radius:14px;background:rgba(255,255,255,.1);font-size:14px;font-weight:650}
+.note .row span:first-child{background:var(--tint);color:#2a160a}
+.how[data-step="1"] .la,.how[data-step="2"] .note{opacity:1;transform:none}
+@media(max-width:860px){
+  .how{height:300vh}
+  .how .pin{grid-template-columns:1fr;gap:6px;align-content:center}
+  .how .vis{width:min(330px,74vw);order:-1}
+  .steps li{display:none;padding:6px 0;opacity:1;transform:none}
+  .steps li.on{display:block;animation:fade .5s var(--ease)}
+  .steps{padding-left:22px;min-height:160px}
+  .la{left:-6%;width:86%;padding:12px 14px}.la .n{font-size:26px}
+  .note{right:-6%;width:88%}
+}
 
-/* features */
-.feat{padding:18vh 0 10vh}
-.feat h2{font-size:clamp(34px,5vw,64px);max-width:16ch;margin-bottom:56px}
-.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:48px 40px;border-top:1px solid var(--line);padding-top:40px}
-.fgrid h3{font-size:21px;margin-bottom:8px}
-.fgrid p{color:var(--soft);font-size:16px}
-@media(max-width:800px){.fgrid{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.fgrid{grid-template-columns:1fr}}
+/* ---------- everywhere (bento) ---------- */
+.sec{padding:16vh 0 0}
+.sec>header{margin-bottom:56px}
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.tile{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(160deg,#2a1b13,#170f0b 70%);border:1px solid var(--line);padding:32px;display:flex;flex-direction:column;min-height:380px;isolation:isolate}
+.tile::before{content:"";position:absolute;inset:-30%;z-index:-1;background:radial-gradient(closest-side at var(--gx,50%) var(--gy,80%),rgba(217,105,46,.22),transparent);opacity:.8}
+.tile h3{font-size:clamp(24px,2.4vw,30px);margin-bottom:6px}
+.tile p{color:var(--soft);font-size:16px;max-width:32ch}
+.tile .art{margin-top:auto;padding-top:28px;display:flex;justify-content:center;transition:transform .8s var(--ease)}
+.tile:hover .art{transform:translateY(-6px)}
+.s2{grid-column:span 2}.s4{grid-column:span 4}.s6{grid-column:span 6}.r2{grid-row:span 2}
+.t-lock .art .phone{width:min(280px,90%);margin-bottom:-120px}
+.t-mac .art{margin-right:-60px;margin-bottom:-40px;justify-content:flex-end}
+.t-mac .laptop{width:min(640px,96%)}
+.t-ipad .art .tablet{width:78%;margin-bottom:-90px}
+.t-watch .art .watch{width:150px;margin-bottom:10px}
+.t-home .art .phone{width:200px;margin-bottom:-170px}
+.t-hist{flex-direction:row;align-items:center;gap:40px;min-height:340px}
+.t-hist .txt{flex:1}
+.t-hist .art{margin:0 0 -140px;padding:0}
+.t-hist .art .phone{width:240px}
+.t-bar{min-height:300px}
+.mb{position:relative;margin:auto -32px -32px;height:210px;background:radial-gradient(120% 140% at 70% 0,#5a3a28,#1d130e 70%);overflow:hidden;border-top:1px solid var(--line)}
+.mb .bar{position:absolute;top:0;left:0;right:0;height:30px;background:rgba(20,13,9,.55);display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 18px;font-size:13px;font-weight:600;color:rgba(255,255,255,.9)}
+.mb .bar .ic{width:15px;height:15px;opacity:.85}
+.mb .pomly{width:18px;height:18px;color:var(--tint)}
+.mb .line{position:absolute;width:2px;top:24px;background:linear-gradient(var(--tint),rgba(244,166,106,.3));border-radius:2px;opacity:0}
+.mb .pill{position:absolute;padding:5px 12px;border-radius:99px;background:rgba(30,20,14,.9);border:1px solid rgba(255,255,255,.12);font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;transform:translate(14px,-50%);opacity:0;transition:opacity .25s}
+.mb .pill b{color:var(--tint)}
+.mb .cur{position:absolute;left:0;top:0;width:20px;height:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+@media(max-width:960px){.bento{grid-template-columns:1fr 1fr}.s2,.s4,.s6{grid-column:span 2}.r2{grid-row:auto}.t-watch,.t-home{grid-column:span 1}.t-hist{flex-direction:column;align-items:flex-start}.t-hist .art{align-self:center}}
+@media(max-width:600px){.t-watch,.t-home{grid-column:span 2}.tile{padding:26px;min-height:340px}.mb{margin:auto -26px -26px}.t-mac .art{margin-right:-40px}}
 
-/* download */
-.dl{padding:12vh 0}
-.dl h2{font-size:clamp(40px,6.4vw,84px);text-align:right;margin-bottom:12px}
-.dl .sub{text-align:right;color:var(--soft);margin-bottom:48px}
-.plats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.plat{background:var(--glass);border:1px solid var(--line);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:border-color .3s,transform .3s}
-.plat.me{border-color:var(--tint);transform:translateY(-6px)}
-.plat svg{width:30px;height:30px;color:var(--tint)}
-.plat h3{font-size:22px}
-.plat p{color:var(--soft);font-size:15px;flex:1}
-.plat .btn{width:100%}
-.plat small{color:var(--soft);font-size:13px}
-.plat small a{color:var(--soft)}
-.copy{font:13px ui-monospace,SFMono-Regular,monospace;color:var(--ink);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;word-break:break-all;min-height:44px}
+/* ---------- sync ---------- */
+.sync .row{display:grid;grid-template-columns:1.25fr 1fr .7fr;align-items:end;gap:5vw;margin-top:64px;position:relative;padding:40px 0}
+.sync .wire{position:absolute;left:8%;right:8%;top:50%;height:2px;background:repeating-linear-gradient(90deg,var(--line) 0 6px,transparent 6px 14px)}
+.sync .wire i{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--tint);box-shadow:0 0 18px var(--tint);animation:travel 3.2s var(--ease) infinite}
+.sync .wire i:nth-child(2){animation-delay:1.6s;animation-direction:reverse}
+.sync.paused .wire i{animation-play-state:paused;opacity:.3}
+@keyframes travel{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:100%;opacity:0}}
+.dev{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;z-index:1}
+.dev .sc{display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 40%,#3a2519,#160e0a);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 0 6px #0b0908,0 30px 60px -20px rgba(0,0,0,.8)}
+.dev .sc b{display:block;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1;transition:opacity .3s}
+.dev .sc small{font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--tint)}
+.dev>span{font-size:14px;color:var(--soft);font-weight:600}
+.d-mac .sc{width:100%;aspect-ratio:16/10;border-radius:14px 14px 4px 4px}.d-mac .sc::after{content:"";position:absolute;left:-6%;right:-6%;bottom:-12px;height:12px;border-radius:2px 2px 14px 14px;background:linear-gradient(#5b5450,#231e1b)}.dev .sc{position:relative}
+.d-mac .sc b{font-size:clamp(40px,6vw,72px)}
+.d-ph .sc{width:min(170px,100%);aspect-ratio:9/19;border-radius:30px}.d-ph .sc::before{content:"";position:absolute;top:14px;left:50%;width:34%;height:16px;margin-left:-17%;border-radius:9px;background:#000}
+.d-ph .sc b{font-size:clamp(30px,3.6vw,42px)}
+.d-w .sc{width:min(130px,100%);aspect-ratio:.84;border-radius:34px}
+.d-w .sc b{font-size:28px}
+.d-w button{margin-top:8px;min-height:30px;padding:0 14px;border-radius:99px;background:var(--tint);color:#2a160a;font-size:12px;font-weight:800}
+.sync.paused .sc small{color:var(--soft)}
+.sync.paused .sc b{opacity:.5}
+.sync .tag{text-align:center;margin-top:10px;color:var(--mute);font-size:14.5px}
+@media(max-width:700px){.sync .row{grid-template-columns:1fr 1fr;gap:28px 18px}.d-mac{grid-column:span 2}.sync .wire{display:none}}
+
+/* ---------- values ---------- */
+.vals{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:28px;overflow:hidden}
+.vals div{background:var(--bg);padding:30px 26px}
+.vals svg{width:28px;height:28px;color:var(--tint);margin-bottom:18px}
+.vals h3{font-size:20px;letter-spacing:-.01em;margin-bottom:6px}
+.vals p{color:var(--soft);font-size:15.5px}
+@media(max-width:900px){.vals{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.vals{grid-template-columns:1fr}}
+
+/* ---------- download ---------- */
+.dl{padding:18vh 0 0}
+.dl .box{margin-top:48px;border-radius:36px;border:1px solid var(--line);background:linear-gradient(170deg,#25180f,#150e0a);padding:clamp(22px,4vw,48px);position:relative;overflow:hidden}
+.dl .box::before{content:"";position:absolute;width:600px;height:600px;right:-200px;top:-260px;background:radial-gradient(closest-side,rgba(217,105,46,.25),transparent);pointer-events:none}
+.seg{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:rgba(0,0,0,.3);border:1px solid var(--line);flex-wrap:wrap;position:relative}
+.seg button{min-height:44px;padding:0 20px;border-radius:999px;font-weight:650;color:var(--soft);transition:background .3s,color .3s;display:flex;align-items:center;gap:8px}
+.seg button svg{width:18px;height:18px}
+.seg button[aria-selected=true]{background:var(--ink);color:#1a110c}
+.panel{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(24px,5vw,72px);margin-top:40px;animation:fade .5s var(--ease);position:relative}
+.panel h3{font-size:clamp(30px,3.6vw,44px);margin-bottom:12px}
+.panel .intro{color:var(--soft);margin-bottom:28px;max-width:38ch}
+.panel .acts{display:flex;flex-wrap:wrap;gap:12px}
+.panel .fine{margin-top:18px;font-size:14.5px;color:var(--mute)}
+.panel .fine a{color:var(--soft)}
+ol.how2{list-style:none;counter-reset:s;display:grid;gap:14px;align-content:start}
+ol.how2 li{counter-increment:s;display:flex;gap:16px;align-items:flex-start;padding:18px 20px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+ol.how2 li::before{content:counter(s);flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(244,166,106,.15);color:var(--tint);font-weight:800;font-size:15px}
+ol.how2 b{display:block}
+ol.how2 span{color:var(--soft);font-size:15.5px}
+details.term{margin-top:22px;font-size:15px;color:var(--soft)}
+details.term summary{cursor:pointer;width:max-content;max-width:100%}
+.copy{display:block;width:100%;margin-top:10px;text-align:left;font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:14px;padding:12px 14px;word-break:break-all}
 .copy:hover{border-color:var(--tint)}
-@media(max-width:1000px){.plats{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.plats{grid-template-columns:1fr}.dl h2,.dl .sub{text-align:left}}
+.req{margin-top:28px;text-align:center;font-size:14px;color:var(--mute)}
+@media(max-width:820px){.panel{grid-template-columns:1fr}}
 
-/* close */
-.close{min-height:90svh;display:grid;place-items:center;text-align:center;position:relative;overflow:hidden}
-.close::before{content:"";position:absolute;width:140vmax;height:140vmax;border-radius:50%;background:conic-gradient(var(--tint) calc(var(--p,0) * 360deg),transparent 0);opacity:.09;mask:radial-gradient(closest-side,transparent 70%,#000 71%)}
-.close h2{font-size:clamp(44px,8vw,110px);max-width:12ch;margin:auto}
-.close p{color:var(--soft);margin:18px 0 30px}
-footer{border-top:1px solid var(--line);padding:28px 0 40px;font-size:14px;color:var(--soft)}
-footer .wrap{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between}
-footer a{color:var(--soft);margin-left:16px}
+/* ---------- faq ---------- */
+.faq{display:grid;grid-template-columns:1fr 1.6fr;gap:6vw;padding-top:18vh}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 0;font-size:clamp(18px,1.8vw,21px);font-weight:650;cursor:pointer}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";flex:none;width:11px;height:11px;border-right:2px solid var(--tint);border-bottom:2px solid var(--tint);transform:rotate(45deg) translateY(-3px);transition:transform .35s var(--ease)}
+.faq details[open] summary::after{transform:rotate(-135deg) translateY(-3px)}
+.faq details p{color:var(--soft);padding:0 0 24px;max-width:58ch}
+.faq details::details-content{block-size:0;overflow:hidden;transition:block-size .4s var(--ease),content-visibility .4s allow-discrete}
+.faq details[open]::details-content{block-size:auto}
+@media(max-width:820px){.faq{grid-template-columns:1fr}}
 
-.rv{opacity:0;transform:translateY(24px);transition:opacity .8s,transform .8s cubic-bezier(.2,.7,.2,1)}
+/* ---------- close ---------- */
+.close{position:relative;min-height:100svh;display:grid;place-items:center;text-align:center;overflow:hidden;margin-top:12vh}
+.close svg.ring{position:absolute;width:min(1100px,150vw);aspect-ratio:1;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);pointer-events:none}
+.close svg.ring circle{fill:none;stroke-width:.5;stroke-linecap:round}
+.close h2{font-size:clamp(52px,9vw,128px);max-width:11ch;margin:auto;letter-spacing:-.045em}
+.close p{color:var(--soft);margin:22px 0 34px;font-size:19px}
+footer{border-top:1px solid var(--line);padding:30px 0 44px;font-size:14.5px;color:var(--mute)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
+footer .brand{display:flex;align-items:center;gap:10px;color:var(--soft);font-weight:700}
+footer .brand img{width:26px;height:26px;border-radius:7px}
+footer nav a{color:var(--soft);text-decoration:none;margin-left:20px}
+footer nav a:hover{color:var(--ink)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(36px);transition:opacity 1s var(--ease),transform 1s var(--ease);transition-delay:var(--d,0s)}
 .rv.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}*{transition:none!important}}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;transition-duration:.01s!important}
+  .rv{opacity:1;transform:none}
+  .sync .wire i{display:none}
+}
 </style>
 </head>
 <body>
-<nav aria-label="Main"><div>
-  <a class="brand" href="#top"><img src="icon-180.png" alt="">Pomly</a>
-  <a class="l" href="#film">Film</a><a class="l" href="#devices">Devices</a><a class="l" href="https://github.com/tapariapurv/pomly">GitHub</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="face" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#5a3a29"/><stop offset=".7" stop-color="#3a2519"/><stop offset="1" stop-color="#2a1a11"/></radialGradient>
+    <symbol id="play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.8v14.4a1 1 0 0 0 1.52.85l11.5-7.2a1 1 0 0 0 0-1.7L8.52 3.95A1 1 0 0 0 7 4.8z"/></symbol>
+    <symbol id="pause" viewBox="0 0 24 24"><rect fill="currentColor" x="5.5" y="4" width="4.6" height="16" rx="1.4"/><rect fill="currentColor" x="13.9" y="4" width="4.6" height="16" rx="1.4"/></symbol>
+    <symbol id="cup" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 10h13v3a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3zM17 11h1.5a2.5 2.5 0 0 1 0 5H17M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/></symbol>
+    <symbol id="xx" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="apple" viewBox="0 0 24 24"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></symbol>
+  </defs>
+</svg>
+
+<nav class="nav" id="nav" aria-label="Main"><div>
+  <a class="brand" href="#top"><img src="icon-180.png" alt="" width="30" height="30">Pomly</a>
+  <a class="l" href="#how">How it works</a>
+  <a class="l" href="#everywhere">Devices</a>
+  <a class="l" href="#faq">Questions</a>
   <a class="btn pri" href="#download">Download</a>
 </div></nav>
 
 <main id="top">
-<section class="hero wrap">
-  <div>
-    <h1>Drag.<br>Focus.<br><span>Rest.</span></h1>
-    <p class="lede">A calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch. One drag sets it. It rings when it's time for a break.</p>
+
+<section class="hero" id="hero">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <h1><span class="w">Drag.</span> <span class="w">Focus.</span> <span class="w"><em>Rest.</em></span></h1>
+    <p class="lead">Pomly is a calm focus timer for your iPhone, iPad, Mac and Apple Watch. Set it with one drag. Get a gentle nudge when it's time for a break.</p>
     <div class="cta">
-      <a class="btn pri" id="smart" href="#download">Download Free</a>
-      <a class="btn" href="#film">Watch the Film</a>
+      <a class="btn pri" id="smart" href="#download"><svg><use href="#apple"/></svg><span>Download Free</span></a>
+      <a class="btn" href="#film"><svg><use href="#play"/></svg>Watch the Film</a>
     </div>
-    <p class="meta">Free and open source · No account · No tracking</p>
+    <p class="trust"><span>Free forever</span>·<span>No account</span>·<span>No ads</span></p>
   </div>
-  <div class="stage">
-    <span class="hint" id="hint" aria-hidden="true">Try it. Drag the dial.</span>
-    <svg class="dial" id="dial" viewBox="-100 -100 200 200" role="slider" tabindex="0" aria-label="Focus length in minutes" aria-valuemin="1" aria-valuemax="60" aria-valuenow="25" aria-valuetext="25 minutes">
-      <defs><radialGradient id="face" cx="50%" cy="35%"><stop offset="0" stop-color="#3a271c"/><stop offset="1" stop-color="#1f150f"/></radialGradient></defs>
-      <circle class="face" r="99"/>
-      <g id="ticks"></g>
-      <circle class="knob" id="knob" r="5"/>
-      <text class="t" id="time" y="12" text-anchor="middle">25:00</text>
-      <text class="s" id="state" y="34" text-anchor="middle">FOCUS</text>
-    </svg>
-    <div class="ctrl"><button class="btn pri" id="go">Start</button><button class="btn" id="end" hidden>End</button></div>
-    <img class="float f1" src="shots/ip_lock.jpg" alt="Pomly Live Activity on the iPhone Lock Screen" loading="lazy">
-    <img class="float f2" src="shots/watch.png" alt="Pomly on Apple Watch" loading="lazy">
+
+  <div class="stage wrap" id="stage">
+    <div class="layer l-mac" aria-hidden="true"><div class="in"><div class="laptop"><div class="lid"><img src="img/mac.webp" alt="" width="1372" height="892"></div></div></div></div>
+    <div class="layer l-ipad" aria-hidden="true"><div class="in"><div class="tablet"><img src="img/ipad.webp" alt="" width="1400" height="1867"></div></div></div>
+    <p class="hint" id="hint" aria-hidden="true">Go on, drag the dial<svg viewBox="0 0 80 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6c18 2 40 10 62 26M56 32h10l-2-10"/></svg></p>
+    <div class="layer l-phone" id="phoneLayer"><div class="in">
+      <div class="phone">
+        <div class="scr">
+          <div class="app" id="app" role="group" aria-label="A working copy of the Pomly timer">
+            <div class="di" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="rgba(244,166,106,.3)" stroke-width="2.5"/><circle id="diRing" cx="10" cy="10" r="7.5" fill="none" stroke="#f4a66a" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="47.1" stroke-dashoffset="0" transform="rotate(-90 10 10)"/></svg><span id="diTime">25:00</span></div>
+            <div class="sb" aria-hidden="true"><span>9:41</span><i><b></b></i></div>
+            <div class="top" aria-hidden="true">TODAY<b id="today">0 min</b><i><svg viewBox="0 0 24 24" style="width:3.8cqw;height:3.8cqw;opacity:.7"><use href="#cup"/></svg></i></div>
+            <div class="on" aria-hidden="true">FOCUSING ON</div>
+            <div class="lbl" aria-hidden="true">Deep work<small>⌃</small></div>
+            <svg class="dial" id="heroDial" viewBox="-100 -100 200 200" role="slider" tabindex="0" aria-label="Focus length" aria-valuemin="1" aria-valuemax="60" aria-valuenow="25" aria-valuetext="25 minutes"></svg>
+            <div class="chips" id="chips"><button data-m="15">15</button><button data-m="25" class="sel">25</button><button data-m="45">45</button><button data-m="60">60</button></div>
+            <div class="acts">
+              <button class="x" id="appEnd" aria-label="End session"><svg><use href="#xx"/></svg></button>
+              <button class="go" id="appGo"><svg><use href="#play"/></svg><span>Start Focus</span></button>
+              <button class="cup" aria-label="Take a break" id="appCup"><svg><use href="#cup"/></svg></button>
+            </div>
+            <div class="tabs" aria-hidden="true">
+              <span><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l2.5 2M10 2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Focus</span>
+              <span><svg viewBox="0 0 24 24"><rect x="3" y="11" width="4.5" height="10" rx="1.2" fill="currentColor"/><rect x="9.75" y="6" width="4.5" height="15" rx="1.2" fill="currentColor"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.2" fill="currentColor"/></svg>History</span>
+              <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Settings</span>
+            </div>
+            <div class="home"></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="layer l-watch" aria-hidden="true"><div class="in"><div class="watch"><img src="img/watch.webp" alt="" width="416" height="496"></div></div></div>
   </div>
 </section>
 
-<section class="film" id="film" data-p>
+<section class="film" id="film" data-p aria-labelledby="filmh">
   <div class="pin">
-    <h2>See it, then get it.</h2>
+    <header class="head wrap"><p class="kicker">The film</p><h2 class="h2" id="filmh">A minute with <em>Pomly.</em></h2></header>
     <div class="frame">
-      <video id="vid" playsinline preload="metadata" poster="promo-poster.jpg"><source media="(max-width:700px)" src="pomly-vertical.mp4" type="video/mp4"><source src="pomly-film.mp4" type="video/mp4"></video>
-      <button class="play" id="play" aria-label="Play the Pomly film"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>Play the Film</span></button>
+      <video id="vid" playsinline preload="none" poster="img/poster.jpg">
+        <source media="(max-width:700px)" src="pomly-vertical.mp4" type="video/mp4">
+        <source src="pomly-film.mp4" type="video/mp4">
+      </video>
+      <button class="play" id="playBtn" aria-label="Play the Pomly film"><span><svg><use href="#play"/></svg></span><i>Play the film<small>1 minute · sound on</small></i></button>
     </div>
   </div>
 </section>
 
-<section class="devices" id="devices" data-p aria-labelledby="dh">
+<section class="how" id="how" data-p data-step="0" aria-labelledby="howh">
   <div class="pin">
-    <header><h2 id="dh">One timer. Every screen you own.</h2></header>
-    <div class="track">
-      <figure class="dev"><img src="shots/ip_running.jpg" alt="Pomly running on iPhone" loading="lazy"><p><b>iPhone</b>Rings through Silent and Focus, with Take a Break right on the alert.</p></figure>
-      <figure class="dev"><img src="shots/ip_lock.jpg" alt="Live Activity on the Lock Screen" loading="lazy"><p><b>Lock Screen</b>Live Activities, the Dynamic Island and StandBy keep the time in view.</p></figure>
-      <figure class="dev wide"><img src="shots/ipad.jpg" alt="Pomly on iPad" loading="lazy"><p><b>iPad</b>The dial and your day side by side, with Home Screen widgets.</p></figure>
-      <figure class="dev wide"><img src="shots/mac_drag.jpg" alt="Dragging down from the Pomly menu bar icon on Mac" loading="lazy"><p><b>Mac</b>Press the menu bar icon and drag down to set it. ⌃⌥P from any app.</p></figure>
-      <figure class="dev watch"><img src="shots/watch.png" alt="Pomly on Apple Watch" loading="lazy"><p><b>Apple Watch</b>Edge to edge dial, Digital Crown, complications and the Smart Stack.</p></figure>
-      <figure class="dev"><img src="shots/ip_history.jpg" alt="Focus history chart" loading="lazy"><p><b>History</b>See where your focus went, by day and by label.</p></figure>
+    <div>
+      <p class="kicker" id="howh">How it works</p>
+      <ol class="steps">
+        <li class="on"><h3>Drag to set.</h3><p>Sweep your finger around the dial to choose how long you'll focus. Or tap 15, 25, 45 or 60.</p></li>
+        <li><h3>Focus.</h3><p>Put your phone down. The time left stays on your Lock Screen, so you can glance instead of unlocking.</p></li>
+        <li><h3><em>Rest.</em></h3><p>When time's up, Pomly rings, even on silent. Take a break with one tap, then go again.</p></li>
+      </ol>
+    </div>
+    <div class="vis" aria-hidden="true">
+      <svg class="dial" id="howDial" viewBox="-100 -100 200 200"></svg>
+      <div class="la"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="rgba(244,166,106,.25)" stroke-width="2.4"/><circle id="laRing" cx="10" cy="10" r="8" fill="none" stroke="#f4a66a" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="50.3" stroke-dashoffset="0" transform="rotate(-90 10 10)"/></svg><div><small>FOCUS</small><b>Deep work</b></div><span class="n" id="laTime">25:00</span></div>
+      <div class="note"><div class="nh"><img src="icon-180.png" alt="">Pomly<span>now</span></div><b>Nice work. Time for a break.</b><p>You focused for 25 minutes on Deep work.</p><div class="row"><span>Take a Break</span><span>Not Now</span></div></div>
     </div>
   </div>
 </section>
 
-<section class="feat wrap" aria-labelledby="fh">
-  <h2 id="fh" class="rv">Everything a focus timer should be. Nothing it shouldn't.</h2>
-  <div class="fgrid">
-    <div class="rv"><h3>One drag to set</h3><p>Sweep the dial for 1 to 120 minutes, or tap 15, 25, 45 or 60.</p></div>
-    <div class="rv"><h3>An alarm that rings</h3><p>Built on AlarmKit, so it breaks through Silent mode like a real alarm.</p></div>
-    <div class="rv"><h3>Sync with a code</h3><p>Pair devices with six characters. Start on your Mac, pause on your Watch.</p></div>
-    <div class="rv"><h3>Widgets and Controls</h3><p>Start a session from the Home Screen, Control Center or Siri.</p></div>
-    <div class="rv"><h3>A mini timer</h3><p>A floating picture-in-picture dial on Mac, draggable anywhere.</p></div>
-    <div class="rv"><h3>Private by default</h3><p>No account, no analytics, no ads. MIT licensed, every line on GitHub.</p></div>
+<section class="sec wrap" id="everywhere" aria-labelledby="evh">
+  <header class="rv"><p class="kicker">Everywhere you are</p><h2 class="h2" id="evh">One timer.<br>Every screen <em>you own.</em></h2></header>
+  <div class="bento">
+    <article class="tile t-lock s2 r2 rv">
+      <h3>Always in view.</h3>
+      <p>The countdown lives on your Lock Screen and in the Dynamic Island.</p>
+      <div class="art"><div class="phone"><div class="scr"><img src="img/lock.webp" alt="The Pomly countdown on the iPhone Lock Screen" loading="lazy" width="1000" height="2174"></div></div></div>
+    </article>
+    <article class="tile t-bar s4 rv" style="--d:.08s">
+      <h3>Right in your Mac's menu bar.</h3>
+      <p>Press the Pomly icon and pull down. The further you drag, the longer you focus.</p>
+      <div class="mb" id="mb" aria-hidden="true">
+        <div class="bar">
+          <svg class="pomly" id="mbIcon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 10V5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="ic" viewBox="0 0 20 20" fill="currentColor"><path d="M10 15.5l2-2.3a3 3 0 0 0-4 0zM5.2 10.8l1.4 1.5a5 5 0 0 1 6.8 0l1.4-1.5a7 7 0 0 0-9.6 0zM2.4 8l1.4 1.5a9 9 0 0 1 12.4 0L17.6 8a11 11 0 0 0-15.2 0z"/></svg>
+          <svg class="ic" viewBox="0 0 26 14" style="width:24px"><rect x=".5" y=".5" width="22" height="13" rx="3.5" fill="none" stroke="currentColor"/><rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"/><rect x="23.5" y="4.5" width="1.6" height="5" rx=".8" fill="currentColor"/></svg>
+          <span>Thu 9:41 AM</span>
+        </div>
+        <div class="line" id="mbLine"></div>
+        <div class="pill" id="mbPill"><b id="mbMin">25</b> min</div>
+        <svg class="cur" id="mbCur" viewBox="0 0 20 24"><path d="M2 1.5v18l4.6-4.3 3 6.6 3-1.4-3-6.4h6.3z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+    </article>
+    <article class="tile t-mac s4 rv">
+      <h3>A proper home on the desktop.</h3>
+      <p>The full app, a floating mini timer, and shortcuts that work from anywhere.</p>
+      <div class="art"><div class="laptop"><div class="lid"><img src="img/mac.webp" alt="Pomly on a Mac in the middle of a focus session" loading="lazy" width="1372" height="892"></div></div></div>
+    </article>
+    <article class="tile t-watch s2 rv">
+      <h3>On your wrist.</h3>
+      <p>Turn the Digital Crown to set the time. Glance at your watch face to check it.</p>
+      <div class="art"><div class="watch"><img src="img/watch.webp" alt="Pomly on Apple Watch" loading="lazy" width="416" height="496"></div></div>
+    </article>
+    <article class="tile t-ipad s2 rv" style="--d:.08s">
+      <h3>Big and calm on iPad.</h3>
+      <p>A full-screen dial that's easy to read from across the desk.</p>
+      <div class="art"><div class="tablet"><img src="img/ipad.webp" alt="Pomly on iPad" loading="lazy" width="1400" height="1867"></div></div>
+    </article>
+    <article class="tile t-home s2 rv" style="--d:.16s">
+      <h3>One tap from Home.</h3>
+      <p>Start a session from a widget, Control Center or by asking Siri.</p>
+      <div class="art"><div class="phone"><div class="scr"><img src="img/home.webp" alt="Pomly widget on the iPhone Home Screen" loading="lazy" width="1000" height="2174"></div></div></div>
+    </article>
+    <article class="tile t-hist s6 rv">
+      <div class="txt">
+        <h3>See where your time went.</h3>
+        <p>A simple chart of your week, your daily average and your streak. No guilt, just a gentle picture of your progress.</p>
+      </div>
+      <div class="art"><div class="phone island"><div class="scr"><img src="img/history.webp" alt="Pomly history chart showing focus time this week" loading="lazy" width="1000" height="2174"></div></div></div>
+    </article>
+  </div>
+</section>
+
+<section class="sec wrap sync" id="sync" aria-labelledby="synch">
+  <header class="rv"><p class="kicker">In sync</p><h2 class="h2" id="synch">Start on your Mac.<br><em>Pause on your wrist.</em></h2>
+  <p class="lead" style="margin-top:22px">Pair your devices with a six-letter code. No sign-up, no email. Try it: tap Pause on the watch.</p></header>
+  <div class="row rv" style="--d:.1s">
+    <div class="wire" aria-hidden="true"><i></i><i></i></div>
+    <div class="dev d-mac"><div class="sc"><div><small class="st">FOCUS</small><b class="ct">18:42</b></div></div><span>Mac</span></div>
+    <div class="dev d-ph"><div class="sc"><div><small class="st">FOCUS</small><b class="ct">18:42</b></div></div><span>iPhone</span></div>
+    <div class="dev d-w"><div class="sc"><div><b class="ct">18:42</b><button id="syncBtn">Pause</button></div></div><span>Apple Watch</span></div>
+  </div>
+  <p class="tag" aria-live="polite" id="syncTag">All three show the same session, to the second.</p>
+</section>
+
+<section class="sec wrap" aria-labelledby="valh">
+  <header class="rv"><p class="kicker">Made with care</p><h2 class="h2" id="valh">Nothing to sign up for.<br>Nothing <em>to pay.</em></h2></header>
+  <div class="vals rv">
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12v8H4v-8M2 7h20v5H2zM12 22V7M12 7H8a2.5 2.5 0 1 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 1 0 0-5c-3 0-4 5-4 5z"/></svg><h3>Free, for real</h3><p>No subscription, no trial, nothing locked behind a paywall.</p></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6M3 3l18 18"/></svg><h3>No account</h3><p>Open it and start. Pomly never asks who you are.</p></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg><h3>Private</h3><p>No ads, no tracking. Your focus history stays on your devices.</p></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9-9a5 5 0 0 1 9-4 5 5 0 0 1 9 4c-2 4.5-9 9-9 9z"/></svg><h3>Made in the open</h3><p>Built by one person, and anyone can see exactly how it works.</p></div>
   </div>
 </section>
 
 <section class="dl wrap" id="download" aria-labelledby="dlh">
-  <h2 id="dlh" class="rv">Get Pomly.</h2>
-  <p class="sub rv">Free on every Apple platform. Version 1.0.1 · iOS, iPadOS, macOS, watchOS 26 or later.</p>
-  <div class="plats">
-    <div class="plat rv" data-os="mac">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
-      <h3>Mac</h3><p>Menu bar timer, mini timer and global shortcuts. Updates itself.</p>
-      <a class="btn pri" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-macOS.zip">Download for Mac</a>
-      <button class="copy" data-copy="brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly" aria-label="Copy the Homebrew install command">brew install --cask pomly</button>
-      <small>Not notarized yet: right-click Pomly › Open the first time.</small>
+  <header class="rv"><p class="kicker">Download</p><h2 class="h2" id="dlh">Get Pomly. <em>It's free.</em></h2></header>
+  <div class="box rv">
+    <div class="seg" role="tablist" aria-label="Choose your device">
+      <button role="tab" id="tab-mac" aria-controls="p-mac" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M1.5 19.5h21"/></svg>Mac</button>
+      <button role="tab" id="tab-ios" aria-controls="p-ios" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="3"/></svg>iPhone &amp; iPad</button>
+      <button role="tab" id="tab-watch" aria-controls="p-watch" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="3.5"/><path d="M9 6l.6-3h4.8l.6 3M9 18l.6 3h4.8l.6-3"/></svg>Apple Watch</button>
     </div>
-    <div class="plat rv" data-os="ios">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
-      <h3>iPhone</h3><p>Live Activities, widgets, Controls and Siri. Includes the Watch app.</p>
-      <a class="btn pri" href="altstore://source?url=https://tapariapurv.github.io/pomly/altstore.json">Add to AltStore</a>
-      <a class="btn" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-iOS-unsigned.ipa">Download IPA</a>
-      <small>Sideload with <a href="https://altstore.io">AltStore</a> or <a href="https://sideloadly.io">Sideloadly</a> and a free Apple ID.</small>
+
+    <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="tab-mac">
+      <div>
+        <h3>Pomly for Mac</h3>
+        <p class="intro">Lives in your menu bar and keeps itself up to date. Download it, then follow three quick steps.</p>
+        <div class="acts"><a class="btn pri" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-macOS.zip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download for Mac</a></div>
+        <details class="term"><summary>Prefer to use Terminal?</summary><button class="copy" data-copy="brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly">brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly &amp;&amp; brew install --cask pomly</button></details>
+      </div>
+      <ol class="how2">
+        <li><div><b>Open the download.</b><span>It unzips into the Pomly app.</span></div></li>
+        <li><div><b>Drag Pomly into Applications.</b><span>Just like any other Mac app.</span></div></li>
+        <li><div><b>The first time, right-click and choose Open.</b><span>Pomly is new and independent, so your Mac asks you to confirm once.</span></div></li>
+      </ol>
     </div>
-    <div class="plat rv" data-os="ipad">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M11 18.5h2"/></svg>
-      <h3>iPad</h3><p>The same app, with the dial and Today side by side.</p>
-      <a class="btn pri" href="altstore://source?url=https://tapariapurv.github.io/pomly/altstore.json">Add to AltStore</a>
-      <a class="btn" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-iOS-unsigned.ipa">Download IPA</a>
-      <small>One IPA for iPhone and iPad.</small>
+
+    <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="tab-ios" hidden>
+      <div>
+        <h3>Pomly for iPhone and iPad</h3>
+        <p class="intro">Pomly isn't on the App Store yet. Until it is, you can install it free with AltStore, a trusted app for adding apps from outside the App Store. It keeps Pomly updated for you.</p>
+        <div class="acts">
+          <a class="btn pri" href="altstore://source?url=https://tapariapurv.github.io/pomly/altstore.json">Add Pomly to AltStore</a>
+          <a class="btn" href="https://altstore.io" target="_blank" rel="noopener">Get AltStore</a>
+        </div>
+        <p class="fine">Installing by hand? <a href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-iOS-unsigned.ipa">Download the app file</a> and open it with <a href="https://sideloadly.io" target="_blank" rel="noopener">Sideloadly</a>.</p>
+      </div>
+      <ol class="how2">
+        <li><div><b>Install AltStore.</b><span>It's free. The short guide on altstore.io walks you through it.</span></div></li>
+        <li><div><b>On your iPhone or iPad, tap “Add Pomly to AltStore”.</b><span>AltStore opens with Pomly ready to go.</span></div></li>
+        <li><div><b>Tap Install.</b><span>That's it. New versions arrive on their own.</span></div></li>
+      </ol>
     </div>
-    <div class="plat rv" data-os="watch">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="3.5"/><path d="M9 6l.6-3h4.8l.6 3M9 18l.6 3h4.8l.6-3"/></svg>
-      <h3>Apple Watch</h3><p>Installs alongside the iPhone app. Complications and the Smart Stack.</p>
-      <a class="btn" href="https://github.com/tapariapurv/pomly#iphone-ipad-and-apple-watch">Install Steps</a>
-      <a class="btn" href="https://github.com/tapariapurv/pomly">Build from Source</a>
-      <small>Open in Xcode with a free Apple ID.</small>
+
+    <div class="panel" role="tabpanel" id="p-watch" aria-labelledby="tab-watch" hidden>
+      <div>
+        <h3>Pomly for Apple Watch</h3>
+        <p class="intro">The Watch app comes with Pomly for iPhone. For now it installs when Pomly is set up with Xcode, Apple's free app-making tool, and your everyday Apple ID.</p>
+        <div class="acts"><a class="btn pri" href="https://github.com/tapariapurv/pomly#iphone-ipad-and-apple-watch" target="_blank" rel="noopener">See the Guide</a></div>
+      </div>
+      <ol class="how2">
+        <li><div><b>Get the project.</b><span>Download Pomly from GitHub.</span></div></li>
+        <li><div><b>Open it in Xcode and sign in.</b><span>Your everyday Apple ID works.</span></div></li>
+        <li><div><b>Plug in your iPhone and press Run.</b><span>Pomly lands on your iPhone and your Watch together.</span></div></li>
+      </ol>
     </div>
+  </div>
+  <p class="req">Version 1.0.1 · Works on iOS 26, iPadOS 26, macOS 26 and watchOS 26 or later.</p>
+</section>
+
+<section class="faq wrap" id="faq" aria-labelledby="faqh">
+  <header class="rv"><p class="kicker">Questions</p><h2 class="h2" id="faqh">Good <em>to know.</em></h2></header>
+  <div class="rv" style="--d:.1s">
+    <details name="faq"><summary>Is Pomly really free?</summary><p>Yes. There are no ads, no subscriptions and nothing to unlock. Pomly is a passion project, and it's free for everyone.</p></details>
+    <details name="faq"><summary>Will the alarm ring if my phone is on silent?</summary><p>Yes. Pomly uses the same alarm system as Apple's Clock app, so it rings through Silent mode and Focus, and you can start your break right from the alert.</p></details>
+    <details name="faq"><summary>Do I need to create an account?</summary><p>No. Open Pomly and start focusing. If you'd like your devices to stay in sync, you pair them with a short code shown on screen. No email, no password.</p></details>
+    <details name="faq"><summary>What does Pomly know about me?</summary><p>Nothing it doesn't need. There's no tracking or analytics. If you turn on sync, only your timer and focus history are shared, and only between your own devices. Read the <a href="privacy.html">privacy policy</a>.</p></details>
+    <details name="faq"><summary>Why isn't it on the App Store?</summary><p>Pomly is made by one independent developer. Until it's listed there, the steps above let you install it free, and it keeps itself updated.</p></details>
+    <details name="faq"><summary>My Mac says Pomly is from an unidentified developer.</summary><p>That's expected for new independent apps. Right-click Pomly in Applications, choose Open, then Open again. You only need to do this once.</p></details>
   </div>
 </section>
 
-<section class="close" data-p aria-labelledby="ch">
+<section class="close" data-p aria-labelledby="closeh">
+  <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" stroke="rgba(255,240,225,.12)" pathLength="60" stroke-dasharray=".06 .94" style="stroke-width:1.6"/><circle id="closeRing" cx="50" cy="50" r="46" stroke="#f4a66a" stroke-opacity=".6" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>
   <div class="wrap">
-    <h2 id="ch" class="rv">Your next 25 minutes start now.</h2>
-    <p class="rv">Free. Open source. Every Apple device.</p>
-    <a class="btn pri rv" href="#download">Download Pomly</a>
+    <h2 id="closeh" class="rv">Your next 25 minutes <em>start now.</em></h2>
+    <p class="rv" style="--d:.1s">Free on iPhone, iPad, Mac and Apple Watch.</p>
+    <a class="btn pri rv" style="--d:.2s" href="#download"><svg><use href="#apple"/></svg>Download Pomly</a>
   </div>
 </section>
 </main>
 
-<footer><div class="wrap"><span>© 2026 Purv Taparia · MIT License</span><span><a href="privacy.html">Privacy</a><a href="support.html">Support</a><a href="https://github.com/tapariapurv/pomly">GitHub</a></span></div></footer>
+<footer><div class="wrap">
+  <span class="brand"><img src="icon-180.png" alt="">Pomly</span>
+  <span>Made by Purv Taparia · © 2026</span>
+  <nav aria-label="Footer"><a href="privacy.html">Privacy</a><a href="support.html">Support</a><a href="https://github.com/tapariapurv/pomly">GitHub</a></nav>
+</div></footer>
 
 <script>
-const $=id=>document.getElementById(id), reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS='http://www.w3.org/2000/svg',fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
 
-// Signature: the hero dial works like the app. Drag to set, Start counts down for real.
-const dial=$('dial'),ticks=$('ticks'),knob=$('knob'),time=$('time'),state=$('state'),go=$('go'),end=$('end');
-let mins=25,left=0,timer=null,lines=[];
-for(let i=0;i<60;i++){const a=i/60*2*Math.PI-Math.PI/2,m=i%5==0,r0=m?76:83,c=Math.cos(a),s=Math.sin(a);
- const l=document.createElementNS('http://www.w3.org/2000/svg','line');
- l.setAttribute('x1',c*r0);l.setAttribute('y1',s*r0);l.setAttribute('x2',c*92);l.setAttribute('y2',s*92);l.setAttribute('stroke-width',m?2.8:1.7);
- ticks.appendChild(l);lines.push(l)}
-const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-function draw(frac){const lit=Math.round(frac*60);
- lines.forEach((l,i)=>{const on=i<lit;l.setAttribute('stroke',on?'var(--tint)':'var(--ink)');l.setAttribute('stroke-opacity',on?1:.22)});
- const a=frac*2*Math.PI-Math.PI/2;knob.setAttribute('cx',Math.cos(a)*92);knob.setAttribute('cy',Math.sin(a)*92)}
-function set(m){mins=Math.max(1,Math.min(60,m));time.textContent=fmt(mins*60);draw(mins/60);
- dial.setAttribute('aria-valuenow',mins);dial.setAttribute('aria-valuetext',mins+' minutes')}
-function fromPointer(e){const r=dial.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;
- let a=Math.atan2(y,x)+Math.PI/2;if(a<0)a+=2*Math.PI;set(Math.round(a/(2*Math.PI)*60)||60)}
-dial.addEventListener('pointerdown',e=>{if(timer)return;dial.setPointerCapture(e.pointerId);fromPointer(e);$('hint').style.opacity=0});
-dial.addEventListener('pointermove',e=>{if(!timer&&dial.hasPointerCapture(e.pointerId))fromPointer(e)});
-dial.addEventListener('keydown',e=>{if(timer)return;const d={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[e.key];if(d){e.preventDefault();set(mins+d)}});
-function stop(){clearInterval(timer);timer=null;go.textContent='Start';end.hidden=true;state.textContent='FOCUS';set(mins)}
+// One dial, drawn like the app: 60 ticks, lit ones glow amber, a hand and a knob.
+function makeDial(svg){
+  el('circle',{class:'face',r:96},svg);el('circle',{class:'rim',r:95.5},svg);
+  const ticks=[];for(let i=0;i<60;i++){const a=i/60*2*Math.PI-Math.PI/2,m=i%5==0,r0=m?72:79,c=Math.cos(a),s=Math.sin(a);
+    ticks.push(el('line',{class:'tk',x1:c*r0,y1:s*r0,x2:c*88,y2:s*88,'stroke-width':m?2.6:1.5},svg))}
+  const hand=el('line',{class:'hand'},svg),knob=el('circle',{class:'knob',r:5.2},svg);
+  const t=el('text',{class:'t',y:11,'text-anchor':'middle'},svg),s=el('text',{class:'s',y:29,'text-anchor':'middle'},svg);
+  return {t,s,draw(frac,label,state){
+    const lit=frac*60;ticks.forEach((l,i)=>{const on=i<lit;l.style.stroke=on?`hsl(${26-i/60*8} 88% ${70-i/60*12}%)`:'#f6ebe0';l.style.opacity=on?1:.2});
+    const a=frac*2*Math.PI-Math.PI/2,x=Math.cos(a),y=Math.sin(a);knob.setAttribute('cx',x*88);knob.setAttribute('cy',y*88);
+    hand.setAttribute('x1',x*30);hand.setAttribute('y1',y*30);hand.setAttribute('x2',x*80);hand.setAttribute('y2',y*80);
+    t.textContent=label;s.textContent='• '+(state||'FOCUS')}};
+}
+
+/* ---------- hero: a working copy of the app ---------- */
+const app=$('#app'),hd=makeDial($('#heroDial')),go=$('#appGo'),dialEl=$('#heroDial'),hint=$('#hint');
+let mins=25,left=0,timer=null,paused=false,focused=0,dragging=false;
+function setMins(m){mins=Math.max(1,Math.min(60,m));hd.draw(mins/60,fmt(mins*60));
+  dialEl.setAttribute('aria-valuenow',mins);dialEl.setAttribute('aria-valuetext',mins+' minutes');
+  $$('#chips button').forEach(b=>b.classList.toggle('sel',+b.dataset.m===mins));$('#diTime').textContent=fmt(mins*60)}
+function angleMins(e){const r=dialEl.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;
+  let a=Math.atan2(y,x)+Math.PI/2;if(a<0)a+=2*Math.PI;return Math.round(a/(2*Math.PI)*60)||60}
+const idle=()=>!timer&&!paused;
+dialEl.addEventListener('pointerdown',e=>{if(!idle())return;dragging=true;dialEl.setPointerCapture(e.pointerId);setMins(angleMins(e));hint.classList.add('gone')});
+dialEl.addEventListener('pointermove',e=>{if(dragging)setMins(angleMins(e))});
+dialEl.addEventListener('pointerup',()=>dragging=false);
+dialEl.addEventListener('keydown',e=>{if(!idle())return;const d={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[e.key];if(d){e.preventDefault();setMins(mins+d)}});
+$$('#chips button').forEach(b=>b.onclick=()=>{setMins(+b.dataset.m);hint.classList.add('gone')});
+function label(t,icon){go.querySelector('span').textContent=t;go.querySelector('use').setAttribute('href',icon)}
+function tick(){left--;focused++;hd.draw(left/3600,fmt(left));$('#diTime').textContent=fmt(left);
+  $('#diRing').style.strokeDashoffset=47.1*(1-left/(mins*60));$('#today').textContent=Math.floor(focused/60)+' min';
+  if(left<=0)reset('BREAK')}
+function reset(state){clearInterval(timer);timer=null;paused=false;app.classList.remove('run','paused');label('Start Focus','#play');setMins(mins);if(state)hd.s.textContent='• '+state}
 go.onclick=()=>{
- if(timer){clearInterval(timer);timer=0;go.textContent='Resume';state.textContent='PAUSED';return}
- if(timer===null)left=mins*60;
- go.textContent='Pause';end.hidden=false;state.textContent='FOCUS';
- timer=setInterval(()=>{left--;time.textContent=fmt(left);draw(left/3600);if(left<=0){stop();state.textContent='TAKE A BREAK'}},1000)};
-end.onclick=stop;
-set(25);
+  if(timer){clearInterval(timer);timer=null;paused=true;app.classList.replace('run','paused');label('Resume','#play');hd.s.textContent='• PAUSED';return}
+  if(!paused)left=mins*60;paused=false;app.classList.remove('paused');app.classList.add('run');label('Pause','#pause');hd.s.textContent='• FOCUS';
+  hint.classList.add('gone');timer=setInterval(tick,1000)};
+$('#appEnd').onclick=()=>reset();
+$('#appCup').onclick=()=>{reset();setMins(5);hd.s.textContent='• BREAK'};
+setMins(25);
 
-// Film: click to play with sound.
-$('play').onclick=()=>{const v=$('vid');v.controls=true;v.play();$('play').remove()};
+// Hero: pointer tilt + glow follow.
+const hero=$('#hero'),phoneL=$('#phoneLayer');
+if(!reduce&&matchMedia('(pointer:fine)').matches)hero.addEventListener('pointermove',e=>{
+  const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
+  hero.style.setProperty('--mx',x*160+'px');phoneL.style.setProperty('--ry',x*8+'deg');phoneL.style.setProperty('--rx',-y*6+'deg')});
 
-// Scroll progress → --p on pinned sections, --y on the hero.
-const ps=[...document.querySelectorAll('[data-p]')],root=document.documentElement;
-function tick(){root.style.setProperty('--y',scrollY);
- for(const el of ps){const r=el.getBoundingClientRect(),span=el.offsetHeight-innerHeight;
-  const p=span>40?-r.top/span:1-(r.top/innerHeight);el.style.setProperty('--p',Math.max(0,Math.min(1,p)).toFixed(4))}}
-if(!reduce){addEventListener('scroll',()=>requestAnimationFrame(tick),{passive:true});addEventListener('resize',tick);tick()}
-else ps.forEach(el=>el.style.setProperty('--p',1));
+/* ---------- how it works: the dial tells the story as you scroll ---------- */
+const how=$('#how'),hw=makeDial($('#howDial')),steps=$$('.steps li'),laT=$('#laTime'),laR=$('#laRing');
+function howUpdate(p){
+  const st=p<.34?0:p<.68?1:2;
+  if(how.dataset.step!=st){how.dataset.step=st;steps.forEach((l,i)=>l.classList.toggle('on',i===st))}
+  if(st===0){const m=Math.max(1,Math.round(Math.min(1,p/.28)*25));hw.draw(m/60,fmt(m*60))}
+  else if(st===1){const k=Math.min(1,(p-.34)/.3),secs=Math.round(1500*(1-k));hw.draw(secs/3600,fmt(secs));laT.textContent=fmt(secs);laR.style.strokeDashoffset=50.3*k}
+  else hw.draw(5/60,'5:00','BREAK');
+}
 
-// Reveal on view.
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
-document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+/* ---------- menu bar demo ---------- */
+const mb=$('#mb'),mbI=$('#mbIcon'),mbL=$('#mbLine'),mbP=$('#mbPill'),mbC=$('#mbCur'),mbM=$('#mbMin');let mbOn=false,mbT0=0;
+const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+function mbFrame(t){if(!mbOn)return;const T=((t-mbT0)/1000)%5.4,r=mb.getBoundingClientRect(),ir=mbI.getBoundingClientRect();
+  const ix=ir.left-r.left+ir.width/2,iy=ir.top-r.top+ir.height/2,maxY=r.height-28;let cx,cy,len=0,show=false;
+  if(T<1.1){const k=ease(T/1.1);cx=ix-160*(1-k);cy=iy+100*(1-k)}
+  else if(T<3.3){const k=ease(Math.min(1,(T-1.2)/1.9));cx=ix;cy=iy+k*(maxY-iy);len=cy-iy;show=T>1.2}
+  else if(T<4.1){cx=ix;cy=maxY;len=cy-iy;show=true}
+  else{const k=ease(Math.min(1,(T-4.1)/1.2));cx=ix-160*k;cy=maxY+(iy+100-maxY)*k}
+  mbC.style.transform=`translate(${cx-3}px,${cy-2}px) scale(${show?.9:1})`;
+  mbL.style.left=ix-1+'px';mbL.style.height=Math.max(0,len-10)+'px';mbL.style.opacity=show?1:0;
+  mbP.style.left=ix+'px';mbP.style.top=cy+'px';mbP.style.opacity=show?1:0;mbM.textContent=Math.max(1,Math.round(len/(maxY-iy)*45));
+  requestAnimationFrame(mbFrame)}
+new IntersectionObserver(([e])=>{const was=mbOn;mbOn=e.isIntersecting&&!reduce;if(mbOn&&!was){mbT0=performance.now();requestAnimationFrame(mbFrame)}}).observe(mb);
+if(reduce){mbC.style.display='none'}
 
-// Highlight the visitor's platform and point the hero button at it.
-const ua=navigator.userAgent,os=/iPad|Macintosh/.test(ua)&&navigator.maxTouchPoints>1?'ipad':/iPhone/.test(ua)?'ios':/Mac/.test(ua)?'mac':null;
-if(os){const card=document.querySelector(`[data-os="${os}"]`);card.classList.add('me');
- const a=card.querySelector('.btn.pri');$('smart').href=a.href;$('smart').textContent={mac:'Download for Mac',ios:'Get It for iPhone',ipad:'Get It for iPad'}[os]}
+/* ---------- sync demo ---------- */
+let sLeft=18*60+42,sPaused=false;const sync=$('#sync');
+setInterval(()=>{if(!sPaused&&sLeft>0){sLeft--;$$('#sync .ct').forEach(b=>b.textContent=fmt(sLeft))}},1000);
+$('#syncBtn').onclick=e=>{sPaused=!sPaused;sync.classList.toggle('paused',sPaused);e.target.textContent=sPaused?'Resume':'Pause';
+  $$('#sync .st').forEach(s=>s.textContent=sPaused?'PAUSED':'FOCUS');$('#syncTag').textContent=sPaused?'Paused everywhere at once.':'Running everywhere again.'};
 
-// Copy buttons.
-document.querySelectorAll('.copy').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy);const t=b.textContent;b.textContent='Copied';setTimeout(()=>b.textContent=t,1400)});
+/* ---------- film ---------- */
+if(matchMedia('(max-width:700px)').matches)$('#vid').poster='img/poster-v.jpg';
+$('#playBtn').onclick=()=>{const v=$('#vid'),b=$('#playBtn');v.controls=true;v.play();b.style.opacity=0;setTimeout(()=>b.remove(),400)};
+
+/* ---------- scroll: progress vars, nav hide ---------- */
+const ps=$$('[data-p]'),closeRing=$('#closeRing'),nav=$('#nav');let lastY=0,ticking=false;
+function onScroll(){ticking=false;const y=scrollY;
+  hero.style.setProperty('--hp',Math.min(1,y/innerHeight).toFixed(3));
+  nav.classList.toggle('hide',y>lastY+2&&y>500);if(y<lastY-2)nav.classList.remove('hide');lastY=y;
+  for(const s of ps){const r=s.getBoundingClientRect(),span=s.offsetHeight-innerHeight;
+    const p=Math.max(0,Math.min(1,span>50?-r.top/span:(innerHeight-r.top)/(innerHeight+r.height*.5)));s.style.setProperty('--p',p.toFixed(4));
+    if(s===how)howUpdate(p);else if(s.classList.contains('close'))closeRing.style.strokeDashoffset=100-p*100}}
+addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
+addEventListener('resize',onScroll);onScroll();
+
+/* ---------- reveal + tile glow ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+$$('.rv').forEach(e=>io.observe(e));
+$$('.tile').forEach(t=>t.addEventListener('pointermove',e=>{const r=t.getBoundingClientRect();t.style.setProperty('--gx',(e.clientX-r.left)/r.width*100+'%');t.style.setProperty('--gy',(e.clientY-r.top)/r.height*100+'%')}));
+
+/* ---------- download tabs, chosen for your device ---------- */
+const tabs=$$('[role=tab]');
+function pick(id){tabs.forEach(t=>{const on=t.id===id;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;$('#'+t.getAttribute('aria-controls')).hidden=!on})}
+tabs.forEach((t,i)=>{t.onclick=()=>pick(t.id);t.onkeydown=e=>{const d={ArrowRight:1,ArrowLeft:-1}[e.key];if(d){const n=tabs[(i+d+tabs.length)%tabs.length];pick(n.id);n.focus()}}});
+const ua=navigator.userAgent,iPad=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),smart=$('#smart span');
+if(iPad||/iPhone|iPod/.test(ua)){pick('tab-ios');smart.textContent=iPad?'Get It for iPad':'Get It for iPhone'}
+else if(/Mac/.test(ua))smart.textContent='Download for Mac';
+$$('.copy').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy);const t=b.textContent;b.textContent='Copied to clipboard';setTimeout(()=>b.textContent=t,1500)});
 </script>
 </body>
 </html>

@@ -4,3 +4,5 @@ DerivedData/
 .DS_Store
 CLAUDE.mdadist/
 build.noindex/
+docs/.vercel
+docs/.env*
