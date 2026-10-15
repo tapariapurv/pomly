@@ -1,11 +1,13 @@
-# Pomly promo
+# Pomly films
 
-A 36-second film, 1920×1080, with a generated score and sound effects. Watch it on the [website](https://tapariapurv.github.io/pomly/#promo) or download it from the [release](https://github.com/tapariapurv/pomly/releases/latest).
+| File | What |
+|---|---|
+| `index.html` → `pomly-film.mp4` | 58 s, 1920×1080: promo, then an install guide for Mac, iPhone/iPad, Watch and sync |
+| `vertical/index.html` → `pomly-vertical.mp4` | 26 s, 1080×1920 promo for Reels, Shorts and TikTok |
 
-Every frame is code ([HyperFrames](https://github.com/heygen-com/hyperframes) + GSAP). All timing lives in `scripts/sound.py`, which writes `assets/cues.js` and `assets/score.m4a`.
+Built from real captures of the app (`assets/cap/`: simulator screen recordings and screenshots, Mac screenshots) with [HyperFrames](https://github.com/heygen-com/hyperframes) + GSAP. Timing, score and SFX come from `scripts/sound.py`.
 
 ```bash
-python3 scripts/sound.py                                   # cues + score
-npx hyperframes check                                      # layout, contrast
-npx hyperframes render --quality delivery --output renders/pomly-promo.mp4
+python3 scripts/sound.py && npx hyperframes render --quality delivery --output renders/pomly-film.mp4
+VERTICAL=1 OUT_DIR=vertical/assets python3 scripts/sound.py && (cd vertical && npx hyperframes render --quality delivery --output renders/pomly-vertical.mp4)
 ```

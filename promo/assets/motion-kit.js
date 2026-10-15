@@ -39,7 +39,7 @@ window.MotionKit = function (tl) {
   const submit = (spec, input, dest, t, prefix = "") => { tl.set(input, { textContent: "" }, t).set(dest, { textContent: prefix + spec.text }, t); show(dest, t); };
 
   // ---- camera (wrapper .cam, inset 0, origin = frame centre) ----
-  const W = 1920 / 2, H = 1080 / 2;   // change if the composition isn't 1920x1080
+  const W = R0.width / 2, H = R0.height / 2; // the composition centre, any aspect
   const camV = (px, py, Z, tx = W, ty = H) => ({ scale: Z, x: tx - W - (px - W) * Z, y: ty - H - (py - H) * Z });
   const cam = (q, px, py, Z, t, d = .55, ease = "expo.inOut", tx, ty) => tl.to(q, { ...camV(px, py, Z, tx, ty), duration: d, ease }, t);
   const wide = (q, t, d = .75, ease = "expo.inOut") => tl.to(q, { scale: 1, x: 0, y: 0, duration: d, ease }, t);

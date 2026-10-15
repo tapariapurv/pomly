@@ -5,10 +5,12 @@ import json, wave, pathlib, subprocess
 import numpy as np
 
 # ===== EDIT: tempo, length, harmony =====
-BPM, DUR = 120, 36.0
+import os
+VERTICAL = os.environ.get("VERTICAL") == "1"
+BPM, DUR = 128, (26.0 if VERTICAL else 58.0)
 B = 60 / BPM
-# warm, unhurried: Fmaj9 - Dm9 - Bbmaj9 - C6/9
-CHORDS = [[53, 60, 64, 67, 69], [50, 57, 60, 64, 65], [46, 53, 57, 60, 62], [48, 55, 60, 62, 67]]
+# warm and bright: Fmaj9 - Am7 - Bbmaj9 - C6/9
+CHORDS = [[53, 60, 64, 67, 69], [57, 64, 67, 72, 74], [46, 53, 57, 60, 62], [48, 55, 60, 62, 67]]
 RESOLVE = [53, 60, 65, 69, 72]
 rng = np.random.default_rng(7)
 
@@ -17,40 +19,44 @@ def typing(text, start, end):            # seeded, human-ish keystroke times tha
     t = start + np.cumsum(g) / g.sum() * (end - start)
     return {"text": text, "times": [round(float(x), 3) for x in t]}
 
-# ===== EDIT: every cue the picture uses (seconds, on the beat grid) =====
-CUES = dict(
-    B=B, DUR=DUR,
-    scene=dict(dial=0, drag=3.5, start=6.0, phone=8.0, widget=13.0, mac=17.0, watch=23.5, sync=27.0, logo=31.0),
-    type=dict(label=typing("Thesis draft", 20.1, 21.0), code=typing("7U6RMN", 27.6, 28.3)),
-    enter=[21.25],
-    click=[6.4, 14.6, 18.2],
-    pops=[6.6, 9.3, 15.0, 19.75, 21.7, 28.6],
-    dragNotes=[3.9 + i * .25 for i in range(7)],
-    macNotes=[18.5 + i * .25 for i in range(5)],
-)
+# ===== EDIT: every cue the picture uses (seconds) =====
+b = lambda n: round(n * B, 3)   # beat -> seconds
+if VERTICAL:
+    scene = dict(open=0, drag=b(6), glance=b(17), mac=b(26), duo=b(36), sync=b(42), logo=b(48))
+    CUES = dict(B=B, DUR=DUR, scene=scene, words=[b(1), b(2), b(3)], clip=b(6) + .1, tap=b(6) + 2.1,
+                type=dict(), enter=[], pops=[b(19), b(21), b(30), b(44)])
+else:
+    scene = dict(open=0, drag=b(8), glance=b(20), looks=b(30), mac=b(40), duo=b(54), sync=b(62), brand=b(70),
+                 guide=b(77), gmac=b(81), gios=b(93), gwatch=b(105), gsync=b(111), logo=b(117))
+    CUES = dict(B=B, DUR=DUR, scene=scene, words=[b(1), b(3), b(5)], clip=b(8) + .1, tap=b(8) + 2.1,
+                type=dict(brew1=typing("brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly", b(82), b(85.5)),
+                          brew2=typing("brew install --cask pomly", b(86.5), b(88)),
+                          code=typing("7U6RMN", b(112.5), b(114))),
+                enter=[b(85.75), b(88.25)],
+                pops=[b(22), b(24), b(46), b(50), b(64), b(95), b(97), b(99), b(107)])
 S = CUES["scene"]
 # ===== EDIT: arrangement =====
-SECTIONS = [
-    (0.0, S["drag"], {"pad", "sparse"}),
-    (S["drag"], S["phone"], {"pad", "arp", "hats"}),
-    (S["phone"], S["sync"], {"pad", "arp", "hats", "drums"}),
-    (S["sync"], S["logo"], {"pad", "arp", "breakdown"}),
-    (S["logo"], DUR, {"pad", "breakdown"}),
-]
-RISER_TO = S["logo"]
-LOGO = S["logo"]
+if VERTICAL:
+    SECTIONS = [(0, S["drag"], {"pad", "sparse"}), (S["drag"], S["glance"], {"pad", "arp", "hats"}),
+                (S["glance"], S["sync"], {"pad", "arp", "hats", "drums"}), (S["sync"], DUR, {"pad", "breakdown"})]
+    RISER_TO = LOGO = S["logo"]
+else:
+    SECTIONS = [(0, S["drag"], {"pad", "sparse"}), (S["drag"], S["glance"], {"pad", "arp", "hats"}),
+                (S["glance"], S["sync"], {"pad", "arp", "hats", "drums"}), (S["sync"], S["guide"], {"pad", "breakdown"}),
+                (S["guide"], S["logo"], {"pad", "arp", "hats"}), (S["logo"], DUR, {"pad", "breakdown"})]
+    RISER_TO = LOGO = S["brand"]
 # ===== EDIT: SFX events =====
 SFX = dict(
     keys=[t for v in CUES["type"].values() for t in v["times"]],
     enter=CUES["enter"],
-    click=CUES["click"],
+    click=[CUES["tap"]],
     pop=CUES["pops"],
-    notes=CUES["dragNotes"] + CUES["macNotes"],
-    whoosh=[S["phone"], S["widget"], S["mac"], S["watch"], S["sync"]],
+    notes=CUES["words"],
+    whoosh=[v for k, v in S.items() if k not in ("open",)],
 )
 
 SR = 48000; N = int(DUR * SR); L, R = np.zeros(N), np.zeros(N)
-OUT = pathlib.Path(__file__).resolve().parent.parent / "assets"; OUT.mkdir(exist_ok=True)
+OUT = pathlib.Path(os.environ.get("OUT_DIR") or pathlib.Path(__file__).resolve().parent.parent / "assets"); OUT.mkdir(exist_ok=True)
 (OUT / "cues.js").write_text("window.CUES=" + json.dumps(CUES, separators=(",", ":")) + ";\n")
 
 def add(sig, t, gain=1.0, pan=0.0):

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<title>Pomly · vertical</title>
+<link rel="stylesheet" href="assets/film.css" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="assets/cues.js"></script>
+<script src="assets/motion-kit.js"></script>
+<style>
+  #root { width: 1080px; height: 1920px; }
+  .head { position: absolute; left: 0; right: 0; text-align: center; }
+  .t2 { font-size: 96px; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-width="1080" data-height="1920" data-duration="26">
+  <audio id="score" src="assets/score.m4a" data-start="0" data-duration="26" data-track-index="2" data-volume="1"></audio>
+  <div id="glow"></div>
+
+  <section id="s0" class="scene" style="display:grid;place-items:center;text-align:center">
+    <div id="words">
+      <div class="mask"><div class="k" id="w0" style="font-size:190px">Drag.</div></div>
+      <div class="mask"><div class="k grad" id="w1" style="font-size:190px">Focus.</div></div>
+      <div class="mask"><div class="k" id="w2" style="font-size:190px">Rest.</div></div>
+    </div>
+  </section>
+
+  <section id="s1" class="scene">
+    <div class="head" style="top:150px">
+      <div class="lbl">Pomly for iPhone</div>
+      <div style="position:relative;margin-top:18px">
+        <div class="mask"><div class="t2" id="a1" data-layout-allow-overlap data-layout-allow-overflow>One drag<br>sets the time.</div></div>
+        <div class="mask" style="position:absolute;left:0;right:0;top:0"><div class="t2" id="a2" data-layout-allow-overlap data-layout-allow-overflow>One tap<br><span class="grad">starts focus.</span></div></div>
+      </div>
+    </div>
+    <div class="stage"><div class="iph" id="p1" style="left:250px;top:560px;width:580px;height:1226px;border-radius:96px;padding:15px"><div class="scr" style="border-radius:82px">
+      <video id="clip" src="assets/cap/ip_drag.mp4" muted playsinline data-start="2.91" data-duration="5.0" data-track-index="1"></video>
+      <div class="sweep" id="sw1"></div></div></div></div>
+  </section>
+
+  <section id="s2" class="scene">
+    <div class="stage" id="cam2"><div class="iph" id="p2" style="left:250px;top:560px;width:580px;height:1226px;border-radius:96px;padding:15px"><div class="scr" style="border-radius:82px">
+      <img src="assets/cap/ip_lock.png" /><img id="home" src="assets/cap/ip_home.png" style="opacity:0" /><div class="sweep" id="sw2"></div></div></div></div>
+    <div class="head" id="c2" style="top:150px">
+      <div class="lbl">Live Activities · Widgets</div>
+      <div class="mask" style="margin-top:18px"><div class="t2" id="a3">Always one<br><span class="grad">glance away.</span></div></div>
+    </div>
+  </section>
+
+  <section id="s3" class="scene">
+    <div class="head" id="c3" style="top:200px">
+      <div class="lbl">Pomly for Mac</div>
+      <div style="position:relative;margin-top:18px">
+        <div class="mask"><div class="t2" id="a4" data-layout-allow-overlap data-layout-allow-overflow>Pull a timer<br>from the menu bar.</div></div>
+        <div class="mask" style="position:absolute;left:0;right:0;top:0"><div class="t2" id="a5" data-layout-allow-overlap data-layout-allow-overflow>Name it.<br><span class="grad">It's running.</span></div></div>
+      </div>
+    </div>
+    <div class="stage" id="cam3"><div class="win" id="m1" style="left:40px;top:760px;width:1000px;height:650px">
+      <img src="assets/cap/mac_main.jpg" /><img id="mdrag" src="assets/cap/mac_drag.jpg" style="opacity:0" /><img id="mlabel" src="assets/cap/mac_label.jpg" style="opacity:0" /></div></div>
+  </section>
+
+  <section id="s4" class="scene">
+    <div class="head" style="top:170px">
+      <div class="lbl">iPad · Apple Watch</div>
+      <div class="mask" style="margin-top:18px"><div class="t2" id="a6">Every screen<br><span class="grad">you own.</span></div></div>
+    </div>
+    <div class="stage">
+      <div class="iph" id="pad" style="left:120px;top:640px;width:600px;height:800px;border-radius:44px;padding:13px"><div class="scr" style="border-radius:32px"><img src="assets/cap/ipad.png" /></div></div>
+      <div class="iph" id="wat" style="left:640px;top:1180px;width:330px;height:396px;border-radius:92px;padding:16px"><div class="scr" style="border-radius:78px"><img src="assets/cap/watch.png" /></div></div>
+    </div>
+  </section>
+
+  <section id="s5" class="scene">
+    <div class="head" style="top:190px">
+      <div class="lbl">Sync</div>
+      <div class="mask" style="margin-top:18px"><div class="t2" id="a7">Every device.<br><span class="grad">One timer.</span></div></div>
+      <div class="chip" id="code" style="width:430px;height:96px;margin-top:50px;opacity:0">7U6RMN</div>
+    </div>
+    <div class="iph sd" style="left:150px;top:820px;width:300px;height:634px;border-radius:52px;padding:9px"><div class="scr" style="border-radius:44px"><img src="assets/cap/ip_running.png" /></div></div>
+    <div class="iph sd" style="left:540px;top:850px;width:390px;height:520px;border-radius:30px;padding:9px"><div class="scr" style="border-radius:22px"><img src="assets/cap/ipad.png" /></div></div>
+    <div class="win sd" style="left:150px;top:1530px;width:520px;height:338px"><img src="assets/cap/mac_main.jpg" /></div>
+    <div class="iph sd" style="left:740px;top:1480px;width:200px;height:240px;border-radius:58px;padding:10px"><div class="scr" style="border-radius:50px"><img src="assets/cap/watch.png" /></div></div>
+  </section>
+
+  <section id="s6" class="scene" style="display:grid;place-items:center;text-align:center"><div>
+    <img id="i1" src="assets/icon.png" style="width:240px;height:240px;border-radius:56px;box-shadow:0 30px 100px rgba(244,166,106,.45)" />
+    <div class="mask" style="margin-top:36px"><div class="k" id="b1" style="font-size:180px">Pomly</div></div>
+    <div class="sub" id="b2" style="font-size:42px;color:var(--ink)">Pomodoro Focus Timer</div>
+    <div class="lbl" id="b3" style="margin-top:40px;font-size:20px">Free · Open source</div>
+    <div class="sub" id="b4" style="margin-top:16px;color:var(--tint);font-size:34px">tapariapurv.github.io/pomly</div>
+  </div></section>
+
+  <div id="grain"></div>
+</div>
+<script>
+document.fonts.ready.then(() => {
+  const C = window.CUES, S = C.scene, tl = gsap.timeline({ paused: true }), K = MotionKit(tl);
+  const cutIn = (q, t, from = 1.06) => tl.fromTo(q, { opacity: 0, scale: from }, { opacity: 1, scale: 1, duration: .5, ease: "expo.out" }, t);
+  const cutOut = (q, t) => tl.to(q, { opacity: 0, scale: .97, duration: .22, ease: "power2.in" }, t - .22);
+  const sweep = (q, t) => tl.fromTo(q, { xPercent: -160 }, { xPercent: 260, duration: 1.1, ease: "power2.inOut" }, t);
+  tl.fromTo("#grain", { x: 0, y: 0 }, { x: -60, y: 40, duration: C.DUR, ease: "steps(70)" }, 0);
+  tl.fromTo("#glow", { scale: .8, opacity: .6 }, { scale: 1.2, opacity: 1, duration: C.DUR, ease: "sine.inOut" }, 0);
+
+  tl.set("#s0", { opacity: 1 }, 0);
+  C.words.forEach((t, i) => K.maskIn("#w" + i, t - .12, .6));
+  tl.to("#words", { scale: 1.08, duration: S.drag, ease: "power1.in" }, 0);
+  cutOut("#s0", S.drag);
+
+  cutIn("#s1", S.drag);
+  tl.fromTo("#p1", { rotationX: 22, y: 380 }, { rotationX: 0, y: 0, duration: 1.2, ease: "expo.out" }, S.drag);
+  sweep("#sw1", S.drag + .6);
+  K.maskIn("#a1", S.drag + .3);
+  K.maskOut("#a1", C.tap - .05, .3);
+  K.maskIn("#a2", C.tap + .1);
+  cutOut("#s1", S.glance);
+
+  cutIn("#s2", S.glance);
+  tl.fromTo("#p2", { y: 200 }, { y: 0, duration: .9, ease: "expo.out" }, S.glance);
+  K.maskIn("#a3", S.glance + .2);
+  K.cam("#cam2", 540, 1560, 1.9, C.pops[0], .6);
+  tl.to("#c2", { opacity: 0, duration: .25 }, C.pops[0]);
+  tl.to("#home", { opacity: 1, duration: .3 }, C.pops[1] - .1);
+  K.cam("#cam2", 540, 900, 1.55, C.pops[1], .6);
+  K.wide("#cam2", S.mac - 1.1, .7);
+  tl.to("#c2", { opacity: 1, duration: .3 }, S.mac - .9);
+  cutOut("#s2", S.mac);
+
+  cutIn("#s3", S.mac);
+  tl.fromTo("#m1", { rotationX: 18, y: 240 }, { rotationX: 0, y: 0, duration: 1.1, ease: "expo.out" }, S.mac);
+  K.maskIn("#a4", S.mac + .25);
+  tl.to("#mdrag", { opacity: 1, duration: .3 }, C.pops[2] - .15);
+  tl.to("#c3", { opacity: 0, duration: .25 }, C.pops[2] - .1);
+  K.cam("#cam3", 840, 1000, 1.9, C.pops[2], .6);
+  tl.to("#mlabel", { opacity: 1, duration: .3 }, C.pops[2] + 1.0);
+  K.wide("#cam3", C.pops[2] + 1.35, .6);
+  tl.set("#a4", { opacity: 0 }, C.pops[2] + 1.3);
+  tl.to("#c3", { opacity: 1, duration: .3 }, C.pops[2] + 1.6);
+  K.maskIn("#a5", C.pops[2] + 1.6);
+  cutOut("#s3", S.duo);
+
+  cutIn("#s4", S.duo);
+  tl.fromTo("#pad", { rotationY: 20, x: -120 }, { rotationY: 6, x: 0, duration: 1.1, ease: "expo.out" }, S.duo);
+  tl.fromTo("#wat", { y: 220, opacity: 0, rotation: 8 }, { y: 0, opacity: 1, rotation: 0, duration: 1, ease: "expo.out" }, S.duo + .2);
+  K.maskIn("#a6", S.duo + .25);
+  cutOut("#s4", S.sync);
+
+  cutIn("#s5", S.sync);
+  K.maskIn("#a7", S.sync + .15);
+  K.stagger(".sd", S.sync + .2, 90, .08, .6);
+  tl.fromTo("#code", { opacity: 0, scale: .8 }, { opacity: 1, scale: 1, duration: .5, ease: "back.out(1.6)" }, C.pops[3]);
+  cutOut("#s5", S.logo);
+
+  cutIn("#s6", S.logo, 1.1);
+  tl.fromTo("#i1", { scale: .6, rotation: -12 }, { scale: 1, rotation: 0, duration: 1.1, ease: "expo.out" }, S.logo + .05);
+  K.maskIn("#b1", S.logo + .3);
+  K.rise("#b2", S.logo + .7, 12, .6);
+  K.rise("#b3", S.logo + 1.0, 10, .6);
+  K.rise("#b4", S.logo + 1.25, 10, .6);
+  tl.to("#s6", { opacity: 1, duration: C.DUR - S.logo }, S.logo);
+
+  window.__timelines["main"] = tl;
+});
+</script>
+</body>
+</html>
