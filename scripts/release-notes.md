@@ -8,5 +8,8 @@
 ### iPhone, iPad & Apple Watch
 Sideload **Pomly-iOS-unsigned.ipa** with [AltStore](https://altstore.io) or [Sideloadly](https://sideloadly.io) (they sign it with your Apple ID), or build from source in Xcode. See the [README](https://github.com/tapariapurv/pomly#iphone-ipad-and-apple-watch).
 
+### Updates
+The Mac app updates itself from now on (Settings › Updates). On iPhone and iPad, add the AltStore source `https://tapariapurv.github.io/pomly/altstore.json` for automatic updates.
+
 ### Highlights
 Drag-to-set dial · AlarmKit alarms · Live Activities & Dynamic Island · Home/Lock Screen/StandBy widgets · Control Center · Siri & Shortcuts · Mac menu bar timer with drag-to-set, mini timer and global shortcuts · Apple Watch app & complications · pairing-code sync · light & dark.

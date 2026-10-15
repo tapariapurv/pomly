@@ -52,11 +52,12 @@ or in one line:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash
 ```
-or download **Pomly-macOS.zip** from [Releases](https://github.com/tapariapurv/pomly/releases/latest). Pomly isn't notarized yet, so open it the first time with right-click › **Open**. Requires macOS 26.
+Pomly then **updates itself**: new versions install between sessions (Settings › Updates). Or download **Pomly-macOS.zip** from [Releases](https://github.com/tapariapurv/pomly/releases/latest). Pomly isn't notarized yet, so open it the first time with right-click › **Open**. Requires macOS 26.
 
 ### iPhone, iPad and Apple Watch
 Until it's on the App Store, pick one:
-- **Sideload:** download **Pomly-iOS-unsigned.ipa** from [Releases](https://github.com/tapariapurv/pomly/releases/latest) and install it with [AltStore](https://altstore.io) or [Sideloadly](https://sideloadly.io), which sign it with your free Apple ID.
+- **Sideload with automatic updates:** in [AltStore](https://altstore.io), add the source `https://tapariapurv.github.io/pomly/altstore.json` and install Pomly from it. Updates arrive by themselves.
+- **Sideload manually:** download **Pomly-iOS-unsigned.ipa** from [Releases](https://github.com/tapariapurv/pomly/releases/latest) and install it with [AltStore](https://altstore.io) or [Sideloadly](https://sideloadly.io), which sign it with your free Apple ID.
 - **Build in Xcode (free Apple ID):** follow [Build from source](#build-from-source), open `Pomly.xcodeproj`, choose your team under *Signing & Capabilities* for each target, plug in your iPhone, and press Run. The Watch app installs with it.
 
 Free Apple IDs re-sign every 7 days. AltStore does this automatically.

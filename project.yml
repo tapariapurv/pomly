@@ -6,7 +6,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0.0"
+    MARKETING_VERSION: "1.0.1"
     CURRENT_PROJECT_VERSION: "1"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: ""
@@ -45,7 +45,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly
         TARGETED_DEVICE_FAMILY: "1,2"
-        "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": Pomly/PomlyMac.entitlements # Mac App Store sandbox + network; no App Group to provision
+        MAC_ENTITLEMENTS: Pomly/PomlyMac.entitlements # scripts/release.sh swaps in PomlyMacDirect for GitHub builds
+        "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": $(MAC_ENTITLEMENTS) # Mac App Store sandbox + network; no App Group to provision
         "CODE_SIGN_IDENTITY[sdk=macosx*]": "-" # sign to run locally (free account)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       configs:

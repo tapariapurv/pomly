@@ -1,0 +1,37 @@
+{
+  "name": "Pomly",
+  "identifier": "com.purvt.pomly.source",
+  "subtitle": "A calm Pomodoro focus timer",
+  "description": "Official source for Pomly: Pomodoro Focus Timer. Free and open source.",
+  "website": "https://tapariapurv.github.io/pomly/",
+  "iconURL": "https://tapariapurv.github.io/pomly/icon.png",
+  "tintColor": "#B85A1E",
+  "apps": [
+    {
+      "name": "Pomly",
+      "bundleIdentifier": "com.purvt.pomly",
+      "developerName": "Purv Taparia",
+      "subtitle": "Pomodoro Focus Timer",
+      "localizedDescription": "Drag the dial, focus, take a break. Live Activities, widgets, an Apple Watch app and instant sync with your Mac.",
+      "iconURL": "https://tapariapurv.github.io/pomly/icon.png",
+      "tintColor": "#B85A1E",
+      "category": "utilities",
+      "screenshots": [],
+      "versions": [
+        {
+          "version": "1.0.1",
+          "date": "2026-10-15",
+          "size": 6236664,
+          "minOSVersion": "26.0",
+          "downloadURL": "https://github.com/tapariapurv/pomly/releases/download/v1.0.1/Pomly-iOS-unsigned.ipa",
+          "localizedDescription": "Pomly 1.0.1. See the release notes on GitHub."
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {}
+      }
+    }
+  ],
+  "news": []
+}

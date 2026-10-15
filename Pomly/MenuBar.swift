@@ -64,6 +64,11 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
         popover.delegate = self
         popover.contentViewController = NSHostingController(rootView: MenuBarPanel(model: model) { [weak self] in self?.popover.performClose(nil) })
         observe()
+        // A menu bar app can run for days without coming forward: look for updates every 6 hours too.
+        let t = Timer(timeInterval: 6 * 3600, repeats: true) { _ in Task { await Updater.shared.check() } }
+        t.tolerance = 600
+        RunLoop.main.add(t, forMode: .common)
+        Task { await Updater.shared.check() }
     }
 
     func popoverDidClose(_ notification: Notification) {
@@ -80,6 +85,7 @@ final class PomlyAppDelegate: NSObject, NSApplicationDelegate {
     private func update(_ s: TimerSnapshot) {
         ticker?.invalidate()
         ticker = nil
+        if !s.isActive { Updater.shared.installIfIdle() } // a pending update lands between sessions
         if s.status == .running {
             let t = Timer(timeInterval: 1, repeats: true) { _ in Task { @MainActor in MenuBar.shared.draw() } }
             t.tolerance = 0.25

@@ -53,6 +53,7 @@ struct RootView: View {
             guard phase == .active else { return }
             TimerEngine.shared.refresh()
             Sync.shared.resume()
+            Task { await Updater.shared.check() }
         }
     }
 }

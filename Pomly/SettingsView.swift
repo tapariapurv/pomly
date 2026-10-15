@@ -85,6 +85,8 @@ struct SettingsView: View {
                     NavigationLink("Silence Notifications") { SilenceGuide() }
                 }
 
+                UpdatesSection()
+
                 Section {
                     Button("Reset History", role: .destructive) { confirmReset = true }
                 } footer: {

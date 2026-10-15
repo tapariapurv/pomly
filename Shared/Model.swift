@@ -169,11 +169,12 @@ enum Pref {
     static let focusMin = "focusMin", breakMin = "breakMin", longBreakMin = "longBreakMin", longEvery = "longEvery"
     static let autoBreak = "autoBreak", autoFocus = "autoFocus", goalMin = "goalMin"
     static let appearance = "appearance", theme = "theme", haptics = "haptics", sound = "sound", liveStyle = "liveStyle"
+    static let autoUpdate = "autoUpdate"
 
     private static let defaults: UserDefaults = {
         let d = UserDefaults.shared
         d.register(defaults: [focusMin: 25, breakMin: 5, longBreakMin: 15, longEvery: 4, autoBreak: false,
-                              autoFocus: false, goalMin: 120, appearance: 0, theme: 0, haptics: true, sound: 0, liveStyle: 0])
+                              autoFocus: false, goalMin: 120, appearance: 0, theme: 0, haptics: true, sound: 0, liveStyle: 0, autoUpdate: true])
         return d
     }()
 
