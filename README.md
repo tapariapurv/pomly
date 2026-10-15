@@ -46,6 +46,7 @@ Live Activities, widgets, a Mac menu bar timer, an Apple Watch app and instant s
 ### Mac
 ```bash
 brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly
+brew trust tapariapurv/pomly   # Homebrew asks you to trust third-party taps once
 brew install --cask pomly
 ```
 or in one line:

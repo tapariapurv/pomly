@@ -7,7 +7,8 @@ cask "pomly" do
   desc "Pomodoro focus timer for the menu bar with drag-to-set and a floating mini timer"
   homepage "https://tapariapurv.github.io/pomly/"
 
-  depends_on macos: ">= :tahoe"
+  auto_updates true # Pomly updates itself from GitHub Releases
+  depends_on macos: :tahoe
 
   app "Pomly.app"
 
@@ -16,13 +17,11 @@ cask "pomly" do
     system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{appdir}/Pomly.app"]
   end
 
-  auto_updates true # Pomly updates itself from GitHub Releases
-
   zap trash: [
-    "~/Library/Preferences/com.purvt.pomly.plist",
-    "~/Library/Preferences/group.com.purvt.pomly.plist",
+    "~/Library/Application Scripts/com.purvt.pomly",
     "~/Library/Application Support/Pomly",
     "~/Library/Containers/com.purvt.pomly",
-    "~/Library/Application Scripts/com.purvt.pomly",
+    "~/Library/Preferences/com.purvt.pomly.plist",
+    "~/Library/Preferences/group.com.purvt.pomly.plist",
   ]
 end

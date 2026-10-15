@@ -7,7 +7,7 @@
 - Mac: the menu bar panel, drag line and guided drag now show over full-screen apps instead of on the desktop Space.
 
 ### Install on Mac
-- Homebrew: `brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly`
+- Homebrew: `brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew trust tapariapurv/pomly && brew install --cask pomly`
 - One line: `curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash`
 - Or download **Pomly-macOS.zip**, unzip, move to Applications, then right-click › Open the first time (not notarized yet).
 
