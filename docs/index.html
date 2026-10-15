@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pomly · A calm focus timer for iPhone, iPad, Mac and Apple Watch</title>
 <meta name="description" content="Pomly is a free, calm Pomodoro focus timer for iPhone, iPad, Mac and Apple Watch. Set it with one drag, focus, and get a gentle nudge when it's time to rest. No account, no ads.">
-<link rel="canonical" href="https://pomly-vert.vercel.app/">
+<link rel="canonical" href="https://tapariapurv.github.io/pomly/">
 <meta name="theme-color" content="#120c09">
 <link rel="icon" href="icon-180.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -13,14 +13,14 @@
 <meta property="og:site_name" content="Pomly">
 <meta property="og:title" content="Pomly · Drag. Focus. Rest.">
 <meta property="og:description" content="A calm focus timer for iPhone, iPad, Mac and Apple Watch. Free, no account, no ads.">
-<meta property="og:image" content="https://pomly-vert.vercel.app/img/poster.jpg">
-<meta property="og:video" content="https://pomly-vert.vercel.app/pomly-film.mp4">
+<meta property="og:image" content="https://tapariapurv.github.io/pomly/img/poster.jpg">
+<meta property="og:video" content="https://tapariapurv.github.io/pomly/pomly-film.mp4">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pomly: Pomodoro Focus Timer","applicationCategory":"ProductivityApplication","operatingSystem":"iOS 26, iPadOS 26, macOS 26, watchOS 26","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/tapariapurv/pomly/releases/latest","image":"https://pomly-vert.vercel.app/icon.png","author":{"@type":"Person","name":"Purv Taparia"}}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pomly: Pomodoro Focus Timer","applicationCategory":"ProductivityApplication","operatingSystem":"iOS 26, iPadOS 26, macOS 26, watchOS 26","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/tapariapurv/pomly/releases/latest","image":"https://tapariapurv.github.io/pomly/icon.png","author":{"@type":"Person","name":"Purv Taparia"}}
 </script>
 <style>
 :root{
@@ -167,7 +167,7 @@ em{font:italic 400 1.08em/1 var(--serif);letter-spacing:-.01em;color:var(--tint)
 .dial .s{font:800 6px var(--sans);letter-spacing:1.6px;fill:var(--tint)}
 
 /* ---------- film ---------- */
-.film{position:relative;height:210vh;margin-top:12vh}
+.film{position:relative;height:210vh;margin-top:-4vh}
 .film .pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
 .film .head{position:absolute;top:13vh;left:0;right:0;text-align:center;opacity:calc(1 - var(--p,0) * 2.4);transform:translateY(calc(var(--p,0) * -80px))}
 .film .frame{position:relative;width:min(1180px,94vw);aspect-ratio:16/9;max-height:86svh;border-radius:calc(44px - var(--p,0) * 26px);overflow:hidden;background:#000;
@@ -310,6 +310,10 @@ details.term{margin-top:22px;font-size:15px;color:var(--soft)}
 details.term summary{cursor:pointer;width:max-content;max-width:100%}
 .copy{display:block;width:100%;margin-top:10px;text-align:left;font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:14px;padding:12px 14px;word-break:break-all}
 .copy:hover{border-color:var(--tint)}
+.link{color:var(--soft);text-decoration:underline;font-size:inherit}
+.link:hover,ol.how2 a:hover{color:var(--ink)}
+ol.how2 a{color:var(--tint)}
+details.term .fine{margin-top:12px}
 .req{margin-top:28px;text-align:center;font-size:14px;color:var(--mute)}
 @media(max-width:820px){.panel{grid-template-columns:1fr}}
 
@@ -423,11 +427,11 @@ footer nav a:hover{color:var(--ink)}
   <div class="pin">
     <header class="head wrap"><p class="kicker">The film</p><h2 class="h2" id="filmh">A minute with <em>Pomly.</em></h2></header>
     <div class="frame">
-      <video id="vid" playsinline preload="none" poster="img/poster.jpg">
+      <video id="vid" playsinline muted loop preload="none" poster="img/poster.jpg">
         <source media="(max-width:700px)" src="pomly-vertical.mp4" type="video/mp4">
         <source src="pomly-film.mp4" type="video/mp4">
       </video>
-      <button class="play" id="playBtn" aria-label="Play the Pomly film"><span><svg><use href="#play"/></svg></span><i>Play the film<small>1 minute · sound on</small></i></button>
+      <button class="play" id="playBtn" aria-label="Play the Pomly film"><span><svg><use href="#play"/></svg></span><i>Watch with sound<small>56 seconds · from the start</small></i></button>
     </div>
   </div>
 </section>
@@ -539,12 +543,15 @@ footer nav a:hover{color:var(--ink)}
         <h3>Pomly for Mac</h3>
         <p class="intro">Lives in your menu bar and keeps itself up to date. Download it, then follow three quick steps.</p>
         <div class="acts"><a class="btn pri" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-macOS.zip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download for Mac</a></div>
-        <details class="term"><summary>Prefer to use Terminal?</summary><button class="copy" data-copy="brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly">brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly &amp;&amp; brew install --cask pomly</button></details>
+        <details class="term"><summary>Quicker: install with one line in Terminal</summary>
+          <button class="copy" data-copy="curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash">curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash</button>
+          <p class="fine">Click to copy, paste into Terminal, press Return. It installs Pomly into Applications and opens it, with no security prompt. Use Homebrew? <button class="link" data-copy="brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly">Copy the brew command</button>.</p>
+        </details>
       </div>
       <ol class="how2">
-        <li><div><b>Open the download.</b><span>It unzips into the Pomly app.</span></div></li>
-        <li><div><b>Drag Pomly into Applications.</b><span>Just like any other Mac app.</span></div></li>
-        <li><div><b>The first time, right-click and choose Open.</b><span>Pomly is new and independent, so your Mac asks you to confirm once.</span></div></li>
+        <li><div><b>Open the download and move Pomly to Applications.</b><span>It unzips into the Pomly app. Drag it into your Applications folder.</span></div></li>
+        <li><div><b>Open Pomly.</b><span>Pomly isn't notarized by Apple yet, so the first time your Mac says it can't check it. Click Done.</span></div></li>
+        <li><div><b>Choose Open Anyway.</b><span>In System Settings › Privacy &amp; Security, scroll down and click <a href="x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension">Open Anyway</a>. You only do this once.</span></div></li>
       </ol>
     </div>
 
@@ -578,7 +585,7 @@ footer nav a:hover{color:var(--ink)}
       </ol>
     </div>
   </div>
-  <p class="req">Version 1.0.1 · Works on iOS 26, iPadOS 26, macOS 26 and watchOS 26 or later.</p>
+  <p class="req">Version 1.0.2 · Works on iOS 26, iPadOS 26, macOS 26 and watchOS 26 or later.</p>
 </section>
 
 <section class="faq wrap" id="faq" aria-labelledby="faqh">
@@ -589,7 +596,7 @@ footer nav a:hover{color:var(--ink)}
     <details name="faq"><summary>Do I need to create an account?</summary><p>No. Open Pomly and start focusing. If you'd like your devices to stay in sync, you pair them with a short code shown on screen. No email, no password.</p></details>
     <details name="faq"><summary>What does Pomly know about me?</summary><p>Nothing it doesn't need. There's no tracking or analytics. If you turn on sync, only your timer and focus history are shared, and only between your own devices. Read the <a href="privacy.html">privacy policy</a>.</p></details>
     <details name="faq"><summary>Why isn't it on the App Store?</summary><p>Pomly is made by one independent developer. Until it's listed there, the steps above let you install it free, and it keeps itself updated.</p></details>
-    <details name="faq"><summary>My Mac says Pomly is from an unidentified developer.</summary><p>That's expected for new independent apps. Right-click Pomly in Applications, choose Open, then Open again. You only need to do this once.</p></details>
+    <details name="faq"><summary>My Mac says it can't check Pomly for malicious software.</summary><p>That's expected for independent apps that aren't notarized yet. Click Done, open System Settings › Privacy &amp; Security, scroll down and click Open Anyway. You only need to do this once. The one-line Terminal install skips this step.</p></details>
   </div>
 </section>
 
@@ -696,7 +703,10 @@ $('#syncBtn').onclick=e=>{sPaused=!sPaused;sync.classList.toggle('paused',sPause
 
 /* ---------- film ---------- */
 if(matchMedia('(max-width:700px)').matches)$('#vid').poster='img/poster-v.jpg';
-$('#playBtn').onclick=()=>{const v=$('#vid'),b=$('#playBtn');v.controls=true;v.play();b.style.opacity=0;setTimeout(()=>b.remove(),400)};
+const vid=$('#vid');let filmOn=false;
+// Plays silently while on screen; the button restarts it from the top with sound.
+if(!reduce)new IntersectionObserver(([e])=>{if(filmOn)return;e.isIntersecting?vid.play().catch(()=>{}):vid.pause()},{threshold:.35}).observe(vid);
+$('#playBtn').onclick=()=>{const b=$('#playBtn');filmOn=true;vid.loop=false;vid.muted=false;vid.currentTime=0;vid.controls=true;vid.play();b.style.opacity=0;setTimeout(()=>b.remove(),400)};
 
 /* ---------- scroll: progress vars, nav hide ---------- */
 const ps=$$('[data-p]'),closeRing=$('#closeRing'),nav=$('#nav');let lastY=0,ticking=false;
@@ -721,7 +731,7 @@ tabs.forEach((t,i)=>{t.onclick=()=>pick(t.id);t.onkeydown=e=>{const d={ArrowRigh
 const ua=navigator.userAgent,iPad=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),smart=$('#smart span');
 if(iPad||/iPhone|iPod/.test(ua)){pick('tab-ios');smart.textContent=iPad?'Get It for iPad':'Get It for iPhone'}
 else if(/Mac/.test(ua))smart.textContent='Download for Mac';
-$$('.copy').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy);const t=b.textContent;b.textContent='Copied to clipboard';setTimeout(()=>b.textContent=t,1500)});
+$$('[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy);const t=b.textContent;b.textContent='Copied to clipboard';setTimeout(()=>b.textContent=t,1500)});
 </script>
 </body>
 </html>

@@ -52,7 +52,7 @@ or in one line:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash
 ```
-Pomly then **updates itself**: new versions install between sessions (Settings › Updates). Or download **Pomly-macOS.zip** from [Releases](https://github.com/tapariapurv/pomly/releases/latest). Pomly isn't notarized yet, so open it the first time with right-click › **Open**. Requires macOS 26.
+Pomly then **updates itself**: new versions install between sessions (Settings › Updates). Or download **Pomly-macOS.zip** from [Releases](https://github.com/tapariapurv/pomly/releases/latest). Pomly isn't notarized yet, so the first time, click Done, then System Settings › Privacy & Security › **Open Anyway** (the Terminal and Homebrew installs skip this). Requires macOS 26.
 
 ### iPhone, iPad and Apple Watch
 Until it's on the App Store, pick one:
