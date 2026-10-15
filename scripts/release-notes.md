@@ -1,6 +1,9 @@
 **Pomly 1.0: a calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch.**
 
-### New in 1.0.2
+### New in 1.0.3
+- Fixed the New Label button, which did nothing on Mac. It now opens a small field on every platform.
+
+### In 1.0.2
 - Mac: the menu bar panel, drag line and guided drag now show over full-screen apps instead of on the desktop Space.
 
 ### Install on Mac
