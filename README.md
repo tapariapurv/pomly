@@ -16,7 +16,7 @@ Live Activities, widgets, a Mac menu bar timer, an Apple Watch app and instant s
 
 <p align="center"><a href="https://tapariapurv.github.io/pomly/"><b>Website</b></a> · <a href="#install">Install</a> · <a href="#features">Features</a> · <a href="https://tapariapurv.github.io/pomly/privacy.html">Privacy</a> · <a href="https://tapariapurv.github.io/pomly/#promo">Promo video</a></p>
 
-<p align="center"><a href="https://tapariapurv.github.io/pomly/#promo"><img src="docs/promo-poster.jpg" width="720" alt="Pomly promo video: watch it in 36 seconds"></a></p>
+<p align="center"><a href="https://tapariapurv.github.io/pomly/#promo"><img src="docs/promo-poster.jpg" width="720" alt="Pomly promo video: watch it in 56 seconds"></a></p>
 
 ---
 

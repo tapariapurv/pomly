@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1920, height=1080" />
+<title>Pomly launch film</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="assets/cues.js"></script>
+<script src="assets/motion-kit.js"></script>
+<style>
+  @font-face { font-family: "SFD"; font-weight: 300; src: url(assets/fonts/SF-Pro-Display-Light.otf); }
+  @font-face { font-family: "SFD"; font-weight: 400; src: url(assets/fonts/SF-Pro-Display-Regular.otf); }
+  @font-face { font-family: "SFD"; font-weight: 500; src: url(assets/fonts/SF-Pro-Display-Medium.otf); }
+  @font-face { font-family: "SFD"; font-weight: 600; src: url(assets/fonts/SF-Pro-Display-Semibold.otf); }
+  @font-face { font-family: "SFD"; font-weight: 700; src: url(assets/fonts/SF-Pro-Display-Bold.otf); }
+  :root { --bg: #120b07; --ink: #f6ebe0; --soft: #bfa898; --ember: #f4a66a; --copper: #b85a1e; }
+  body { margin: 0; background: var(--bg); }
+  #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: "SFD", -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .cam { position: absolute; inset: 0; }
+  .abs { position: absolute; }
+  .mask { overflow: hidden; padding: .08em 0 .14em; margin: -.08em 0 -.14em; }
+  .mask > * { display: block; }
+  .h1 { font-weight: 600; font-size: 96px; letter-spacing: -.035em; line-height: 1.02; }
+  .h2 { font-weight: 600; font-size: 72px; letter-spacing: -.03em; line-height: 1.05; }
+  .sub { font-weight: 400; font-size: 32px; line-height: 1.38; color: var(--soft); letter-spacing: -.005em; }
+  .eyebrow { font-weight: 600; font-size: 20px; letter-spacing: .22em; text-transform: uppercase; color: var(--ember); }
+  .em { background: linear-gradient(100deg, #ffd2a8 0%, #f4a66a 45%, #d9773a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* atmosphere */
+  #glow { position: absolute; left: 50%; top: 50%; width: 1800px; height: 1800px; margin: -900px 0 0 -900px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(244,166,106,.30), rgba(184,90,30,.12) 45%, rgba(18,11,7,0) 100%); }
+  .tglow { position: absolute; left: 50%; top: 50%; width: 1700px; height: 1700px; margin: -850px 0 0 -850px; border-radius: 50%; opacity: 0; }
+  #vignette { position: absolute; inset: 0; pointer-events: none; z-index: 50;
+    background: radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+  #grain { position: absolute; left: -128px; top: -128px; width: 2176px; height: 1336px; z-index: 51; pointer-events: none;
+    background: url(assets/grain.png); opacity: .07; mix-blend-mode: overlay; }
+
+  /* devices */
+  .iphone { --b: calc(var(--sw) * .034); position: absolute; width: calc(var(--sw) + 2 * var(--b)); padding: var(--b); box-sizing: border-box;
+    border-radius: calc(var(--sw) * .137 + var(--b)); background: #050403;
+    box-shadow: 0 0 0 calc(var(--sw) * .007) #4a413a, 0 0 0 calc(var(--sw) * .011) #191512,
+      0 60px 120px -30px rgba(0,0,0,.85), 0 30px 60px -10px rgba(0,0,0,.45); }
+  .iphone .scr { position: relative; width: var(--sw); height: calc(var(--sw) * 2.17413); border-radius: calc(var(--sw) * .137); overflow: hidden; background: #000; }
+  .scr img, .scr video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .island { position: absolute; left: 50%; top: calc(var(--sw) * .0274); width: calc(var(--sw) * .313); height: calc(var(--sw) * .092);
+    transform: translateX(-50%); border-radius: 999px; background: #000; z-index: 3; }
+  .glare { position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: linear-gradient(118deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.03) 28%, rgba(255,255,255,0) 42%); }
+  .ipad { --b: calc(var(--sw) * .03); position: absolute; width: calc(var(--sw) + 2 * var(--b)); padding: var(--b); box-sizing: border-box;
+    border-radius: calc(var(--sw) * .055 + var(--b)); background: #050403;
+    box-shadow: 0 0 0 calc(var(--sw) * .005) #4a413a, 0 0 0 calc(var(--sw) * .008) #191512, 0 60px 120px -30px rgba(0,0,0,.85); }
+  .ipad .scr { position: relative; width: var(--sw); height: calc(var(--sw) * 1.33333); border-radius: calc(var(--sw) * .055); overflow: hidden; }
+  .watch { --b: calc(var(--sw) * .085); position: absolute; width: calc(var(--sw) + 2 * var(--b)); padding: var(--b); box-sizing: border-box;
+    border-radius: calc(var(--sw) * .3); background: #050403;
+    box-shadow: 0 0 0 calc(var(--sw) * .025) #3d3530, 0 0 0 calc(var(--sw) * .035) #15110e, 0 40px 80px -20px rgba(0,0,0,.85); }
+  .watch .scr { position: relative; width: var(--sw); height: calc(var(--sw) * 1.19231); border-radius: calc(var(--sw) * .22); overflow: hidden; }
+  .watch .crown { position: absolute; right: calc(var(--sw) * -.13); top: 26%; width: calc(var(--sw) * .07); height: 22%; border-radius: 6px;
+    background: linear-gradient(90deg, #2a2420, #5a5049 60%, #2a2420); }
+  .macwin { position: absolute; display: block; filter: drop-shadow(0 50px 70px rgba(0,0,0,.6)) drop-shadow(0 0 1px rgba(255,255,255,.25)); }
+
+  /* title ring */
+  #ring { position: absolute; left: 50%; top: 50%; width: 1320px; height: 1320px; margin: -660px 0 0 -660px; }
+  /* meet */
+  #icon, .icon { border-radius: 22.37%; box-shadow: 0 30px 80px -10px rgba(184,90,30,.55), 0 0 0 1px rgba(255,255,255,.08); display: block; }
+  /* touch + ripple */
+  .touch { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; z-index: 6; opacity: 0;
+    background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,.18) 60%, rgba(255,255,255,0) 72%);
+    box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+  /* mac desktop */
+  #wall { position: absolute; inset: 0; background:
+    radial-gradient(ellipse 70% 60% at 70% 80%, rgba(184,90,30,.55), rgba(0,0,0,0) 70%),
+    radial-gradient(ellipse 60% 55% at 15% 20%, rgba(244,166,106,.22), rgba(0,0,0,0) 70%),
+    linear-gradient(160deg, #2a1a10, #120b07 60%, #1d120b); }
+  #menubar { position: absolute; left: 0; right: 0; top: 0; height: 42px; display: flex; align-items: center; padding: 0 22px; box-sizing: border-box;
+    background: rgba(14,9,6,.55); font-size: 18px; font-weight: 500; color: #f3ece6; gap: 30px; z-index: 5;
+    box-shadow: 0 1px 0 rgba(255,255,255,.06); }
+  #menubar .r { margin-left: auto; display: flex; align-items: center; gap: 26px; }
+  #mb-item { display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
+  .key { width: 128px; height: 128px; border-radius: 26px; display: grid; place-items: center; font-size: 60px; font-weight: 500; color: #f6ebe0;
+    background: linear-gradient(180deg, #3a2a20, #24180f); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 0 #120b07, 0 18px 30px rgba(0,0,0,.5); }
+  /* stats */
+  .stat { font-weight: 600; font-size: 110px; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .stat small { font-size: .42em; letter-spacing: -.01em; color: var(--soft); font-weight: 500; margin-left: .12em; }
+  .dot { width: 46px; height: 46px; border-radius: 50%; }
+  #dotring { position: absolute; width: 62px; height: 62px; border-radius: 50%; box-shadow: 0 0 0 3px #f6ebe0; opacity: 0; }
+  .val { position: absolute; left: 0; right: 0; top: 410px; text-align: center; font-weight: 600; font-size: 168px; letter-spacing: -.045em; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="56" data-fps="60">
+  <audio id="score" src="assets/score.m4a" data-start="0" data-duration="56" data-track-index="2" data-volume="1"></audio>
+
+  <div id="glow"></div>
+  <div class="tglow" id="tg0" style="background:radial-gradient(closest-side, rgba(244,166,106,.34), rgba(0,0,0,0))"></div>
+  <div class="tglow" id="tg1" style="background:radial-gradient(closest-side, rgba(159,209,168,.30), rgba(0,0,0,0))"></div>
+  <div class="tglow" id="tg2" style="background:radial-gradient(closest-side, rgba(140,196,240,.30), rgba(0,0,0,0))"></div>
+  <div class="tglow" id="tg3" style="background:radial-gradient(closest-side, rgba(242,160,178,.30), rgba(0,0,0,0))"></div>
+  <div class="tglow" id="tg4" style="background:radial-gradient(closest-side, rgba(199,166,240,.30), rgba(0,0,0,0))"></div>
+  <div class="tglow" id="tg5" style="background:radial-gradient(closest-side, rgba(255,236,214,.30), rgba(0,0,0,0))"></div>
+
+  <!-- 1 · Title: the dial's ticks light up like a session starting -->
+  <section id="s1" class="scene">
+    <svg id="ring" viewBox="-500 -500 1000 1000"><g id="ticks"></g></svg>
+    <div class="abs" style="left:0;right:0;top:432px;text-align:center">
+      <div class="mask"><div class="h1" id="t1">Do your best work.</div></div>
+      <div class="mask" style="margin-top:14px"><div class="h1 em" id="t2">One focus at a time.</div></div>
+    </div>
+  </section>
+
+  <!-- 2 · Meet Pomly -->
+  <section id="s2" class="scene">
+    <div class="abs" style="left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div id="lockup" style="display:flex;align-items:center;gap:52px">
+        <img id="icon" src="assets/icon.png" style="width:236px;height:236px" />
+        <div class="mask" style="padding-right:.1em"><div id="word" style="font-weight:600;font-size:212px;letter-spacing:-.045em;line-height:1">Pomly</div></div>
+      </div>
+      <div class="sub" id="meet-sub" style="margin-top:46px;font-size:36px;opacity:0">The calm focus timer for iPhone, iPad, Mac and Apple Watch.</div>
+    </div>
+  </section>
+
+  <!-- 3 · Set: real screen recording of dragging the dial and starting -->
+  <section id="s3" class="scene">
+    <div class="abs" style="left:170px;top:420px;width:640px">
+      <div class="mask"><div class="h1" id="c3a">Drag the dial.</div></div>
+      <div class="sub" id="c3a-s" style="margin-top:22px">Any length from 1 to 120 minutes.</div>
+    </div>
+    <div class="abs" style="left:170px;top:420px;width:640px">
+      <div class="mask"><div class="h1" id="c3b">Tap to <span class="em">focus.</span></div></div>
+      <div class="sub" id="c3b-s" style="margin-top:22px">Start becomes Pause and End, in Liquid Glass.</div>
+    </div>
+    <div class="cam" id="cam3">
+      <div class="iphone" id="ph3" style="--sw:420px;left:1005px;top:69px">
+        <div class="scr">
+          <img src="assets/cap/drag0.png" />
+          <video id="v-drag" src="assets/cap/drag.mp4" muted playsinline data-start="10.6" data-duration="6.9" data-track-index="1"></video>
+          <div class="island"></div><div class="glare"></div>
+        </div>
+      </div>
+      <div class="touch" id="touch"></div>
+    </div>
+  </section>
+
+  <!-- 4 · Full screen -->
+  <section id="s4" class="scene">
+    <div class="abs" style="left:0;right:0;top:96px;text-align:center;z-index:2">
+      <div class="mask"><div class="h2" id="c4">Just you and the time.</div></div>
+      <div class="sub" id="c4-s" style="margin-top:16px">A full-screen timer. Nothing else.</div>
+    </div>
+    <div class="cam" id="cam4">
+      <div class="iphone" id="ph4" style="--sw:300px;left:800px;top:282px"><div class="scr"><img src="assets/cap/fullscreen.png" /><div class="island"></div><div class="glare"></div></div></div>
+    </div>
+  </section>
+
+  <!-- 5 · Live Activity + widgets -->
+  <section id="s5" class="scene">
+    <div class="abs" style="left:150px;top:380px;width:620px;z-index:2">
+      <div class="mask"><div class="h1" id="c5">Always a glance away.</div></div>
+      <div class="sub" id="c5-s" style="margin-top:22px">Live Activities on the Lock Screen and in the Dynamic Island. Widgets that start a session.</div>
+    </div>
+    <div class="cam" id="cam5" style="perspective:2200px">
+      <div class="iphone" id="ph5b" style="--sw:330px;left:1395px;top:160px"><div class="scr"><img src="assets/cap/ip_home.png" /><div class="glare"></div></div></div>
+      <div class="iphone" id="ph5a" style="--sw:360px;left:920px;top:110px"><div class="scr"><img src="assets/cap/ip_lock.png" /><div class="glare"></div></div></div>
+    </div>
+  </section>
+
+  <!-- 6 · Mac: menu bar timer + global shortcut -->
+  <section id="s6" class="scene">
+    <div class="cam" id="cam6">
+      <div id="wall"></div>
+      <div id="menubar">
+        <span style="font-size:21px;margin-top:-3px">&#xF8FF;</span><b style="font-weight:700">Pomly</b><span>File</span><span>Edit</span><span>View</span><span>Timer</span><span>Window</span><span>Help</span>
+        <div class="r">
+          <div id="mb-item">
+            <svg width="22" height="22" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="rgba(243,236,230,.35)" stroke-width="1.8"/>
+              <circle id="mb-arc" cx="8" cy="8" r="6.5" fill="none" stroke="#f3ece6" stroke-width="1.8" stroke-linecap="round" pathLength="100"
+                stroke-dasharray="85 100" transform="rotate(-90 8 8)"/></svg>
+            <span id="mb-time">21:14</span>
+          </div>
+          <svg width="22" height="18" viewBox="0 0 22 18"><path d="M11 16.5l2.6-3a3.6 3.6 0 0 0-5.2 0zM5.2 10.2a8.2 8.2 0 0 1 11.6 0l1.7-1.9a10.7 10.7 0 0 0-15 0zM1.8 6.4a13 13 0 0 1 18.4 0L21.9 4.5a15.4 15.4 0 0 0-21.8 0z" fill="#f3ece6"/></svg>
+          <svg width="32" height="16" viewBox="0 0 32 16"><rect x=".75" y=".75" width="26.5" height="14.5" rx="4" fill="none" stroke="rgba(243,236,230,.55)" stroke-width="1.5"/><rect x="3" y="3" width="22" height="10" rx="2.2" fill="#f3ece6"/><rect x="28.8" y="5.2" width="2" height="5.6" rx="1" fill="rgba(243,236,230,.55)"/></svg>
+          <span>Thu Oct 15&nbsp;&nbsp;9:41 AM</span>
+        </div>
+      </div>
+      <img class="macwin" id="macwin" src="assets/cap/mac.png" style="left:700px;top:150px;width:1080px" />
+    </div>
+    <div class="abs" style="left:150px;top:400px;width:520px" id="c6wrap">
+      <div class="mask"><div class="h2" id="c6">Right in your menu bar.</div></div>
+      <div class="sub" id="c6-s" style="margin-top:20px">A live countdown ring, a mini timer, and the Timer menu.</div>
+    </div>
+    <div class="abs" style="left:0;right:0;top:530px;text-align:center" id="keys-wrap">
+      <div style="display:flex;justify-content:center;gap:30px">
+        <div class="key" id="k1">&#x2303;</div><div class="key" id="k2">&#x2325;</div><div class="key" id="k3">P</div>
+      </div>
+      <div class="sub" id="c6b" style="margin-top:44px;color:var(--ink);font-size:38px;font-weight:500">Pause from anywhere.</div>
+    </div>
+  </section>
+
+  <!-- 7 · Family -->
+  <section id="s7" class="scene">
+    <div class="abs" style="left:0;right:0;top:70px;text-align:center;font-weight:600;font-size:60px;letter-spacing:-.03em;z-index:3">
+      <span id="w1" style="opacity:.2">iPhone.</span> <span id="w2" style="opacity:.2">iPad.</span> <span id="w3" style="opacity:.2">Mac.</span> <span id="w4" style="opacity:.2">Apple Watch.</span>
+    </div>
+    <div class="cam" id="cam7">
+      <img class="macwin" id="f-mac" src="assets/cap/mac.png" style="left:560px;top:225px;width:860px" />
+      <div class="ipad" id="f-ipad" style="--sw:430px;left:250px;top:380px"><div class="scr"><img src="assets/cap/ipad_a.png" /><div class="glare"></div></div></div>
+      <div class="iphone" id="f-ph" style="--sw:250px;left:1380px;top:430px"><div class="scr"><img src="assets/cap/running.png" /><div class="island"></div><div class="glare"></div></div></div>
+      <div class="watch" id="f-watch" style="--sw:150px;left:1620px;top:740px"><div class="crown"></div><div class="scr"><img src="assets/cap/watch.png" /></div></div>
+    </div>
+  </section>
+
+  <!-- 8 · Progress -->
+  <section id="s8" class="scene">
+    <div class="cam" id="cam8" style="perspective:2400px">
+      <div class="iphone" id="ph8" style="--sw:400px;left:420px;top:92px"><div class="scr">
+        <img src="assets/cap/history_week.png" /><img id="hm" src="assets/cap/history_month.png" style="opacity:0" /><div class="island"></div><div class="glare"></div></div></div>
+    </div>
+    <div class="abs" style="left:1060px;top:250px;width:760px">
+      <div class="eyebrow" id="c8-e">History</div>
+      <div class="mask" style="margin-top:18px"><div class="h2" id="c8">Watch your focus add up.</div></div>
+      <div id="st1" style="margin-top:70px;opacity:0">
+        <div class="stat"><span id="n1">0</span><small>hr</small> <span id="n2">0</span><small>min</small></div>
+        <div class="sub" id="st1-l" style="margin-top:10px">focused this week</div>
+      </div>
+      <div id="st2" style="margin-top:48px;opacity:0">
+        <div class="stat"><span id="n3">0</span><small>day streak</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · Themes -->
+  <section id="s9" class="scene">
+    <div class="abs" style="left:170px;top:420px;width:600px">
+      <div class="mask"><div class="h1" id="c9">Make it yours.</div></div>
+      <div class="sub" id="c9-s" style="margin-top:22px">Five themes, light and dark.</div>
+      <div id="dots" style="position:relative;display:flex;gap:26px;margin-top:44px;opacity:0">
+        <div class="dot" style="background:#f4a66a"></div><div class="dot" style="background:#9fd1a8"></div><div class="dot" style="background:#8cc4f0"></div>
+        <div class="dot" style="background:#f2a0b2"></div><div class="dot" style="background:#c7a6f0"></div><div class="dot" style="background:#fbf6ef"></div>
+        <div id="dotring"></div>
+      </div>
+    </div>
+    <div class="cam" id="cam9">
+      <div class="iphone" id="ph9" style="--sw:380px;left:1080px;top:127px"><div class="scr">
+        <img id="th0" src="assets/cap/theme0a.png" /><img id="th1" src="assets/cap/theme1a.png" style="opacity:0" />
+        <img id="th2" src="assets/cap/theme2a.png" style="opacity:0" /><img id="th3" src="assets/cap/theme3a.png" style="opacity:0" />
+        <img id="th4" src="assets/cap/theme4a.png" style="opacity:0" /><img id="th5" src="assets/cap/running_light.png" style="opacity:0" />
+        <div class="island"></div><div class="glare"></div></div></div>
+    </div>
+  </section>
+
+  <!-- 10 · Values -->
+  <section id="s10" class="scene">
+    <div class="abs eyebrow" id="v-e" style="left:0;right:0;top:350px;text-align:center;opacity:0">And it's</div>
+    <div class="val mask"><div id="v0">Free.</div></div>
+    <div class="val mask"><div id="v1">Open source.</div></div>
+    <div class="val mask"><div id="v2">No account.</div></div>
+    <div class="val mask"><div id="v3" class="em">No tracking.</div></div>
+  </section>
+
+  <!-- 11 · End card -->
+  <section id="s11" class="scene">
+    <div class="abs" style="left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <img class="icon" id="e-icon" src="assets/icon.png" style="width:200px;height:200px" />
+      <div class="mask" style="margin-top:44px"><div id="e-word" style="font-weight:600;font-size:132px;letter-spacing:-.045em;line-height:1">Pomly</div></div>
+      <div class="mask" style="margin-top:18px"><div id="e-tag" class="em" style="font-weight:500;font-size:46px;letter-spacing:-.02em">Focus, beautifully.</div></div>
+      <div class="sub" id="e-plat" style="margin-top:56px;font-size:26px;letter-spacing:.06em;opacity:0">Free for iPhone, iPad, Mac and Apple Watch</div>
+      <div id="e-url" style="margin-top:16px;font-size:26px;font-weight:500;color:var(--ink);opacity:0">tapariapurv.github.io/pomly</div>
+    </div>
+  </section>
+
+  <div id="vignette"></div>
+  <div id="grain"></div>
+</div>
+<script>
+document.fonts.ready.then(() => {
+  const C = window.CUES, S = C.scene, B = C.B, tl = gsap.timeline({ paused: true }), K = MotionKit(tl);
+  const E = "expo.inOut";
+
+  // ---------- build static geometry first ----------
+  // 60 dial ticks (every 5th long), like Pomly's dial
+  const g = document.getElementById("ticks"); let svg = "";
+  for (let i = 0; i < 60; i++) { const a = i * 6, long = i % 5 === 0, r1 = long ? 360 : 380, r2 = 420;
+    svg += `<line class="tk" x1="0" y1="${-r1}" x2="0" y2="${-r2}" transform="rotate(${a})" stroke="#f6ebe0" stroke-width="${long ? 7 : 4}" stroke-linecap="round" opacity=".10"/>`; }
+  g.innerHTML = svg;
+  const ticks = [...g.querySelectorAll(".tk")];
+  // measure: meet lockup (icon starts centred)
+  const ICON = K.box("#icon"), dxIcon = 960 - ICON.cx;
+  // phone 3 geometry (content coords): screen origin + dial
+  const P3 = { x: 1005 + 420 * .034, y: 69 + 420 * .034, w: 420, h: 420 * 2.17413 };
+  const dialC = [P3.x + P3.w * .5, P3.y + P3.h * .4705], dialR = P3.w * .365;
+  const ringPt = (deg) => [dialC[0] + dialR * Math.sin(deg * Math.PI / 180), dialC[1] - dialR * Math.cos(deg * Math.PI / 180)];
+  const DOTS = [...document.querySelectorAll("#dots .dot")].map((d) => d.offsetLeft);
+  const MB = K.box("#mb-item");
+
+  // ---------- atmosphere ----------
+  tl.fromTo("#glow", { scale: .55, opacity: 0 }, { scale: 1, opacity: 1, duration: 4.5, ease: "power2.out" }, 0);
+  tl.to("#glow", { scale: 1.15, duration: S.full - 4.5, ease: "sine.inOut" }, 4.5);
+  tl.to("#glow", { opacity: .25, duration: .6 }, S.full);
+  tl.to("#glow", { opacity: 1, scale: 1, duration: .8 }, S.live);
+  tl.to("#glow", { opacity: 0, duration: .5 }, S.themes - .3);
+  tl.to("#glow", { opacity: 1, duration: .8 }, S.values);
+  tl.to("#glow", { scale: .8, duration: C.DUR - S.end, ease: "power1.out" }, S.end);
+  tl.to("#grain", { x: 128, y: 96, duration: C.DUR, ease: "steps(" + Math.round(C.DUR * 12) + ")" }, 0);
+
+  // ---------- 1 · Title ----------
+  tl.set("#s1", { opacity: 1 }, 0);
+  tl.fromTo("#ring", { scale: .86, rotation: -24 }, { scale: 1, rotation: 0, duration: S.meet, ease: "power2.out" }, 0);
+  ticks.forEach((t, i) => tl.to(t, { attr: { opacity: 1, stroke: i % 5 ? "#f4a66a" : "#ffd2a8" }, duration: .25, ease: "power2.out" }, .3 + i * (4.0 / 60)));
+  K.maskIn("#t1", C.title.l1); K.maskIn("#t2", C.title.l2);
+  K.maskOut("#t1", S.meet - .1, .4); K.maskOut("#t2", S.meet, .4);
+  tl.to("#ring", { scale: .26, rotation: 90, opacity: 0, duration: .7, ease: "expo.in" }, S.meet - .55);
+  tl.set("#s1", { opacity: 0 }, S.meet + .2);
+
+  // ---------- 2 · Meet ----------
+  tl.set("#s2", { opacity: 1 }, S.meet - .01);
+  tl.fromTo("#icon", { x: dxIcon, scale: .3, rotation: -40, opacity: 0, filter: "blur(18px)" },
+    { scale: 1, rotation: 0, opacity: 1, filter: "blur(0px)", duration: .9, ease: "expo.out" }, S.meet);
+  tl.to("#icon", { x: 0, duration: .8, ease: E }, C.meet.word);
+  K.maskIn("#word", C.meet.word + .15, 1);
+  K.rise("#meet-sub", C.meet.sub, 16, .7);
+  tl.fromTo("#lockup", { scale: 1 }, { scale: 1.04, duration: S.set - S.meet, ease: "none" }, S.meet);
+  tl.to("#s2", { opacity: 0, scale: 1.08, filter: "blur(10px)", duration: .4, ease: "power2.in" }, S.set - .4);
+
+  // ---------- 3 · Set (real recording) ----------
+  tl.set("#s3", { opacity: 1 }, S.set);
+  tl.fromTo("#ph3", { y: 520, rotationX: 28, rotationZ: -4, transformPerspective: 1800 },
+    { y: 0, rotationX: 0, rotationZ: 0, duration: 1.1, ease: "expo.out" }, S.set);
+  K.maskIn("#c3a", S.set + .3); K.rise("#c3a-s", S.set + .6, 14, .6);
+  // push to the dial for the drag
+  K.cam("#cam3", dialC[0], dialC[1], 1.45, C.drag[0] - .6, .8, E, 1290, 560);
+  // touch: a finger tracing the ring from 42 to 50 minutes (6 degrees a minute), as recorded
+  const o = { d: 252 }, p = ringPt(252); tl.set("#touch", { x: p[0], y: p[1] }, 0);
+  tl.to("#touch", { opacity: 1, scale: 1, duration: .15 }, C.drag[0] - .15);
+  tl.to(o, { d: 300, duration: C.drag[1] - C.drag[0], ease: "none", onUpdate: () => { const q = ringPt(o.d); gsap.set("#touch", { x: q[0], y: q[1] }); } }, C.drag[0]);
+  tl.to("#touch", { opacity: 0, scale: .7, duration: .2 }, C.drag[1]);
+  // pull back for the tap on Start
+  K.wide("#cam3", C.drag[1] + .3, .8);
+  const startPt = [P3.x + P3.w * .40, P3.y + P3.h * .8125];
+  tl.set("#touch", { x: startPt[0], y: startPt[1], scale: 1.3 }, C.tap - .35);
+  tl.to("#touch", { opacity: 1, scale: 1, duration: .2 }, C.tap - .3);
+  tl.to("#touch", { scale: .8, duration: .08, yoyo: true, repeat: 1 }, C.tap);
+  tl.to("#touch", { opacity: 0, scale: 1.6, duration: .35 }, C.tap + .2);
+  K.maskOut("#c3a", C.tap - .2, .35); tl.to("#c3a-s", { opacity: 0, duration: .25 }, C.tap - .5);
+  K.maskIn("#c3b", C.tap - .1); K.rise("#c3b-s", C.tap + .3, 14, .6);
+  tl.to("#ph3", { y: -14, duration: S.full - C.tap, ease: "sine.inOut" }, C.tap);
+  K.sceneOut("#s3", S.full);
+
+  // ---------- 4 · Full screen ----------
+  K.sceneIn("#s4", S.full);
+  tl.fromTo("#ph4", { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: "expo.out" }, S.full);
+  K.maskIn("#c4", S.full + .25); K.rise("#c4-s", S.full + .6, 12, .6);
+  tl.fromTo("#cam4", { scale: 1 }, { scale: 1.07, duration: S.live - S.full, ease: "none" }, S.full);
+  K.sceneOut("#s4", S.live);
+
+  // ---------- 5 · Live Activity + widgets ----------
+  tl.set("#s5", { opacity: 1 }, S.live);
+  tl.fromTo("#ph5a", { y: 600, rotationY: -26, rotationX: 10 }, { y: 0, rotationY: -12, rotationX: 0, duration: 1.1, ease: "expo.out" }, S.live);
+  tl.fromTo("#ph5b", { y: 700, rotationY: -30 }, { y: 0, rotationY: -18, duration: 1.2, ease: "expo.out" }, S.live + .25);
+  tl.to("#ph5a", { rotationY: -4, duration: 4, ease: "sine.inOut" }, S.live + 1.1);
+  K.maskIn("#c5", S.live + .3); K.rise("#c5-s", S.live + .6, 14, .6);
+  const LA = [920 + 360 * .034 + 180, 110 + 360 * .034 + 360 * 2.17413 * .785];
+  K.cam("#cam5", LA[0], LA[1], 1.9, S.live + 2.0, .8, E, 1250, 600);
+  K.wide("#cam5", S.mac - 1.3, .8);
+  tl.to("#s5", { opacity: 0, duration: .3, ease: "power2.in" }, S.mac - .3);
+
+  // ---------- 6 · Mac ----------
+  tl.set("#s6", { opacity: 1 }, S.mac);
+  tl.fromTo("#cam6", { scale: 1.12, opacity: 0 }, { scale: 1, opacity: 1, duration: .9, ease: "expo.out" }, S.mac);
+  tl.fromTo("#macwin", { y: 140, scale: .94 }, { y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, S.mac + .15);
+  K.maskIn("#c6", S.mac + .4); K.rise("#c6-s", S.mac + .7, 14, .6);
+  // push into the status item; the window recedes, the countdown ticks live
+  tl.to("#c6wrap", { opacity: 0, y: -20, duration: .3, ease: "power2.in" }, C.mac.press - .9);
+  K.cam("#cam6", MB.cx, MB.cy, 2.5, C.mac.press - .8, .9, E, 700, 380);
+  tl.to("#macwin", { opacity: .0, duration: .5 }, C.mac.press - .6);
+  // live countdown: 21:14 → ticks once a second until paused, then resumes
+  const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  let sec = 21 * 60 + 14; const p1 = C.mac.press + .5, p2 = C.mac.release;
+  for (let t = C.mac.press - .5; t < S.family; t += 1) {
+    if (t >= p1 && t < p2) continue;
+    tl.set("#mb-time", { textContent: clock(sec) }, t); tl.set("#mb-arc", { attr: { "stroke-dasharray": `${(sec / 1500 * 100).toFixed(2)} 100` } }, t); sec--; }
+  K.stagger(["#k1", "#k2", "#k3"], C.mac.press - .1, 30, .07, .5);
+  K.rise("#c6b", C.mac.press + .1, 12, .5);
+  [p1, p2].forEach((t) => { tl.to(["#k1", "#k2", "#k3"], { y: 8, duration: .07, yoyo: true, repeat: 1, ease: "power1.inOut", stagger: .03 }, t - .1); });
+  tl.to("#mb-item", { opacity: .38, duration: .12 }, p1);
+  tl.set("#c6b", { textContent: "Paused. ⌃⌥P again to resume." }, p1 + .05);
+  tl.to("#mb-item", { opacity: 1, duration: .12 }, p2);
+  tl.set("#c6b", { textContent: "Pause from anywhere." }, p2 + .05);
+  K.sceneOut("#s6", S.family);
+
+  // ---------- 7 · Family ----------
+  tl.set("#s7", { opacity: 1 }, S.family);
+  const fam = [["#f-ph", "#w1"], ["#f-ipad", "#w2"], ["#f-mac", "#w3"], ["#f-watch", "#w4"]];
+  fam.forEach(([d, w], i) => { const t = S.family + i * B;
+    tl.fromTo(d, { y: 260, opacity: 0, scale: .92 }, { y: 0, opacity: 1, scale: 1, duration: .9, ease: "expo.out" }, t);
+    tl.to(w, { opacity: 1, duration: .3 }, t); });
+  tl.fromTo("#cam7", { scale: 1.04 }, { scale: 1, duration: S.progress - S.family, ease: "power1.out" }, S.family);
+  K.sceneOut("#s7", S.progress);
+
+  // ---------- 8 · Progress ----------
+  K.sceneIn("#s8", S.progress);
+  tl.fromTo("#ph8", { y: 300, rotationY: 30 }, { y: 0, rotationY: 14, duration: 1.1, ease: "expo.out" }, S.progress);
+  tl.to("#ph8", { rotationY: 6, duration: S.themes - S.progress - 1.1, ease: "sine.inOut" }, S.progress + 1.1);
+  K.rise("#c8-e", S.progress + .2, 10, .5); K.maskIn("#c8", S.progress + .3);
+  K.rise("#st1", C.stats, 20, .6); K.count("#n1", 0, 12, C.stats, 1.3); K.count("#n2", 0, 25, C.stats + .1, 1.3);
+  K.rise("#st2", C.stats + .5, 20, .6); K.count("#n3", 0, 13, C.stats + .5, 1.3);
+  // switch to Month: screen and numbers change together
+  tl.to("#hm", { opacity: 1, duration: .35 }, C.month);
+  tl.to(["#n1", "#n2", "#st1-l"], { opacity: 0, duration: .15 }, C.month - .15);
+  tl.set("#st1-l", { textContent: "focused this month" }, C.month);
+  tl.to(["#n1", "#n2", "#st1-l"], { opacity: 1, duration: .25 }, C.month + .05);
+  K.count("#n1", 12, 40, C.month, 1.0); K.count("#n2", 25, 45, C.month, 1.0);
+  K.sceneOut("#s8", S.themes);
+
+  // ---------- 9 · Themes ----------
+  tl.set("#s9", { opacity: 1 }, S.themes);
+  tl.fromTo("#ph9", { y: 560, rotationZ: 6 }, { y: 0, rotationZ: 0, duration: 1, ease: "expo.out" }, S.themes);
+  K.maskIn("#c9", S.themes + .2); K.rise("#c9-s", S.themes + .45, 12, .5); K.rise("#dots", S.themes + .6, 12, .5);
+  tl.set("#dotring", { x: DOTS[0] - 8, y: -8 }, 0);
+  tl.to("#dotring", { opacity: 1, duration: .2 }, S.themes + .8);
+  tl.to("#tg0", { opacity: 1, duration: .5 }, S.themes);
+  C.themes.forEach((t, i) => { if (!i) return;
+    tl.to(`#th${i}`, { opacity: 1, duration: .28, ease: "power1.inOut" }, t);
+    tl.to(`#tg${i - 1}`, { opacity: 0, duration: .4 }, t); tl.to(`#tg${i}`, { opacity: 1, duration: .4 }, t);
+    tl.to("#dotring", { x: DOTS[i] - 8, duration: .4, ease: "expo.out" }, t);
+    tl.fromTo("#ph9", { scale: 1.015 }, { scale: 1, duration: .4, ease: "power2.out" }, t); });
+  tl.to("#tg5", { opacity: 0, duration: .3 }, S.values - .3);
+  K.sceneOut("#s9", S.values);
+
+  // ---------- 10 · Values ----------
+  tl.set("#s10", { opacity: 1 }, S.values);
+  K.fadeIn("#v-e", S.values, .3);
+  C.values.forEach((t, i) => { K.maskIn(`#v${i}`, t, .6); if (i < 3) K.maskOut(`#v${i}`, C.values[i + 1], .3); });
+  tl.to("#s10", { opacity: 0, duration: .35, ease: "power2.in" }, S.end - .35);
+
+  // ---------- 11 · End ----------
+  tl.set("#s11", { opacity: 1 }, S.end);
+  tl.fromTo("#e-icon", { scale: .5, rotation: -30, opacity: 0, filter: "blur(16px)" }, { scale: 1, rotation: 0, opacity: 1, filter: "blur(0px)", duration: 1.1, ease: "expo.out" }, S.end);
+  K.maskIn("#e-word", S.end + .35, 1); K.maskIn("#e-tag", S.end + .75, 1);
+  K.rise("#e-plat", S.end + 1.5, 10, .6); K.rise("#e-url", S.end + 1.75, 10, .6);
+  tl.fromTo("#s11 > div", { scale: .985 }, { scale: 1, duration: 3.5, ease: "power2.out" }, S.end);
+  tl.set({}, {}, C.DUR);
+
+  window.__timelines["main"] = tl;
+});
+</script>
+</body>
+</html>
