@@ -5,96 +5,306 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pomly: Pomodoro Focus Timer for iPhone, iPad, Mac &amp; Apple Watch</title>
 <meta name="description" content="Pomly is a free, open-source Pomodoro focus timer for iPhone, iPad, Mac and Apple Watch. Drag the dial, focus, take a break. Live Activities, widgets, a Mac menu bar timer and instant sync. No account, no tracking.">
-<meta name="keywords" content="pomodoro timer, focus timer, study timer, mac menu bar timer, apple watch timer, live activity, productivity app, adhd focus, deep work, open source">
 <link rel="canonical" href="https://tapariapurv.github.io/pomly/">
-<meta name="theme-color" content="#1c130e" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#fbf6ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c130e">
 <link rel="icon" href="icon-180.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Pomly">
 <meta property="og:title" content="Pomly: Pomodoro Focus Timer">
 <meta property="og:description" content="Drag the dial, focus, take a break. iPhone, iPad, Mac and Apple Watch, in sync. Free and open source.">
-<meta property="og:url" content="https://tapariapurv.github.io/pomly/">
-<meta property="og:image" content="https://tapariapurv.github.io/pomly/icon.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://tapariapurv.github.io/pomly/promo-poster.jpg">
 <meta property="og:video" content="https://tapariapurv.github.io/pomly/pomly-film.mp4">
-<meta name="twitter:title" content="Pomly: Pomodoro Focus Timer">
-<meta name="twitter:description" content="A calm Pomodoro timer for every Apple device. Free and open source.">
-<meta name="twitter:image" content="https://tapariapurv.github.io/pomly/icon.png">
-<link rel="stylesheet" href="style.css">
+<meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[
-{"@type":"SoftwareApplication","name":"Pomly: Pomodoro Focus Timer","applicationCategory":"ProductivityApplication","operatingSystem":"iOS 26, iPadOS 26, macOS 26, watchOS 26","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A free, open-source Pomodoro focus timer with Live Activities, widgets, a Mac menu bar timer, an Apple Watch app and instant device sync.","url":"https://tapariapurv.github.io/pomly/","downloadUrl":"https://github.com/tapariapurv/pomly/releases/latest","image":"https://tapariapurv.github.io/pomly/icon.png","author":{"@type":"Person","name":"Purv Taparia"},"license":"https://opensource.org/licenses/MIT"},
-{"@type":"FAQPage","mainEntity":[
-{"@type":"Question","name":"Is Pomly free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pomly is free and open source under the MIT license, with no ads, subscriptions or tracking."}},
-{"@type":"Question","name":"Which devices does Pomly support?","acceptedAnswer":{"@type":"Answer","text":"iPhone, iPad, Mac and Apple Watch, running iOS, iPadOS, macOS and watchOS 26 or later."}},
-{"@type":"Question","name":"How does sync work without an account?","acceptedAnswer":{"@type":"Answer","text":"Open Sync Devices on one device and type its 6-character code on another. Pomly pairs them with an anonymous ID, and only paired devices can read the data."}},
-{"@type":"Question","name":"How do I install Pomly on a Mac?","acceptedAnswer":{"@type":"Answer","text":"Run: brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly. Or download Pomly-macOS.zip from GitHub Releases."}}
-]}]}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Pomly: Pomodoro Focus Timer","applicationCategory":"ProductivityApplication","operatingSystem":"iOS 26, iPadOS 26, macOS 26, watchOS 26","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/tapariapurv/pomly/releases/latest","image":"https://tapariapurv.github.io/pomly/icon.png","author":{"@type":"Person","name":"Purv Taparia"},"license":"https://opensource.org/licenses/MIT"}
 </script>
+<style>
+:root{--bg:#1c130e;--bg2:#2a1c14;--ink:#f6ebe0;--soft:#c4ae9e;--tint:#f4a66a;--deep:#b85a1e;--glass:rgba(255,244,232,.07);--line:rgba(255,244,232,.13);color-scheme:dark;
+--sans:ui-rounded,"SF Pro Rounded","SF Pro Display",system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{font:17px/1.55 var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:var(--tint)}
+img{max-width:100%;display:block}
+.wrap{max-width:1160px;margin:auto;padding:0 24px}
+h1,h2,h3{font-weight:650;letter-spacing:-.025em;line-height:1.04}
+.soft{color:var(--soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:600 16px var(--sans);text-decoration:none;color:var(--ink);background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);cursor:pointer;transition:transform .2s,background .2s}
+.btn:hover{transform:translateY(-1px);background:rgba(255,244,232,.12)}
+.btn.pri{background:var(--tint);color:#21140c;border-color:transparent}
+.btn.pri:hover{background:#ffb985}
+:focus-visible{outline:2px solid var(--tint);outline-offset:3px}
+
+/* nav */
+nav{position:fixed;inset:12px 0 auto;z-index:20;display:flex;justify-content:center;pointer-events:none}
+nav div{pointer-events:auto;display:flex;align-items:center;gap:6px;padding:6px 6px 6px 14px;border-radius:999px;background:rgba(28,19,14,.62);border:1px solid var(--line);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4)}
+nav .brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);text-decoration:none;margin-right:8px}
+nav .brand img{width:26px;height:26px;border-radius:7px}
+nav a.l{color:var(--soft);text-decoration:none;font-size:15px;padding:10px 10px}
+nav a.l:hover{color:var(--ink)}
+nav .btn{min-height:38px;padding:0 16px;font-size:15px}
+@media(max-width:560px){nav a.l{display:none}}
+
+/* hero */
+.hero{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:40px;padding-top:90px;padding-bottom:40px;position:relative}
+.hero::before{content:"";position:absolute;inset:-10% -30% auto auto;width:900px;height:900px;background:radial-gradient(closest-side,rgba(244,166,106,.16),transparent);pointer-events:none;transform:translateY(calc(var(--y,0) * .25px))}
+.hero h1{font-size:clamp(52px,8.4vw,112px)}
+.hero h1 span{color:var(--tint)}
+.hero .lede{font-size:clamp(18px,2.1vw,22px);color:var(--soft);max-width:30ch;margin:22px 0 30px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.meta{margin-top:18px;font-size:14px;color:var(--soft)}
+.stage{position:relative;justify-self:center;width:min(480px,88vw);aspect-ratio:1}
+.dial{width:100%;height:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
+.dial:active{cursor:grabbing}
+.dial .face{fill:url(#face);stroke:var(--line)}
+.dial line{stroke-linecap:round;transition:stroke .25s,stroke-opacity .25s}
+.dial .t{font:300 46px var(--sans);fill:var(--ink);font-variant-numeric:tabular-nums}
+.dial .s{font:700 8.5px var(--sans);letter-spacing:2.5px;fill:var(--tint)}
+.dial .knob{fill:var(--ink);filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.ctrl{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);display:flex;gap:10px}
+.hint{position:absolute;top:-4px;right:2%;font-size:14px;color:var(--soft);transition:opacity .4s}
+.float{position:absolute;width:31%;border-radius:22px;box-shadow:0 30px 60px rgba(0,0,0,.5);border:1px solid var(--line)}
+.f1{left:-16%;bottom:6%;rotate:-7deg;transform:translateY(calc(var(--y,0) * -.12px))}
+.f2{right:-12%;top:8%;width:24%;border-radius:30%;rotate:6deg;transform:translateY(calc(var(--y,0) * -.22px))}
+@media(max-width:900px){.hero{grid-template-columns:1fr;text-align:left;padding-top:110px}.stage{margin-top:20px}.f1{left:-4%}.f2{right:-2%}}
+
+/* film */
+.film{height:220vh;position:relative}
+.film .pin{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden}
+.film .frame{position:relative;width:min(1160px,92vw);aspect-ratio:16/9;border-radius:calc(40px - var(--p,0) * 22px);overflow:hidden;
+ transform:scale(calc(.62 + var(--p,0) * .38));border:1px solid var(--line);box-shadow:0 40px 120px rgba(0,0,0,.6);background:#000}
+.film video{width:100%;height:100%;object-fit:cover}
+.film .play{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;padding:clamp(14px,3vw,32px);background:linear-gradient(transparent 40%,rgba(0,0,0,.55));border:0;cursor:pointer;color:var(--ink)}
+.film .play span{display:flex;align-items:center;gap:12px;font:600 18px var(--sans);padding:14px 24px 14px 18px;border-radius:999px;background:rgba(28,19,14,.55);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.film .play svg{width:30px;height:30px}
+.film h2{position:absolute;top:12vh;left:0;right:0;text-align:center;font-size:clamp(34px,5vw,64px);opacity:calc(1 - var(--p,0) * 2.2);transform:translateY(calc(var(--p,0) * -60px))}
+@media(max-width:700px){.film{height:auto}.film .pin{position:static;height:auto;padding:60px 0;gap:24px}.film .frame{transform:none;border-radius:20px;aspect-ratio:9/16;width:min(92vw,420px)}.film h2{position:static;opacity:1;transform:none}}
+
+/* devices: horizontal pan */
+.devices{height:400vh;position:relative}
+.devices .pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.devices header{padding:0 max(24px,calc(50vw - 556px));margin-bottom:4vh}
+.devices header h2{font-size:clamp(34px,5vw,64px);max-width:14ch}
+.track{display:flex;gap:4vw;padding:0 max(24px,calc(50vw - 556px));width:max-content;transform:translateX(calc(var(--p,0) * (100vw - 100%)))}
+.dev{flex:none;display:flex;flex-direction:column;gap:16px}
+.dev img{height:min(56vh,560px);width:auto;border-radius:28px;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.dev.wide img{border-radius:14px}
+.dev.watch img{height:min(34vh,340px);border-radius:28%;align-self:center;margin:auto 0}
+.dev p{max-width:34ch;color:var(--soft);font-size:16px}
+.dev b{color:var(--ink);display:block;font-size:19px;margin-bottom:2px}
+@media(max-width:700px){.devices{height:auto;padding:70px 0}.devices .pin{position:static;height:auto}.track{transform:none;width:auto;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px}.dev{scroll-snap-align:center}.dev img{height:440px}}
+
+/* features */
+.feat{padding:18vh 0 10vh}
+.feat h2{font-size:clamp(34px,5vw,64px);max-width:16ch;margin-bottom:56px}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:48px 40px;border-top:1px solid var(--line);padding-top:40px}
+.fgrid h3{font-size:21px;margin-bottom:8px}
+.fgrid p{color:var(--soft);font-size:16px}
+@media(max-width:800px){.fgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.fgrid{grid-template-columns:1fr}}
+
+/* download */
+.dl{padding:12vh 0}
+.dl h2{font-size:clamp(40px,6.4vw,84px);text-align:right;margin-bottom:12px}
+.dl .sub{text-align:right;color:var(--soft);margin-bottom:48px}
+.plats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.plat{background:var(--glass);border:1px solid var(--line);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:border-color .3s,transform .3s}
+.plat.me{border-color:var(--tint);transform:translateY(-6px)}
+.plat svg{width:30px;height:30px;color:var(--tint)}
+.plat h3{font-size:22px}
+.plat p{color:var(--soft);font-size:15px;flex:1}
+.plat .btn{width:100%}
+.plat small{color:var(--soft);font-size:13px}
+.plat small a{color:var(--soft)}
+.copy{font:13px ui-monospace,SFMono-Regular,monospace;color:var(--ink);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;word-break:break-all;min-height:44px}
+.copy:hover{border-color:var(--tint)}
+@media(max-width:1000px){.plats{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.plats{grid-template-columns:1fr}.dl h2,.dl .sub{text-align:left}}
+
+/* close */
+.close{min-height:90svh;display:grid;place-items:center;text-align:center;position:relative;overflow:hidden}
+.close::before{content:"";position:absolute;width:140vmax;height:140vmax;border-radius:50%;background:conic-gradient(var(--tint) calc(var(--p,0) * 360deg),transparent 0);opacity:.09;mask:radial-gradient(closest-side,transparent 70%,#000 71%)}
+.close h2{font-size:clamp(44px,8vw,110px);max-width:12ch;margin:auto}
+.close p{color:var(--soft);margin:18px 0 30px}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;font-size:14px;color:var(--soft)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between}
+footer a{color:var(--soft);margin-left:16px}
+
+.rv{opacity:0;transform:translateY(24px);transition:opacity .8s,transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}*{transition:none!important}}
+</style>
 </head>
 <body>
-<main>
-<header class="hero">
-  <img src="icon.png" alt="Pomly app icon" width="112" height="112">
-  <h1>Drag. Focus. Rest.</h1>
-  <p class="lede">Pomly is a calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch. Set a time with one drag, and let it ring when it's time for a break.</p>
-  <div class="cta">
-    <a class="btn primary" href="https://github.com/tapariapurv/pomly/releases/latest">Download for Mac</a>
-    <a class="btn" href="https://github.com/tapariapurv/pomly#install">iPhone, iPad &amp; Watch</a>
-    <a class="btn" href="https://github.com/tapariapurv/pomly">View on GitHub</a>
+<nav aria-label="Main"><div>
+  <a class="brand" href="#top"><img src="icon-180.png" alt="">Pomly</a>
+  <a class="l" href="#film">Film</a><a class="l" href="#devices">Devices</a><a class="l" href="https://github.com/tapariapurv/pomly">GitHub</a>
+  <a class="btn pri" href="#download">Download</a>
+</div></nav>
+
+<main id="top">
+<section class="hero wrap">
+  <div>
+    <h1>Drag.<br>Focus.<br><span>Rest.</span></h1>
+    <p class="lede">A calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch. One drag sets it. It rings when it's time for a break.</p>
+    <div class="cta">
+      <a class="btn pri" id="smart" href="#download">Download Free</a>
+      <a class="btn" href="#film">Watch the Film</a>
+    </div>
+    <p class="meta">Free and open source · No account · No tracking</p>
   </div>
-  <p class="small">Free and open source · No account · No tracking</p>
-  <svg class="dial" viewBox="-100 -100 200 200" role="img" aria-label="The Pomly dial showing 25 minutes"><g id="ticks"></g>
-    <text x="0" y="10" text-anchor="middle" font-size="34" font-weight="300" fill="currentColor" font-family="ui-rounded,system-ui">25:00</text>
-    <text x="0" y="30" text-anchor="middle" font-size="7" font-weight="700" letter-spacing="2" fill="var(--tint)" font-family="ui-rounded,system-ui">• FOCUS</text></svg>
-</header>
-
-<section aria-labelledby="v" id="promo">
-  <h2 id="v">See it, then get it</h2>
-  <p class="small" style="text-align:center;margin:-6px 0 18px">The film ends with a 20-second install guide for every device. <a href="pomly-vertical.mp4">Vertical cut</a></p>
-  <video controls playsinline preload="none" poster="promo-poster.jpg" style="width:100%;border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.35)">
-    <source src="pomly-film.mp4" type="video/mp4">
-  </video>
-</section>
-
-<section aria-labelledby="f">
-  <h2 id="f">Everything a focus timer should be</h2>
-  <div class="grid">
-    <div class="card"><span class="caps">Simple</span><h3>One drag to set</h3><p>Drag around the dial for 1–120 minutes or tap 15 · 25 · 45 · 60. Start becomes Pause and End in one fluid Liquid Glass morph.</p></div>
-    <div class="card"><span class="caps">Reliable</span><h3>Rings through Silent</h3><p>Alarms break through Silent mode and Focus, with "Take a Break" right on the alert.</p></div>
-    <div class="card"><span class="caps">Glanceable</span><h3>Live Activities &amp; widgets</h3><p>Lock Screen, Dynamic Island, StandBy, Home Screen widgets that start sessions, Control Center and Siri.</p></div>
-    <div class="card"><span class="caps">Mac</span><h3>A menu bar timer you drag</h3><p>Press the menu bar icon and drag down to pick a length. A floating mini timer and ⌃⌥P / ⌃⌥D shortcuts work from any app.</p></div>
-    <div class="card"><span class="caps">Watch</span><h3>Your wrist, your dial</h3><p>An edge-to-edge dial with the Digital Crown, plus watch-face complications and the Smart Stack.</p></div>
-    <div class="card"><span class="caps">Sync</span><h3>Every device, one timer</h3><p>Pair with a 6-character code. Start on your Mac, pause on your Watch. No sign-up.</p></div>
+  <div class="stage">
+    <span class="hint" id="hint" aria-hidden="true">Try it. Drag the dial.</span>
+    <svg class="dial" id="dial" viewBox="-100 -100 200 200" role="slider" tabindex="0" aria-label="Focus length in minutes" aria-valuemin="1" aria-valuemax="60" aria-valuenow="25" aria-valuetext="25 minutes">
+      <defs><radialGradient id="face" cx="50%" cy="35%"><stop offset="0" stop-color="#3a271c"/><stop offset="1" stop-color="#1f150f"/></radialGradient></defs>
+      <circle class="face" r="99"/>
+      <g id="ticks"></g>
+      <circle class="knob" id="knob" r="5"/>
+      <text class="t" id="time" y="12" text-anchor="middle">25:00</text>
+      <text class="s" id="state" y="34" text-anchor="middle">FOCUS</text>
+    </svg>
+    <div class="ctrl"><button class="btn pri" id="go">Start</button><button class="btn" id="end" hidden>End</button></div>
+    <img class="float f1" src="shots/ip_lock.jpg" alt="Pomly Live Activity on the iPhone Lock Screen" loading="lazy">
+    <img class="float f2" src="shots/watch.png" alt="Pomly on Apple Watch" loading="lazy">
   </div>
 </section>
 
-<section aria-labelledby="i" id="install">
-  <h2 id="i">Get Pomly</h2>
-  <div class="grid">
-    <div class="card"><span class="caps">Mac · Homebrew</span><h3>One command</h3><p><code>brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly</code><br><br><code>brew install --cask pomly</code></p></div>
-    <div class="card"><span class="caps">Mac · Download</span><h3>Or one line in Terminal</h3><p><code>curl -fsSL https://raw.githubusercontent.com/tapariapurv/pomly/main/scripts/install.sh | bash</code></p><p class="small">Or grab <a href="https://github.com/tapariapurv/pomly/releases/latest">Pomly-macOS.zip</a> from Releases.</p></div>
-    <div class="card"><span class="caps">iPhone · iPad · Watch</span><h3>Build or sideload</h3><p>Open the project in Xcode with a free Apple ID, or sideload the IPA with AltStore or Sideloadly. <a href="https://github.com/tapariapurv/pomly#iphone-ipad-and-apple-watch">Steps</a>.</p></div>
+<section class="film" id="film" data-p>
+  <div class="pin">
+    <h2>See it, then get it.</h2>
+    <div class="frame">
+      <video id="vid" playsinline preload="metadata" poster="promo-poster.jpg"><source media="(max-width:700px)" src="pomly-vertical.mp4" type="video/mp4"><source src="pomly-film.mp4" type="video/mp4"></video>
+      <button class="play" id="play" aria-label="Play the Pomly film"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>Play the Film</span></button>
+    </div>
   </div>
 </section>
 
-<section aria-labelledby="q">
-  <h2 id="q">Questions</h2>
-  <details><summary>Is Pomly really free?</summary><p>Yes. It's MIT-licensed and open source, with no ads, subscriptions, analytics or tracking.</p></details>
-  <details><summary>What does sync store?</summary><p>Only if you turn it on: an anonymous ID, the current timer, and your focus sessions (times and labels), readable only by your paired devices. See the <a href="privacy.html">privacy policy</a>.</p></details>
-  <details><summary>Why does macOS say the app is from an unidentified developer?</summary><p>Pomly isn't notarized yet. The Homebrew cask and install script clear the quarantine flag for you, or right-click Pomly and choose Open.</p></details>
-  <details><summary>Which systems does it need?</summary><p>iOS, iPadOS, macOS and watchOS 26 or later.</p></details>
+<section class="devices" id="devices" data-p aria-labelledby="dh">
+  <div class="pin">
+    <header><h2 id="dh">One timer. Every screen you own.</h2></header>
+    <div class="track">
+      <figure class="dev"><img src="shots/ip_running.jpg" alt="Pomly running on iPhone" loading="lazy"><p><b>iPhone</b>Rings through Silent and Focus, with Take a Break right on the alert.</p></figure>
+      <figure class="dev"><img src="shots/ip_lock.jpg" alt="Live Activity on the Lock Screen" loading="lazy"><p><b>Lock Screen</b>Live Activities, the Dynamic Island and StandBy keep the time in view.</p></figure>
+      <figure class="dev wide"><img src="shots/ipad.jpg" alt="Pomly on iPad" loading="lazy"><p><b>iPad</b>The dial and your day side by side, with Home Screen widgets.</p></figure>
+      <figure class="dev wide"><img src="shots/mac_drag.jpg" alt="Dragging down from the Pomly menu bar icon on Mac" loading="lazy"><p><b>Mac</b>Press the menu bar icon and drag down to set it. ⌃⌥P from any app.</p></figure>
+      <figure class="dev watch"><img src="shots/watch.png" alt="Pomly on Apple Watch" loading="lazy"><p><b>Apple Watch</b>Edge to edge dial, Digital Crown, complications and the Smart Stack.</p></figure>
+      <figure class="dev"><img src="shots/ip_history.jpg" alt="Focus history chart" loading="lazy"><p><b>History</b>See where your focus went, by day and by label.</p></figure>
+    </div>
+  </div>
+</section>
+
+<section class="feat wrap" aria-labelledby="fh">
+  <h2 id="fh" class="rv">Everything a focus timer should be. Nothing it shouldn't.</h2>
+  <div class="fgrid">
+    <div class="rv"><h3>One drag to set</h3><p>Sweep the dial for 1 to 120 minutes, or tap 15, 25, 45 or 60.</p></div>
+    <div class="rv"><h3>An alarm that rings</h3><p>Built on AlarmKit, so it breaks through Silent mode like a real alarm.</p></div>
+    <div class="rv"><h3>Sync with a code</h3><p>Pair devices with six characters. Start on your Mac, pause on your Watch.</p></div>
+    <div class="rv"><h3>Widgets and Controls</h3><p>Start a session from the Home Screen, Control Center or Siri.</p></div>
+    <div class="rv"><h3>A mini timer</h3><p>A floating picture-in-picture dial on Mac, draggable anywhere.</p></div>
+    <div class="rv"><h3>Private by default</h3><p>No account, no analytics, no ads. MIT licensed, every line on GitHub.</p></div>
+  </div>
+</section>
+
+<section class="dl wrap" id="download" aria-labelledby="dlh">
+  <h2 id="dlh" class="rv">Get Pomly.</h2>
+  <p class="sub rv">Free on every Apple platform. Version 1.0.1 · iOS, iPadOS, macOS, watchOS 26 or later.</p>
+  <div class="plats">
+    <div class="plat rv" data-os="mac">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+      <h3>Mac</h3><p>Menu bar timer, mini timer and global shortcuts. Updates itself.</p>
+      <a class="btn pri" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-macOS.zip">Download for Mac</a>
+      <button class="copy" data-copy="brew tap tapariapurv/pomly https://github.com/tapariapurv/pomly && brew install --cask pomly" aria-label="Copy the Homebrew install command">brew install --cask pomly</button>
+      <small>Not notarized yet: right-click Pomly › Open the first time.</small>
+    </div>
+    <div class="plat rv" data-os="ios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+      <h3>iPhone</h3><p>Live Activities, widgets, Controls and Siri. Includes the Watch app.</p>
+      <a class="btn pri" href="altstore://source?url=https://tapariapurv.github.io/pomly/altstore.json">Add to AltStore</a>
+      <a class="btn" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-iOS-unsigned.ipa">Download IPA</a>
+      <small>Sideload with <a href="https://altstore.io">AltStore</a> or <a href="https://sideloadly.io">Sideloadly</a> and a free Apple ID.</small>
+    </div>
+    <div class="plat rv" data-os="ipad">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M11 18.5h2"/></svg>
+      <h3>iPad</h3><p>The same app, with the dial and Today side by side.</p>
+      <a class="btn pri" href="altstore://source?url=https://tapariapurv.github.io/pomly/altstore.json">Add to AltStore</a>
+      <a class="btn" href="https://github.com/tapariapurv/pomly/releases/latest/download/Pomly-iOS-unsigned.ipa">Download IPA</a>
+      <small>One IPA for iPhone and iPad.</small>
+    </div>
+    <div class="plat rv" data-os="watch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="3.5"/><path d="M9 6l.6-3h4.8l.6 3M9 18l.6 3h4.8l.6-3"/></svg>
+      <h3>Apple Watch</h3><p>Installs alongside the iPhone app. Complications and the Smart Stack.</p>
+      <a class="btn" href="https://github.com/tapariapurv/pomly#iphone-ipad-and-apple-watch">Install Steps</a>
+      <a class="btn" href="https://github.com/tapariapurv/pomly">Build from Source</a>
+      <small>Open in Xcode with a free Apple ID.</small>
+    </div>
+  </div>
+</section>
+
+<section class="close" data-p aria-labelledby="ch">
+  <div class="wrap">
+    <h2 id="ch" class="rv">Your next 25 minutes start now.</h2>
+    <p class="rv">Free. Open source. Every Apple device.</p>
+    <a class="btn pri rv" href="#download">Download Pomly</a>
+  </div>
 </section>
 </main>
-<footer><a href="privacy.html">Privacy</a><a href="support.html">Support</a><a href="https://github.com/tapariapurv/pomly">GitHub</a><br><br>© 2026 Purv Taparia · MIT License</footer>
+
+<footer><div class="wrap"><span>© 2026 Purv Taparia · MIT License</span><span><a href="privacy.html">Privacy</a><a href="support.html">Support</a><a href="https://github.com/tapariapurv/pomly">GitHub</a></span></div></footer>
+
 <script>
-// The signature dial: 60 rounded ticks, the first 25 lit.
-const g=document.getElementById('ticks');let h='';
-for(let i=0;i<60;i++){const a=i/60*2*Math.PI-Math.PI/2,m=i%5==0,r0=m?79:85,c=Math.cos(a),s=Math.sin(a),on=i<25;
-h+=`<line class="${on?'lit':''}" x1="${(c*r0).toFixed(2)}" y1="${(s*r0).toFixed(2)}" x2="${(c*95).toFixed(2)}" y2="${(s*95).toFixed(2)}" stroke="${on?'var(--tint)':'currentColor'}" stroke-opacity="${on?1:.25}" stroke-width="${m?2.6:1.6}" stroke-linecap="round"/>`}
-g.innerHTML=h;
+const $=id=>document.getElementById(id), reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Signature: the hero dial works like the app. Drag to set, Start counts down for real.
+const dial=$('dial'),ticks=$('ticks'),knob=$('knob'),time=$('time'),state=$('state'),go=$('go'),end=$('end');
+let mins=25,left=0,timer=null,lines=[];
+for(let i=0;i<60;i++){const a=i/60*2*Math.PI-Math.PI/2,m=i%5==0,r0=m?76:83,c=Math.cos(a),s=Math.sin(a);
+ const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+ l.setAttribute('x1',c*r0);l.setAttribute('y1',s*r0);l.setAttribute('x2',c*92);l.setAttribute('y2',s*92);l.setAttribute('stroke-width',m?2.8:1.7);
+ ticks.appendChild(l);lines.push(l)}
+const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+function draw(frac){const lit=Math.round(frac*60);
+ lines.forEach((l,i)=>{const on=i<lit;l.setAttribute('stroke',on?'var(--tint)':'var(--ink)');l.setAttribute('stroke-opacity',on?1:.22)});
+ const a=frac*2*Math.PI-Math.PI/2;knob.setAttribute('cx',Math.cos(a)*92);knob.setAttribute('cy',Math.sin(a)*92)}
+function set(m){mins=Math.max(1,Math.min(60,m));time.textContent=fmt(mins*60);draw(mins/60);
+ dial.setAttribute('aria-valuenow',mins);dial.setAttribute('aria-valuetext',mins+' minutes')}
+function fromPointer(e){const r=dial.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;
+ let a=Math.atan2(y,x)+Math.PI/2;if(a<0)a+=2*Math.PI;set(Math.round(a/(2*Math.PI)*60)||60)}
+dial.addEventListener('pointerdown',e=>{if(timer)return;dial.setPointerCapture(e.pointerId);fromPointer(e);$('hint').style.opacity=0});
+dial.addEventListener('pointermove',e=>{if(!timer&&dial.hasPointerCapture(e.pointerId))fromPointer(e)});
+dial.addEventListener('keydown',e=>{if(timer)return;const d={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[e.key];if(d){e.preventDefault();set(mins+d)}});
+function stop(){clearInterval(timer);timer=null;go.textContent='Start';end.hidden=true;state.textContent='FOCUS';set(mins)}
+go.onclick=()=>{
+ if(timer){clearInterval(timer);timer=0;go.textContent='Resume';state.textContent='PAUSED';return}
+ if(timer===null)left=mins*60;
+ go.textContent='Pause';end.hidden=false;state.textContent='FOCUS';
+ timer=setInterval(()=>{left--;time.textContent=fmt(left);draw(left/3600);if(left<=0){stop();state.textContent='TAKE A BREAK'}},1000)};
+end.onclick=stop;
+set(25);
+
+// Film: click to play with sound.
+$('play').onclick=()=>{const v=$('vid');v.controls=true;v.play();$('play').remove()};
+
+// Scroll progress → --p on pinned sections, --y on the hero.
+const ps=[...document.querySelectorAll('[data-p]')],root=document.documentElement;
+function tick(){root.style.setProperty('--y',scrollY);
+ for(const el of ps){const r=el.getBoundingClientRect(),span=el.offsetHeight-innerHeight;
+  const p=span>40?-r.top/span:1-(r.top/innerHeight);el.style.setProperty('--p',Math.max(0,Math.min(1,p)).toFixed(4))}}
+if(!reduce){addEventListener('scroll',()=>requestAnimationFrame(tick),{passive:true});addEventListener('resize',tick);tick()}
+else ps.forEach(el=>el.style.setProperty('--p',1));
+
+// Reveal on view.
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+// Highlight the visitor's platform and point the hero button at it.
+const ua=navigator.userAgent,os=/iPad|Macintosh/.test(ua)&&navigator.maxTouchPoints>1?'ipad':/iPhone/.test(ua)?'ios':/Mac/.test(ua)?'mac':null;
+if(os){const card=document.querySelector(`[data-os="${os}"]`);card.classList.add('me');
+ const a=card.querySelector('.btn.pri');$('smart').href=a.href;$('smart').textContent={mac:'Download for Mac',ios:'Get It for iPhone',ipad:'Get It for iPad'}[os]}
+
+// Copy buttons.
+document.querySelectorAll('.copy').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy);const t=b.textContent;b.textContent='Copied';setTimeout(()=>b.textContent=t,1400)});
 </script>
 </body>
 </html>
