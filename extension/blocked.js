@@ -1,4 +1,3 @@
-import { ALLOW_MIN, settings, site, left, blocking, fmt } from './shared.js'
 const $ = id => document.getElementById(id)
 const url = location.hash.slice(1)
 let host = ''
@@ -6,7 +5,7 @@ try { host = new URL(url).hostname.replace(/^www\./, '') } catch {}
 let s
 
 async function check() {
-  const l = await chrome.storage.local.get(['wire', 'space'])
+  const l = await ext.storage.local.get(['wire', 'space'])
   if (!blocking(l, await settings())) return url ? location.replace(url) : history.back() // session over: back to where you were
   s = l.wire.s
   tick()
@@ -24,7 +23,7 @@ let answer
 const ask = () => { const a = 12 + Math.floor(Math.random() * 38), b = 6 + Math.floor(Math.random() * 4); answer = a * b; $('q').textContent = `${a} × ${b} =`; $('ans').value = '' }
 async function open() {
   const d = site(host, (await settings()).sites)
-  if (d) await chrome.runtime.sendMessage({ allow: d })
+  if (d) await ext.runtime.sendMessage({ allow: d })
   location.replace(url)
 }
 $('open').onclick = async () => {
@@ -41,7 +40,7 @@ $('quiz').onsubmit = e => {
   ask()
 }
 $('open').hidden = !url
-$('back').onclick = () => history.length > 1 ? history.back() : chrome.tabs.getCurrent(t => chrome.tabs.remove(t.id))
-chrome.storage.onChanged.addListener(check)
+$('back').onclick = () => history.length > 1 ? history.back() : ext.tabs.getCurrent().then(t => ext.tabs.remove(t.id))
+ext.storage.onChanged.addListener(check)
 setInterval(tick, 1000)
 check()

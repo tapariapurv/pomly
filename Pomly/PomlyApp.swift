@@ -13,6 +13,7 @@ struct PomlyApp: App {
     init() {
         Pref.register()
         TimerEngine.didLog = { Planner.log($0) }
+        Ambient.shared.follow()
     }
 
     var body: some Scene {
@@ -65,6 +66,8 @@ struct PomlyShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: StartFocusIntent(), phrases: ["Start a focus in \(.applicationName)",
                                                           "Start focusing with \(.applicationName)",
+                                                          "Start a Pomodoro in \(.applicationName)",
+                                                          "Focus with \(.applicationName)",
                                                           "Start \(.applicationName)"],
                     shortTitle: "Start Focus", systemImageName: "timer")
         AppShortcut(intent: StartBreakIntent(), phrases: ["Take a break in \(.applicationName)"],
@@ -79,18 +82,32 @@ struct PomlyShortcuts: AppShortcutsProvider {
     }
 }
 
-/// Pair Pomly with a system Focus: the Focus silences notifications, Pomly starts the session.
+/// Pair Pomly with a system Focus: the Focus silences notifications, Pomly starts the session and ends it with the Focus.
+/// The system calls perform() on both edges; when the Focus turns off it passes the default values (autoStart false).
 struct PomlyFocusFilter: SetFocusFilterIntent {
     static let title: LocalizedStringResource = "Pomly"
-    static let description: IntentDescription? = "Start a focus session when this Focus turns on."
+    static let description: IntentDescription? = "Start a focus session when this Focus turns on, and end it when the Focus turns off."
     @Parameter(title: "Start a Session Automatically", default: false) var autoStart: Bool
+    @Parameter(title: "Minutes", inclusiveRange: (1, 180)) var minutes: Int?
+    @Parameter(title: "Label") var label: String?
+
+    static var parameterSummary: some ParameterSummary { Summary("\(\.$autoStart)") { \.$minutes; \.$label } }
 
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(title: autoStart ? "Starts a focus session" : "Doesn't start a session")
     }
 
     @MainActor func perform() async throws -> some IntentResult {
-        if autoStart, !TimerEngine.shared.snap.isActive { await TimerEngine.shared.start(.focus) }
+        let engine = TimerEngine.shared, key = "focusFilterStart"
+        if autoStart {
+            guard !engine.snap.isActive else { return .result() }
+            _ = try await StartFocusIntent(minutes: minutes, label: label).perform()
+            UserDefaults.shared.set(engine.snap.startedAt?.timeIntervalSinceReferenceDate, forKey: key)
+        } else if let started = UserDefaults.shared.object(forKey: key) as? Double {
+            UserDefaults.shared.removeObject(forKey: key)
+            // Only end the session the Focus started, never one begun by hand.
+            if engine.snap.phase == .focus, engine.snap.isActive, engine.snap.startedAt?.timeIntervalSinceReferenceDate == started { engine.stop() }
+        }
         return .result()
     }
 }

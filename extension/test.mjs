@@ -1,6 +1,7 @@
 // node extension/test.mjs — checks the block rule pattern and the blocking decision.
 import assert from 'node:assert'
-import { pattern, blocking, REF } from './shared.js'
+import { readFileSync } from 'node:fs'
+const { pattern, blocking, REF } = new Function(readFileSync(new URL('shared.js', import.meta.url), 'utf8') + ';return { pattern, blocking, REF }')() // shared.js is a classic script
 const re = new RegExp(pattern('youtube.com'))
 for (const u of ['https://youtube.com', 'https://www.youtube.com/watch?v=1', 'http://m.youtube.com:443/x', 'https://youtube.com?x', 'https://youtube.com#a']) assert(re.test(u), u)
 for (const u of ['https://notyoutube.com', 'https://youtube.com.evil.io/', 'https://google.com/?q=youtube.com', 'https://youtubexcom']) assert(!re.test(u), u)

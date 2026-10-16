@@ -23,6 +23,8 @@ targets:
         destinationFilters: [iOS]
       - target: PomlyWatch # embedded, as the App Store requires for a companion Watch app
         destinationFilters: [iOS]
+      - target: PomlySafari # Safari Web Extension, same files as the Chromium one
+        destinationFilters: [macOS]
     entitlements:
       path: Pomly/Pomly.entitlements
       properties:
@@ -38,6 +40,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         NSSupportsLiveActivities: true
+        UIBackgroundModes: [audio] # ambient sound keeps playing with the screen locked
         NSAlarmKitUsageDescription: Pomly rings when a focus session or break ends, even in Silent mode.
         NSRemindersFullAccessUsageDescription: Pomly imports reminders as tasks and completes them when you mark a task done.
         NSCalendarsFullAccessUsageDescription: Pomly finds free time in your day and adds finished focus sessions to a Pomly calendar.
@@ -74,6 +77,32 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly.widgets
         TARGETED_DEVICE_FAMILY: "1,2"
+  PomlySafari:
+    type: app-extension
+    platform: macOS
+    sources:
+      - PomlySafari
+      - path: extension # the browser extension itself, shared with Chromium (not copied)
+        excludes: [test.mjs, icons, "icons/**"]
+        buildPhase: resources
+      - path: extension/icons
+        type: folder
+        buildPhase: resources
+    info:
+      path: PomlySafari/Info.plist
+      properties:
+        CFBundleDisplayName: Pomly Focus
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSHumanReadableCopyright: © 2026 Purv Taparia
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.purvt.pomly.safari
+        ENABLE_APP_SANDBOX: YES
+        CODE_SIGN_IDENTITY: "-" # sign to run locally (free account)
   PomlyWatch:
     type: application
     platform: watchOS

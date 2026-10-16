@@ -1,10 +1,9 @@
-import { settings, left, blocking, fmt } from './shared.js'
 const $ = id => document.getElementById(id)
-const send = m => chrome.runtime.sendMessage(m)
+const send = m => ext.runtime.sendMessage(m)
 let l = {}, o = {}
 
 async function render() {
-  [l, o] = [await chrome.storage.local.get(['wire', 'space']), await settings()]
+  [l, o] = [await ext.storage.local.get(['wire', 'space']), await settings()]
   $('unpaired').hidden = !!l.space
   $('paired').hidden = !l.space
   const s = l.wire?.s, on = blocking(l, o)
@@ -24,7 +23,7 @@ async function render() {
     li.textContent = d
     x.textContent = '×'
     x.setAttribute('aria-label', `Remove ${d}`)
-    x.onclick = () => chrome.storage.sync.set({ sites: o.sites.filter(v => v !== d) })
+    x.onclick = () => ext.storage.sync.set({ sites: o.sites.filter(v => v !== d) })
     li.append(x)
     return li
   }))
@@ -45,8 +44,8 @@ $('code').oninput = async e => {
 $('main').onclick = () => send({ control: l.wire.s.status === 'running' ? 'pause' : l.wire.s.status === 'paused' ? 'resume' : 'start' })
 $('stop').onclick = () => send({ control: 'stop' })
 $('leave').onclick = () => send({ leave: 1 })
-$('enabled').onchange = e => chrome.storage.sync.set({ enabled: e.target.checked })
-$('puzzle').onchange = e => chrome.storage.sync.set({ puzzle: e.target.checked })
+$('enabled').onchange = e => ext.storage.sync.set({ enabled: e.target.checked })
+$('puzzle').onchange = e => ext.storage.sync.set({ puzzle: e.target.checked })
 $('add').onsubmit = e => {
   e.preventDefault()
   let d = $('site').value.trim().toLowerCase()
@@ -54,8 +53,8 @@ $('add').onsubmit = e => {
   if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(d)) return $('siteErr').textContent = 'Enter a site like news.com.'
   $('siteErr').textContent = ''
   $('site').value = ''
-  if (!o.sites.includes(d)) chrome.storage.sync.set({ sites: [...o.sites, d] })
+  if (!o.sites.includes(d)) ext.storage.sync.set({ sites: [...o.sites, d] })
 }
-chrome.storage.onChanged.addListener(render)
+ext.storage.onChanged.addListener(render)
 setInterval(tick, 1000)
 render()

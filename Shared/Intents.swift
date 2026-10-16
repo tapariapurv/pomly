@@ -9,13 +9,17 @@ typealias PomlyIntent = AppIntent
 
 struct StartFocusIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Start Focus"
-    static let description = IntentDescription("Starts a focus session.")
-    @Parameter(title: "Minutes") var minutes: Int?
+    static let description = IntentDescription("Starts a focus session, optionally with a length and a label, like writing for 50 minutes.")
+    @Parameter(title: "Minutes", inclusiveRange: (1, 180)) var minutes: Int?
+    @Parameter(title: "Label") var label: String?
+
+    static var parameterSummary: some ParameterSummary { Summary("Focus on \(\.$label) for \(\.$minutes) minutes") }
 
     init() {}
-    init(minutes: Int?) { self.minutes = minutes }
+    init(minutes: Int?, label: String? = nil) { self.minutes = minutes; self.label = label }
 
     @MainActor func perform() async throws -> some IntentResult {
+        if let label = label?.trimmingCharacters(in: .whitespacesAndNewlines), !label.isEmpty { TimerEngine.shared.setLabel(label) }
         await TimerEngine.shared.start(.focus, seconds: minutes.map { TimeInterval($0 * 60) })
         return .result()
     }
@@ -24,7 +28,9 @@ struct StartFocusIntent: PomlyIntent {
 struct StartBreakIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Take a Break"
     static let description = IntentDescription("Starts a break.")
-    @Parameter(title: "Minutes") var minutes: Int?
+    @Parameter(title: "Minutes", inclusiveRange: (1, 60)) var minutes: Int?
+
+    static var parameterSummary: some ParameterSummary { Summary("Take a break for \(\.$minutes) minutes") }
 
     init() {}
 
@@ -36,6 +42,7 @@ struct StartBreakIntent: PomlyIntent {
 
 struct PauseIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Pause Timer"
+    static let description = IntentDescription("Pauses the current session.")
     @MainActor func perform() async throws -> some IntentResult {
         TimerEngine.shared.pause()
         return .result()
@@ -44,6 +51,7 @@ struct PauseIntent: PomlyIntent {
 
 struct ResumeIntent: PomlyIntent {
     static let title: LocalizedStringResource = "Resume Timer"
+    static let description = IntentDescription("Resumes a paused session.")
     @MainActor func perform() async throws -> some IntentResult {
         await TimerEngine.shared.resume()
         return .result()
@@ -52,6 +60,7 @@ struct ResumeIntent: PomlyIntent {
 
 struct StopIntent: PomlyIntent {
     static let title: LocalizedStringResource = "End Session"
+    static let description = IntentDescription("Ends the current session. Focus that ran a minute or more still counts.")
     @MainActor func perform() async throws -> some IntentResult {
         TimerEngine.shared.stop()
         return .result()

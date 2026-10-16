@@ -81,8 +81,12 @@ struct SettingsView: View {
                     Text("Pomly rings when a session ends, even in Silent mode. Start a break right from the alert.")
                 }
 
+                AmbientSection()
+
                 Section {
                     NavigationLink("Silence Notifications") { SilenceGuide() }
+                } footer: {
+                    Text("Add Pomly as a Focus filter, or use the Set Focus action with Start Focus in Shortcuts.")
                 }
 
                 UpdatesSection()
@@ -179,7 +183,7 @@ struct SilenceGuide: View {
                 Label("Under Focus Filters, tap Add Filter, then Pomly", systemImage: "3.circle")
                 Label("Turn on Start a Session Automatically", systemImage: "4.circle")
             } footer: {
-                Text("iOS doesn't let apps silence notifications. A Focus does it system-wide, and Pomly's filter starts your session when it turns on.")
+                Text("iOS doesn't let apps silence notifications. A Focus does it system-wide, and Pomly's filter starts your session when it turns on and ends it when it turns off.")
             }
         }
         .pomlyBackground()
