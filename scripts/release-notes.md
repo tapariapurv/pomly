@@ -1,6 +1,16 @@
-**Pomly 1.0: a calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch.**
+**Pomly 1.1: a calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch.**
 
-### New in 1.0.4
+### New in 1.1
+- Focus rooms: share a link and focus together, with a quiet "3 people focusing".
+- Tasks: pick what each block is for, import from Reminders, then mark it Done or carry it over.
+- Calendar (optional, Settings › Advanced): a suggested free gap and sessions logged to a Pomly calendar.
+- Weekly insights in History: best hour, how sessions felt, a forgiving streak and a shareable recap card.
+- After each session: an optional 1–5 "How did it feel?" and a short break tip.
+- Ambient sound: white noise, brown noise or rain while you focus.
+- Focus filter and Siri: a Focus can start and end sessions; "Focus on writing for 50 minutes" in Shortcuts.
+- Pomly Focus for Safari (Mac), alongside Chrome. Free builds: Safari › Settings › Developer › Allow Unsigned Extensions.
+
+### In 1.0.4
 - Check for Updates: a button in Settings › Updates and, on Mac, in the Pomly menu.
 - Safer Mac updates: the old app stays in place until the new one is ready, errors are shown, and an app outside Applications asks to be moved instead of retrying.
 
