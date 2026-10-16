@@ -1,6 +1,6 @@
 cask "pomly" do
-  version "1.0.3"
-  sha256 "2f0024a15261f0676044038a4339ca7f43fc86a0d601699a92b9a58421087cc6"
+  version "1.0.4"
+  sha256 "8a4d38057dae7737f706a959b5eaec6b11c96836657ebba2bc63f73233aeb746"
 
   url "https://github.com/tapariapurv/pomly/releases/download/v#{version}/Pomly-macOS.zip"
   name "Pomly"

@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "1.0.4",
+          "date": "2026-10-16",
+          "size": 6251645,
+          "minOSVersion": "26.0",
+          "downloadURL": "https://github.com/tapariapurv/pomly/releases/download/v1.0.4/Pomly-iOS-unsigned.ipa",
+          "localizedDescription": "Pomly 1.0.4. See the release notes on GitHub."
+        },
+        {
           "version": "1.0.3",
           "date": "2026-10-15",
           "size": 6246925,

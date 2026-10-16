@@ -1,6 +1,10 @@
 **Pomly 1.0: a calm Pomodoro timer for iPhone, iPad, Mac and Apple Watch.**
 
-### New in 1.0.3
+### New in 1.0.4
+- Check for Updates: a button in Settings › Updates and, on Mac, in the Pomly menu.
+- Safer Mac updates: the old app stays in place until the new one is ready, errors are shown, and an app outside Applications asks to be moved instead of retrying.
+
+### In 1.0.3
 - Fixed the New Label button, which did nothing on Mac. It now opens a small field on every platform.
 
 ### In 1.0.2
