@@ -163,6 +163,7 @@ struct AdvancedSettings: View {
             } footer: {
                 Text("Off by default, so you decide when to rest.")
             }
+            CalendarSection()
         }
         .pomlyBackground()
         .navigationTitle("Advanced")

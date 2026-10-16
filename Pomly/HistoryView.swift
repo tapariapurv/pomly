@@ -32,7 +32,7 @@ struct HistoryView: View {
     }
 
     @ViewBuilder private var rows: some View {
-        if !sessions.isEmpty { summary }
+        if !sessions.isEmpty { summary; InsightsSection(sessions: sessions, tint: tint) }
         ForEach(grouped, id: \.day) { group in
             Section(dayTitle(group.day)) {
                 ForEach(group.items) { session in
@@ -71,7 +71,7 @@ struct HistoryView: View {
 
     private var summary: some View {
         let d = days, total = d.reduce(0) { $0 + $1.minutes } * 60
-        let streak = Stats.streak(Set(totalsByDay.keys), today: Calendar.current.startOfDay(for: .now))
+        let streak = Stats.streak(Set(totalsByDay.keys), today: Calendar.current.startOfDay(for: .now), freezes: true)
         return Section {
             Picker("Range", selection: $range) {
                 Text("Week").tag(7)

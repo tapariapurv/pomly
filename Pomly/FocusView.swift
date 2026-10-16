@@ -47,6 +47,7 @@ struct FocusView: View {
             guard [5, 25, 100].contains(n) else { return }
             Task { try? await Task.sleep(for: .seconds(2)); requestReview() } // after the celebration, not during it
         }
+        .taskSheet()
         #if os(iOS)
         .fullScreenCover(isPresented: $fullScreen) { FullScreenTimer(tint: tint) }
         #endif
@@ -146,9 +147,10 @@ struct FocusView: View {
                 Text(s.label.isEmpty ? (s.phase == .focus ? String(localized: "Focus") : String(localized: "Break")) : s.label)
                     .font(.title2.weight(.semibold)).fontDesign(.rounded).lineLimit(1)
                 Group {
-                    s.phase == .focus ? Text("\(s.planned.shortText) of focus. Take a breather.") : Text("Rested. Ready for the next one?")
+                    s.phase == .focus ? Text("\(s.planned.shortText) of focus. \(Ritual.tip(s.focusCount))") : Text("Rested. Ready for the next one?")
                 }
                 .font(.subheadline).fontDesign(.rounded).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.8)
+                if s.phase == .focus { WrapUp(snap: s, tint: tint) }
             }
             .transition(.blurReplace)
         } else if s.phase == .rest, s.isActive {
@@ -163,7 +165,11 @@ struct FocusView: View {
             }
             .transition(.blurReplace)
         } else {
-            labelPicker.transition(.blurReplace)
+            VStack(spacing: 0) {
+                labelPicker
+                if s.status == .idle { FreeGapHint(planned: s.planned, tint: tint) }
+            }
+            .transition(.blurReplace)
         }
     }
 
@@ -179,6 +185,7 @@ struct FocusView: View {
     private var labelPicker: some View {
         let s = engine.snap
         return Menu {
+            TaskMenuSection()
             ForEach(labelChoices, id: \.self) { l in Button(l) { engine.setLabel(l) } }
             Divider()
             Button("New Label…", systemImage: "plus") { newLabel = ""; askingLabel = true }

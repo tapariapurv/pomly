@@ -10,7 +10,10 @@ struct PomlyApp: App {
     @NSApplicationDelegateAdaptor(PomlyAppDelegate.self) private var appDelegate
     #endif
 
-    init() { Pref.register() }
+    init() {
+        Pref.register()
+        TimerEngine.didLog = { Planner.log($0) }
+    }
 
     var body: some Scene {
         WindowGroup {

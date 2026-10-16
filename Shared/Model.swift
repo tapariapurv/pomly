@@ -19,6 +19,8 @@ import UIKit
     var planned: TimeInterval = 0
     var label: String = ""
     var completed: Bool = false
+    /// "How did it feel?" 1–5, 0 when skipped.
+    var feel: Int = 0
 
     init(start: Date, duration: TimeInterval, planned: TimeInterval, label: String, completed: Bool) {
         self.start = start
@@ -39,11 +41,13 @@ enum Store {
 
 enum Stats {
     /// Consecutive active days ending today (or yesterday, so an unfinished today doesn't break the streak).
-    static func streak(_ activeDays: Set<Date>, today: Date, calendar: Calendar = .current) -> Int {
+    /// With `freezes`, one missed day per calendar week is forgiven (it doesn't count, it just doesn't break the run).
+    static func streak(_ activeDays: Set<Date>, today: Date, freezes: Bool = false, calendar: Calendar = .current) -> Int {
         var day = activeDays.contains(today) ? today : calendar.date(byAdding: .day, value: -1, to: today)!
-        var n = 0
-        while activeDays.contains(day) {
-            n += 1
+        var n = 0, frozenWeeks = Set<Date>()
+        while true {
+            if activeDays.contains(day) { n += 1 }
+            else if !freezes || n == 0 || !frozenWeeks.insert(calendar.dateInterval(of: .weekOfYear, for: day)!.start).inserted { break }
             day = calendar.date(byAdding: .day, value: -1, to: day)!
         }
         return n

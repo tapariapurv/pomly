@@ -26,8 +26,12 @@
 	<string>public.app-category.productivity</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Pomly rings when a focus session or break ends, even in Silent mode.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Pomly finds free time in your day and adds finished focus sessions to a Pomly calendar.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Purv Taparia</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Pomly imports reminders as tasks and completes them when you mark a task done.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UILaunchScreen</key>

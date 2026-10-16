@@ -237,7 +237,11 @@ final class TimerEngine {
         try? ctx.save()
         cacheToday()
         Sync.shared.add(session)
+        Self.didLog?(session)
     }
+
+    /// App-only follow-ups for a logged focus session (the calendar log); unset in extensions.
+    static var didLog: ((Session) -> Void)?
 
     private func cacheToday() {
         let start = Calendar.current.startOfDay(for: .now)
