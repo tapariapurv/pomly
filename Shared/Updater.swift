@@ -17,6 +17,9 @@ final class Updater {
     /// A newer version on GitHub, if there is one.
     private(set) var latest: String?
     private(set) var installing = false
+    private(set) var checking = false
+    /// Why the last check or install failed, shown under the button.
+    private(set) var error: String?
     @ObservationIgnored private var download: URL?
     @ObservationIgnored private var checked = Date.distantPast
 
@@ -36,7 +39,8 @@ final class Updater {
 
     static func isNewer(_ a: String, than b: String) -> Bool { a.compare(b, options: .numeric) == .orderedDescending }
 
-    /// At most hourly. On Mac, an idle app installs right away when automatic updates are on.
+    /// At most hourly unless forced (the Check for Updates button). On Mac, an automatic check installs right away
+    /// when the app is idle and automatic updates are on; a forced one leaves the choice to the person.
     func check(force: Bool = false) async {
         #if os(iOS)
         if !resolved { // only store installs have a verified App Store transaction
@@ -44,20 +48,27 @@ final class Updater {
             if case .verified(let t)? = try? await AppTransaction.shared, t.environment != .xcode { active = false } else { active = true }
         }
         #endif
-        guard active, !installing, force || checked < .now - 3600 else { return }
-        checked = .now
+        guard active, !installing, !checking, force || checked < .now - 3600 else { return }
+        checking = true
+        defer { checking = false }
+        error = nil
         struct Release: Decodable {
             struct Asset: Decodable { let name: String; let browser_download_url: URL }
             let tag_name: String
             let assets: [Asset]
         }
-        guard let (data, _) = try? await URLSession.shared.data(from: Self.api),
-              let r = try? JSONDecoder().decode(Release.self, from: data) else { return }
+        guard let (data, response) = try? await URLSession.shared.data(from: Self.api),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let r = try? JSONDecoder().decode(Release.self, from: data) else {
+            error = String(localized: "Couldn't reach GitHub. Check your connection and try again.")
+            return
+        }
+        checked = .now
         let v = r.tag_name.trimmingCharacters(in: CharacterSet(charactersIn: "vV"))
         guard Self.isNewer(v, than: Self.current) else { latest = nil; return }
         latest = v
         download = r.assets.first { $0.name == "Pomly-macOS.zip" }?.browser_download_url
-        installIfIdle()
+        if !force { installIfIdle() }
     }
 
     /// Called when a check finds something and whenever a session ends.
@@ -72,30 +83,72 @@ final class Updater {
     /// Download, unpack, then swap the app after we quit and relaunch it.
     func install() async {
         guard let download, !installing else { return }
+        let fm = FileManager.default, app = Bundle.main.bundleURL
+        // A read-only spot (a translocated or root-owned app) would fail the swap and relaunch the old app,
+        // which would then try again on every launch.
+        guard fm.isWritableFile(atPath: app.deletingLastPathComponent().path) else {
+            error = String(localized: "Move Pomly to your Applications folder to update it.")
+            return
+        }
         installing = true
+        error = nil
         defer { installing = false }
-        let fm = FileManager.default, dir = fm.temporaryDirectory.appending(path: "PomlyUpdate-\(UUID().uuidString)")
-        guard let (zip, _) = try? await URLSession.shared.download(from: download),
-              (try? fm.createDirectory(at: dir, withIntermediateDirectories: true)) != nil,
-              Self.run("/usr/bin/ditto", "-x", "-k", zip.path, dir.path) else { return }
-        let fresh = dir.appending(path: "Pomly.app"), app = Bundle.main.bundleURL.path
+        let dir = fm.temporaryDirectory.appending(path: "PomlyUpdate-\(UUID().uuidString)")
+        let fresh = dir.appending(path: "Pomly.app")
         // ponytail: bundle-id check only; verify the code signature once releases are notarized.
-        guard Bundle(url: fresh)?.bundleIdentifier == Bundle.main.bundleIdentifier else { return }
-        let pid = ProcessInfo.processInfo.processIdentifier
+        guard let (zip, response) = try? await URLSession.shared.download(from: download),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              (try? fm.createDirectory(at: dir, withIntermediateDirectories: true)) != nil,
+              await Self.run("/usr/bin/ditto", "-x", "-k", zip.path, dir.path),
+              Bundle(url: fresh)?.bundleIdentifier == Bundle.main.bundleIdentifier else {
+            error = String(localized: "The update couldn't be downloaded. Try again later.")
+            return
+        }
+        // Wait for us to quit, then swap; if the new copy can't move in, put the old one back.
         let swap = """
-        while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done
-        rm -rf "\(app)" && mv "\(fresh.path)" "\(app)"
-        xattr -dr com.apple.quarantine "\(app)" 2>/dev/null
-        open "\(app)"
+        while kill -0 "$1" 2>/dev/null; do sleep 0.2; done
+        mv "$2" "$2.old" && { mv "$3" "$2" && rm -rf "$2.old" || mv "$2.old" "$2"; }
+        xattr -dr com.apple.quarantine "$2" 2>/dev/null
+        open "$2"
         """
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/sh")
-        p.arguments = ["-c", swap]
-        guard (try? p.run()) != nil else { return }
+        p.arguments = ["-c", swap, "sh", "\(ProcessInfo.processInfo.processIdentifier)", app.path, fresh.path]
+        guard (try? p.run()) != nil else {
+            error = String(localized: "The update couldn't be installed. Try again later.")
+            return
+        }
         NSApp.terminate(nil)
     }
 
-    private static func run(_ tool: String, _ args: String...) -> Bool {
+    /// App menu › Check for Updates…: the usual Mac alert.
+    func checkAndAlert() async {
+        await check(force: true)
+        NSApp.activate()
+        let a = NSAlert()
+        if let latest {
+            a.messageText = String(localized: "Pomly \(latest) Is Available")
+            a.informativeText = String(localized: "You have Pomly \(Self.current). Pomly quits and reopens to finish the update.")
+            a.addButton(withTitle: String(localized: "Install and Relaunch"))
+            a.addButton(withTitle: String(localized: "Later"))
+            guard a.runModal() == .alertFirstButtonReturn else { return }
+            await install()
+            guard let error else { return }
+            let e = NSAlert()
+            e.messageText = error
+            e.runModal()
+        } else if let error {
+            a.messageText = error
+            a.runModal()
+        } else {
+            a.messageText = String(localized: "You're Up to Date")
+            a.informativeText = String(localized: "Pomly \(Self.current) is the latest version.")
+            a.runModal()
+        }
+    }
+
+    /// Runs off the main thread so unpacking doesn't freeze the UI.
+    @concurrent private nonisolated static func run(_ tool: String, _ args: String...) async -> Bool {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: tool)
         p.arguments = args
@@ -128,7 +181,16 @@ struct UpdatesSection: View {
                     }
                     .disabled(updater.installing)
                 } else {
-                    LabeledContent("Pomly \(Updater.current)", value: String(localized: "Up to Date"))
+                    LabeledContent("Pomly \(Updater.current)", value: updater.error == nil ? String(localized: "Up to Date") : "")
+                }
+                Button {
+                    Task { await updater.check(force: true) }
+                } label: {
+                    LabeledContent("Check for Updates") { if updater.checking { ProgressView().controlSize(.small) } }
+                }
+                .disabled(updater.checking || updater.installing)
+                if let e = updater.error {
+                    Text(e).font(.footnote).foregroundStyle(.secondary)
                 }
                 #if os(macOS)
                 Toggle("Install Updates Automatically", isOn: $auto)

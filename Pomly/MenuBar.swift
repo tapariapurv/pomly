@@ -454,6 +454,11 @@ struct MenuBarPanel: View {
 /// Timer menu in the Mac menu bar: the main actions by keyboard.
 struct PomlyCommands: Commands {
     var body: some Commands {
+        #if DIRECT
+        CommandGroup(after: .appInfo) {
+            Button("Check for Updates…") { Task { await Updater.shared.checkAndAlert() } }
+        }
+        #endif
         CommandMenu("Timer") {
             Button("Start Focus") { Task { await TimerEngine.shared.start(.focus) } }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
