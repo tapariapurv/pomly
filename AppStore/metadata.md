@@ -30,7 +30,9 @@ BLOCK DISTRACTING SITES
 FOCUS, SIMPLY
 • Drag around the dial to set 1–120 minutes, or tap 15 · 25 · 45 · 60
 • Alarms ring through Silent mode and Focus, with "Take a Break" right on the alert
-• Label what you're working on: Study, Reading, Deep Work
+• Pick what this block is for from a short task list, or import from Reminders. Mark it Done or carry it over
+• Focus rooms: share a link and focus alongside friends, with a quiet "3 people focusing"
+• Optional calendar help: Pomly suggests a free gap and logs sessions to a Pomly calendar
 • Ambient sound while you focus: white noise, brown noise or rain, alongside your music
 • Full-screen minimal timer in black or white, portrait or landscape
 
@@ -48,12 +50,16 @@ EVERY DEVICE
 • Instant sync between your devices with a pairing code
 
 PROGRESS WITHOUT PRESSURE
-• Daily goal ring, week and month charts, streaks
+• Daily goal ring, week and month charts, and a streak that forgives one missed day a week
+• Weekly insights: your best hour, how sessions felt, and a recap card to share
 • Long breaks every few sessions, auto-start options, five color themes, light and dark
 
 PRIVATE BY DESIGN
 No ads, no tracking, no analytics, no sign-up. Sync is optional and anonymous.
 ```
+
+**What's New (1.1)**
+> Focus rooms, tasks with Reminders import, calendar suggestions, weekly insights, ambient sound, a Focus filter, and Pomly Focus for Safari.
 
 **What's New (1.0)**
 > Hello, Pomly. Drag, focus, rest, repeat on iPhone, iPad, Mac and Apple Watch.
