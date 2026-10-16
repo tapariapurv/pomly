@@ -87,6 +87,7 @@ Native Pomodoro / focus timer. SwiftUI, iOS/iPadOS/macOS/watchOS 26+ (27 SDKs). 
 
 ## Sync (Firebase, REST only, no SDK)
 - Project `pomly-43c42` (macOS Chrome, account Purv). Anonymous Auth on. RTDB `https://pomly-43c42-default-rtdb.firebaseio.com`, rules: `codes/$code` (pairing codes, 10 min) and `spaces/$space/{members,state,sessions}`, members only. Web API key lives in `Shared/Sync.swift`.
+- Rooms (`Shared/Rooms.swift`, UI `Pomly/RoomViews.swift`): `rooms/$room/{members/$uid = present-until ms, state}`, 8-char code = invite; writing your own member entry joins, members read/write, anyone in the room may delete a lapsed entry. Shares phase + timing only (not label). Links: `pomly://room|join?code=`, shared as `docs/join/?room=|code=`.
 - Browser extension `extension/` (MV3, any Chromium): joins the space like a device (members/$uid = code), streams `state`, blocks via declarativeNetRequest redirect rules + a `chrome.alarms` at the end date (works while the worker sleeps). Writes state with `by: ext-…`. Check: `node extension/test.mjs`. Zipped by `scripts/release.sh`.
 - Safari: the `PomlySafari` appex (Mac only) bundles `extension/` as-is, so scripts stay classic (no ES modules; `ext` = `browser ?? chrome`). Free-account builds are unsigned: Safari › Settings › Developer › Allow Unsigned Extensions (resets when Safari quits).
 - Always use the user's **macOS** Chrome (Claude in Chrome `select_browser`), never the Windows one.

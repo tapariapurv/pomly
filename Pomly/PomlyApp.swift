@@ -53,10 +53,13 @@ struct RootView: View {
         #if os(macOS)
         .frame(minWidth: 400, minHeight: 620)
         #endif
+        .onOpenURL { Room.open($0) }
+        .handlesExternalEvents(preferring: ["*"], allowing: ["*"]) // Mac: links go to the open window, not a new one
         .onChange(of: scenePhase, initial: true) { _, phase in
             guard phase == .active else { return }
             TimerEngine.shared.refresh()
             Sync.shared.resume()
+            Room.shared.resume()
             Task { await Updater.shared.check() }
         }
     }

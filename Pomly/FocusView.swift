@@ -59,6 +59,7 @@ struct FocusView: View {
         VStack(spacing: 18) {
             header
             title
+            RoomLine()
             Spacer(minLength: 0)
             dial.frame(maxWidth: 520)
             presets
@@ -76,6 +77,7 @@ struct FocusView: View {
                 VStack(spacing: 18) {
                     header
                     title
+                    RoomLine()
                     dial.frame(maxWidth: 420)
                     presets
                     Spacer(minLength: 0)
@@ -113,6 +115,7 @@ struct FocusView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: 36)
+        .overlay(alignment: .leading) { RoomButton() }
         .overlay(alignment: .trailing) {
             #if DEBUG
             quickToggle

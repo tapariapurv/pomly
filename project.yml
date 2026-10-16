@@ -41,6 +41,7 @@ targets:
         UILaunchScreen: {}
         NSSupportsLiveActivities: true
         UIBackgroundModes: [audio] # ambient sound keeps playing with the screen locked
+        CFBundleURLTypes: [{ CFBundleURLName: com.purvt.pomly, CFBundleURLSchemes: [pomly] }]
         NSAlarmKitUsageDescription: Pomly rings when a focus session or break ends, even in Silent mode.
         NSRemindersFullAccessUsageDescription: Pomly imports reminders as tasks and completes them when you mark a task done.
         NSCalendarsFullAccessUsageDescription: Pomly finds free time in your day and adds finished focus sessions to a Pomly calendar.

@@ -8,7 +8,7 @@ final class Sync {
     static let shared = Sync()
     private static let key = "AIzaSyCBlZMzIfz72TEyqZg-YvqGgIVimYkNRUU" // public by design; the database rules do the guarding
     private static let db = "https://pomly-43c42-default-rtdb.firebaseio.com"
-    private static let device = UUID().uuidString // per launch, to drop our own echoes
+    static let device = UUID().uuidString // per launch, to drop our own echoes
 
     private(set) var space = UserDefaults.shared.string(forKey: "syncSpace") {
         didSet { UserDefaults.shared.set(space, forKey: "syncSpace") }
@@ -17,7 +17,7 @@ final class Sync {
     var isPaired: Bool { space != nil && members.count > 1 }
 
     // Plumbing, not UI state: views never need to re-render for these.
-    @ObservationIgnored private var uid = UserDefaults.shared.string(forKey: "syncUID")
+    @ObservationIgnored private(set) var uid = UserDefaults.shared.string(forKey: "syncUID")
     @ObservationIgnored private var idToken: String?
     @ObservationIgnored private var expiry = Date.distantPast
     @ObservationIgnored private var code: String?
@@ -237,7 +237,7 @@ final class Sync {
 
     // MARK: REST
 
-    private func signIn() async throws -> String {
+    func signIn() async throws -> String {
         _ = try await token()
         guard let uid else { throw URLError(.userAuthenticationRequired) }
         return uid
@@ -274,12 +274,12 @@ final class Sync {
         return t
     }
 
-    private func url(_ path: String) async throws -> URL {
+    func url(_ path: String) async throws -> URL {
         URL(string: "\(Self.db)/\(path).json?auth=\(try await token())")!
     }
 
     @discardableResult
-    private func call(_ path: String, _ method: String = "GET", _ body: (any Encodable)? = nil) async throws -> Data {
+    func call(_ path: String, _ method: String = "GET", _ body: (any Encodable)? = nil) async throws -> Data {
         var req = URLRequest(url: try await url(path))
         req.httpMethod = method
         if let body { req.httpBody = try JSONEncoder().encode(body) }
@@ -288,12 +288,12 @@ final class Sync {
         return data
     }
 
-    private static func random(_ n: Int) -> String {
+    static func random(_ n: Int) -> String {
         String((0..<n).map { _ in "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".randomElement()! }) // no 0/O or 1/I mix-ups
     }
 
     private struct Code: Codable { var owner: String; var space: String; var exp: Double }
-    private struct Wire: Codable { var s: TimerSnapshot; var by: String; var at: Double }
+    struct Wire: Codable { var s: TimerSnapshot; var by: String; var at: Double }
     private struct Item: Codable {
         var start, duration, planned: Double
         var label: String
@@ -351,6 +351,9 @@ struct SyncView: View {
                         .textSelection(.enabled)
                         #endif
                         .accessibilityLabel(code.map { $0.map(String.init).joined(separator: " ") } ?? "")
+                    #if !os(watchOS)
+                    if let code { ShareLink("Share Link", item: Room.link(code, room: false)) }
+                    #endif
                     TextField("Enter a Code", text: $entry)
                         .font(.system(.title3, design: .monospaced, weight: .medium))
                         .multilineTextAlignment(.center)

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Join · Pomly</title><meta name="description" content="Open a Pomly invite: focus together, or sync your devices.">
+<meta name="robots" content="noindex"><link rel="icon" href="../icon-180.png"><link rel="stylesheet" href="../style.css"></head>
+<body><main><header class="hero"><img src="../icon.png" alt="">
+<h1 id="title">Opening Pomly…</h1>
+<p class="lede" id="lede">If nothing happens, open it here, or get Pomly first.</p>
+<div class="cta"><a class="btn primary" id="open" href="../">Open in Pomly</a><a class="btn" href="../#dl">Get Pomly</a></div>
+<p class="small" id="code"></p></header></main>
+<footer><a href="../">Home</a><a href="../support.html">Support</a></footer>
+<script>
+const q = new URLSearchParams(location.search), room = q.get("room"), pair = q.get("code");
+const code = (room || pair || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+if (code) {
+  const link = room ? `pomly://room?code=${code}` : `pomly://join?code=${code}`;
+  document.getElementById("title").textContent = room ? "Focus Together" : "Sync Your Devices";
+  document.getElementById("open").href = link;
+  document.getElementById("code").textContent = `Code: ${code}`;
+  location.href = link;
+} else {
+  document.getElementById("title").textContent = "Pomly";
+  document.getElementById("lede").textContent = "This invite link is missing its code.";
+  document.getElementById("open").remove();
+}
+</script></body></html>

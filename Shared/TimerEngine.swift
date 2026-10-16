@@ -19,6 +19,7 @@ final class TimerEngine {
             guard snap != oldValue else { return }
             snap.save()
             Sync.shared.push(snap)
+            Room.shared.push(snap)
         }
     }
     private(set) var lifetimeCompleted = UserDefaults.shared.integer(forKey: "lifetimeCompleted") {

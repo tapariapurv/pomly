@@ -22,6 +22,13 @@ struct PomlyTests {
         #expect(DialView.angle(of: CGPoint(x: 10, y: 0), center: CGPoint(x: 0, y: 0)) == 90)
     }
 
+    @Test func roomCountsOnlyFreshMembers() {
+        let now = Date(timeIntervalSince1970: 1_000)
+        let ms = now.timeIntervalSince1970 * 1000
+        #expect(Room.present(["a": ms + 90_000, "b": ms + 1, "c": ms - 1, "d": ms], at: now) == 2) // lapsed and exactly-now drop off
+        #expect(Room.present([:], at: now) == 0)
+    }
+
     @Test func longBreakEveryN() {
         #expect(Pref.breakMinutes(focusCount: 4, every: 4, short: 5, long: 15) == 15)
         #expect(Pref.breakMinutes(focusCount: 3, every: 4, short: 5, long: 15) == 5)
