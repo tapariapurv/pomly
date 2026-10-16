@@ -39,6 +39,8 @@ Live Activities, widgets, a Mac menu bar timer, an Apple Watch app and instant s
 
 **Sync:** pair devices with a 6-character code. The timer and history follow you between iPhone, iPad, Mac and Watch in real time.
 
+**Browser extension:** Pomly Focus pairs with the same code and blocks the sites you pick during focus sessions, in any Chromium browser (Chrome, Edge, Brave, Arc, Opera, Vivaldi). Opening a blocked site anyway can take a quick puzzle (optional) and unblocks it for 5 minutes. Install: download `Pomly-Extension.zip` from the [latest release](https://github.com/tapariapurv/pomly/releases/latest), unzip, open `chrome://extensions`, turn on Developer mode, click **Load unpacked** and pick the folder.
+
 **Progress:** a daily goal ring, week and month charts, streaks, five color themes, light and dark.
 
 ## Install

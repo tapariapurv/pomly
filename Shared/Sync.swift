@@ -338,7 +338,7 @@ struct SyncView: View {
                             .contentTransition(.symbolEffect(.replace))
                         Text(sync.isPaired ? "Devices Synced" : "Sync Your Devices")
                             .font(.title2.weight(.semibold)).fontDesign(.rounded)
-                        Text(sync.isPaired ? "Add another device with this code." : "Enter this code on your other device, or enter its code below.")
+                        Text(sync.isPaired ? "Add another device with this code." : "Enter this code on your other device or the Pomly browser extension, or enter its code below.")
                             .font(.subheadline).foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)

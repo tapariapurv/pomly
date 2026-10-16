@@ -87,4 +87,5 @@ Native Pomodoro / focus timer. SwiftUI, iOS/iPadOS/macOS/watchOS 26+ (27 SDKs). 
 
 ## Sync (Firebase, REST only, no SDK)
 - Project `pomly-43c42` (macOS Chrome, account Purv). Anonymous Auth on. RTDB `https://pomly-43c42-default-rtdb.firebaseio.com`, rules: `codes/$code` (pairing codes, 10 min) and `spaces/$space/{members,state,sessions}`, members only. Web API key lives in `Shared/Sync.swift`.
+- Browser extension `extension/` (MV3, any Chromium): joins the space like a device (members/$uid = code), streams `state`, blocks via declarativeNetRequest redirect rules + a `chrome.alarms` at the end date (works while the worker sleeps). Writes state with `by: ext-…`. Check: `node extension/test.mjs`. Zipped by `scripts/release.sh`.
 - Always use the user's **macOS** Chrome (Claude in Chrome `select_browser`), never the Windows one.
